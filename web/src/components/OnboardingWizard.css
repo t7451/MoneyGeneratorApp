@@ -7,7 +7,7 @@
 
 .role-card {
   padding: 1.5rem;
-  border: 2px solid #e5e5e5;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -15,28 +15,29 @@
   flex-direction: column;
   gap: 0.5rem;
   text-align: left;
-  background: white;
+  background: var(--bg-primary);
 }
 
 .role-card:hover {
-  border-color: #3b82f6;
+  border-color: var(--accent-color);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .role-card.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--accent-color);
+  background: var(--bg-tertiary); /* Using tertiary as selected state or define custom tint */
+  /* For better control, consider --bg-selected if needed, but tertiary usually works */
 }
 
 .role-card h3 {
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 1.125rem;
   margin: 0;
 }
 
 .role-card p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -46,9 +47,9 @@
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  box-shadow: var(--card-shadow);
 }
 
 .step-indicator {
@@ -66,7 +67,7 @@
   left: 2rem;
   right: 2rem;
   height: 2px;
-  background: #e5e7eb;
+  background: var(--border-color);
   z-index: 0;
   transform: translateY(-50%);
 }
@@ -75,29 +76,29 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f3f4f6;
-  border: 2px solid #e5e7eb;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   position: relative;
   z-index: 1;
   transition: all 0.3s ease;
 }
 
 .step.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white; /* Always white on accent */
   transform: scale(1.1);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
 .step.completed {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--success-color);
+  border-color: var(--success-color);
   color: white;
 }
 
@@ -108,13 +109,13 @@
 
 .wizard-step h2 {
   font-size: 1.75rem;
-  color: #111827;
+  color: var(--text-primary);
   text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .wizard-step > p {
-  color: #6b7280;
+  color: var(--text-secondary);
   text-align: center;
   margin-bottom: 2.5rem;
 }
@@ -136,22 +137,22 @@
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--accent-color);
   color: white;
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
@@ -170,29 +171,29 @@
 
 .platform-card {
   padding: 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   text-align: center;
   cursor: pointer;
-  background: white;
+  background: var(--bg-primary);
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 80px;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .platform-card:hover {
-  border-color: #93c5fd;
-  color: #1d4ed8;
+  border-color: var(--accent-color); /* Light blue */
+  color: var(--accent-hover);
 }
 
 .platform-card.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #1d4ed8;
+  border-color: var(--accent-color);
+  background: var(--bg-tertiary);
+  color: var(--accent-hover);
   font-weight: 600;
 }
 
@@ -202,46 +203,4 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  .wizard-container, .role-card, .platform-card {
-    background: #1f2937;
-    border-color: #374151;
-  }
-  
-  .wizard-step h2, .role-card h3 {
-    color: #f3f4f6;
-  }
-  
-  .wizard-step > p, .role-card p {
-    color: #9ca3af;
-  }
-  
-  .step-indicator::before {
-    background: #374151;
-  }
-  
-  .step {
-    background: #374151;
-    border-color: #4b5563;
-    color: #9ca3af;
-  }
-  
-  .role-card:hover, .platform-card:hover {
-    border-color: #60a5fa;
-  }
-  
-  .role-card.selected, .platform-card.selected {
-    background: #1e3a8a;
-    border-color: #3b82f6;
-  }
-  
-  .btn-secondary {
-    background: #374151;
-    color: #e5e7eb;
-  }
-  
-  .btn-secondary:hover:not(:disabled) {
-    background: #4b5563;
-  }
-}
+/* No media query needed as CSS variables handle the theme switch */

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './components/Toast';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AppLayout } from './layouts/AppLayout';
+import { ThemeProvider } from './context/ThemeContext';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { Checkout } from './components/Checkout';
 import { DashboardPage } from './pages/DashboardPage';
@@ -63,11 +64,13 @@ const AppRoutes = () => {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AppProvider>
-          <AppRoutes />
-        </AppProvider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AppProvider>
+            <AppRoutes />
+          </AppProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

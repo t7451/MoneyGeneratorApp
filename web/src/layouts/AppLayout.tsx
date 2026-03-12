@@ -6,8 +6,11 @@ import {
   Briefcase, 
   Users, 
   Settings,
-  Bell
+  Bell,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import './AppLayout.css';
 
 interface AppLayoutProps {
@@ -23,6 +26,8 @@ const NAV_ITEMS = [
 ];
 
 export const AppLayout: React.FC<AppLayoutProps> = () => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="app-layout">
       {/* Mobile Top Header */}
@@ -32,6 +37,9 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
           <h1>Money Generator</h1>
         </div>
         <div className="header-actions">
+          <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle Theme">
+             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           <button className="icon-btn">
             <Bell size={20} />
           </button>
@@ -42,6 +50,9 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
       <aside className="sidebar">
         <div className="sidebar-brand">
           MoneyGen
+          <button className="icon-btn theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => (
