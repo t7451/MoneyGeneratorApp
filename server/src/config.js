@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const ConfigSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PAYPAL_WEBHOOK_SECRET: z.string().min(1).default('demo-paypal-secret'),
   PLAID_WEBHOOK_SECRET: z.string().min(1).default('demo-plaid-secret'),
   CRM_WEBHOOK_SECRET: z.string().min(1).default('demo-crm-secret'),
@@ -10,6 +11,7 @@ const ConfigSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
   WEBHOOK_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
   WEBHOOK_REPLAY_WINDOW_MS: z.coerce.number().int().positive().default(5 * 60_000),
+  CORS_ORIGIN: z.string().optional(),
 });
 
 const parsed = ConfigSchema.safeParse(process.env);
@@ -21,6 +23,7 @@ if (!parsed.success) {
 }
 
 export const config = {
+  env: parsed.data.NODE_ENV,
   secrets: {
     paypalWebhook: parsed.data.PAYPAL_WEBHOOK_SECRET,
     plaidWebhook: parsed.data.PLAID_WEBHOOK_SECRET,
@@ -38,4 +41,5 @@ export const config = {
   security: {
     webhookReplayWindowMs: parsed.data.WEBHOOK_REPLAY_WINDOW_MS,
   },
+  corsOrigin: parsed.data.CORS_ORIGIN,
 };

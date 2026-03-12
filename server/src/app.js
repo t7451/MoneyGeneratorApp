@@ -1,5 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+import helmet from 'helmet';
 import { config } from './config.js';
 import { IntegrationService } from './integrationService.js';
 import { Models } from './models.js';
@@ -8,6 +10,15 @@ import rateLimit from 'express-rate-limit';
 import { MetricsService } from './metrics.js';
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: config.corsOrigin || '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-paypal-signature', 'x-paypal-transmission-time', 'x-plaid-signature', 'x-plaid-timestamp'],
+}));
 
 const publicLimiter = rateLimit({
   windowMs: config.rateLimiting.windowMs,
@@ -170,11 +181,6 @@ app.post('/billing/paypal/subscription/confirm', requireUser, (req, res) => {
       userId,
       correlationId: req.correlationId,
       log: req.log,
-    });
-    const entitlement = IntegrationService.createEntitlement({
-      userId,
-      correlationId: req.correlationId,
-      source: 'paypal_api',
     });
     const entitlement = IntegrationService.createEntitlement({
       userId: req.user?.id || userId,
