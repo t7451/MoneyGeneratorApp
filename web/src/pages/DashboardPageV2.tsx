@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
-import { Card, CardHeader, CardBody, CardFooter } from '../components/Card';
+import { Card, CardBody, CardFooter } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';

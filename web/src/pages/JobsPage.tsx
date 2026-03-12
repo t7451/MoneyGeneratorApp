@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Briefcase, Search, Bell, MapPin, Star, DollarSign } from 'lucide-react';
 import { JobCard } from '../components/JobCard';
-import { JobMap } from '../components/JobMap';
+// import { JobMap } from '../components/JobMap'; // TODO: Re-enable when maplibre-gl is installed
 import { MOCK_JOBS, Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
 
@@ -104,7 +104,7 @@ export const JobsPage: React.FC = () => {
 
   const handleApply = (job: Job) => {
     setJobStatus((prev) => {
-      const next = { ...prev, [job.id]: 'applied' };
+      const next = { ...prev, [job.id]: 'applied' } as Record<string, 'saved' | 'applied'>;
       persistJobPreferences(next, alertsEnabled);
       return next;
     });
@@ -114,7 +114,7 @@ export const JobsPage: React.FC = () => {
   const handleSave = (job: Job) => {
     const wasSaved = jobStatus[job.id] === 'saved';
     setJobStatus((prev) => {
-      const next = { ...prev };
+      const next = { ...prev } as Record<string, 'saved' | 'applied'>;
       if (next[job.id] === 'saved') {
         delete next[job.id];
       } else {
@@ -204,8 +204,9 @@ export const JobsPage: React.FC = () => {
       </div>
       
       {viewMode === 'map' ? (
-        <div className="map-view" style={{ padding: '0 1rem 1rem' }}>
-          <JobMap jobs={filteredJobs} />
+        <div className="map-view" style={{ padding: '2rem 1rem', textAlign: 'center', color: '#666' }}>
+          <MapPin size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+          <p>Map view coming soon! Try the list view instead.</p>
         </div>
       ) : filteredJobs.length > 0 ? (
         <div className="job-list" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
