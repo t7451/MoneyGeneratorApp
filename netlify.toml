@@ -1,7 +1,7 @@
 [build]
 base = "web"
 # TypeScript is a required dev dependency for the build: tsc && vite build
-command = "npm ci && npm run build"
+command = "npm ci --include=dev && npm run build"
 publish = "dist"
 
 [build.environment]
@@ -11,7 +11,7 @@ VITE_V2_ENABLED = "true"
 
 # Development/Preview context
 [context.deploy-preview]
-command = "npm ci && npm run build"
+command = "npm ci --include=dev && npm run build"
 
 [context.deploy-preview.environment]
 NODE_ENV = "preview"
@@ -20,7 +20,7 @@ VITE_V2_ENABLED = "true"
 
 # Production context - optimized
 [context.production]
-command = "npm ci && npm run build"
+command = "npm ci --include=dev && npm run build"
 
 [context.production.environment]
 NODE_ENV = "production"
@@ -29,7 +29,7 @@ VITE_V2_ENABLED = "true"
 
 # Branch context for feature branches
 [context."feature/*"]
-command = "npm ci && npm run build"
+command = "npm ci --include=dev && npm run build"
 
 [context."feature/*".environment]
 NODE_ENV = "development"
