@@ -1,7 +1,15 @@
 import express from 'express';
 import { featureFlagsService } from '../services/featureFlags.js';
+import referralsRouter from './v2/referrals.js';
+import subscriptionsRouter from './v2/subscriptions.js';
+import reportingRouter from './v2/reporting.js';
 
 const router = express.Router();
+
+// Mount v2 sub-routers
+router.use('/referrals', referralsRouter);
+router.use('/subscriptions', subscriptionsRouter);
+router.use('/reporting', reportingRouter);
 
 /**
  * Feature Flags V2 Routes
