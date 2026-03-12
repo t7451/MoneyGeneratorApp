@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { config } from './config.js';
 import { EventStatus, Models } from './models.js';
 import { httpClient } from './httpClient.js';
+import { MetricsService } from './metrics.js';
 
 const {
   PAYPAL_WEBHOOK_SECRET = 'demo-paypal-secret',
@@ -12,7 +13,6 @@ const {
   CRM_WEBHOOK_URL = 'https://crm.example.com/webhooks',
   ENABLE_PROVIDER_HTTP = 'false',
 } = process.env;
-import { MetricsService } from './metrics.js';
 
 const STATUS = {
   ACTIVE: 'active',
@@ -83,9 +83,8 @@ function emitInternalEvent(type, payload, log) {
   log?.info('internal_event', { type, payload });
 }
 
-function enqueueOutboundWebhook(event, correlationId) {
-  const targetUrl = event.targetUrl || CRM_WEBHOOK_URL;
 function enqueueOutboundWebhook(event) {
+  const targetUrl = event.targetUrl || CRM_WEBHOOK_URL;
   const serialized = JSON.stringify(event.payload);
   const timestamp = Date.now();
   const signature = signPayload(config.secrets.crmWebhook, `${timestamp}.${serialized}`);
@@ -94,7 +93,7 @@ function enqueueOutboundWebhook(event) {
     attempts: 0,
     status: 'queued',
     targetUrl,
-    correlationId,
+    correlationId: event.correlationId,
   });
 }
 
@@ -143,8 +142,6 @@ async function sendPlaidRequest(path, { body, log }) {
     body,
     log,
     tag: 'plaid_api',
-    signature,
-    timestamp,
   });
 }
 
@@ -244,8 +241,7 @@ export const IntegrationService = {
     return record;
   },
 
-  createPayPalSubscription: ({ userId, planId, correlationId, log }) => {
-  createPayPalSubscription: ({ userId, planId, correlationId, source = 'billing' }) => {
+  createPayPalSubscription: ({ userId, planId, correlationId, log, source = 'billing' }) => {
     const providerSubscriptionId = `paypal-${uuid()}`;
     const approvalUrl = `https://paypal.example/approve/${providerSubscriptionId}`;
     const sub = {
@@ -270,6 +266,16 @@ export const IntegrationService = {
     Models.subscriptions.set(sub.id, sub);
     Models.auditLog.push({ type: 'subscription_created', sub, idempotencyKey });
     Models.subscriptionEvents.set(providerSubscriptionId, sub.id);
+    
+    MetricsService.emitEvent({
+      eventType: 'subscription.initiated',
+      userId,
+      ts: new Date(),
+      correlationId,
+      source,
+      properties: { planId, providerSubscriptionId },
+    });
+    
     return { approvalUrl, subscriptionId: sub.id, providerSubscriptionId, idempotencyKey };
   },
 
@@ -449,3 +455,4 @@ export const IntegrationService = {
   getMetrics: () => Models.metrics.counters,
   dispatchOutboundWebhooks,
 };
+
