@@ -250,28 +250,29 @@ body.dark,
 html.dark {
   color-scheme: dark;
 
-  --bg-primary: var(--color-dark-bg-primary);
-  --bg-secondary: var(--color-dark-bg-secondary);
-  --bg-tertiary: var(--color-dark-bg-tertiary);
-  --bg-hover: var(--color-dark-bg-hover);
-  --bg-elevated: var(--color-dark-bg-tertiary);
+  /* Richer, deeper dark theme using Slate 950 base */
+  --bg-primary: #020617;        /* Slate 950 - Deepest background */
+  --bg-secondary: #0f172a;      /* Slate 900 - Cards/Sidebar */
+  --bg-tertiary: #1e293b;       /* Slate 800 - Inputs/Elevated */
+  --bg-hover: #334155;          /* Slate 700 - Hover states */
+  --bg-elevated: #1e293b;       /* Slate 800 - Modals/Dropdowns */
   
-  --text-primary: var(--color-dark-text-primary);
-  --text-secondary: var(--color-dark-text-secondary);
-  --text-tertiary: var(--color-dark-text-tertiary);
-  --text-muted: #64748b;
+  --text-primary: #f8fafc;      /* Slate 50 - Brightest text */
+  --text-secondary: #cbd5e1;    /* Slate 300 - Secondary text */
+  --text-tertiary: #94a3b8;     /* Slate 400 - Muted text */
+  --text-muted: #64748b;        /* Slate 500 - Very muted */
   
-  --border-color: var(--color-dark-border);
-  --border-color-light: var(--color-dark-border-light);
+  --border-color: #1e293b;      /* Slate 800 - Subtle borders */
+  --border-color-light: #0f172a;/* Slate 900 - Darker borders */
 
-  --glass-effect: rgba(15, 23, 42, 0.5);
-  --glass-border: 1px solid rgba(148, 163, 184, 0.15);
+  --glass-effect: rgba(2, 6, 23, 0.7);
+  --glass-border: 1px solid rgba(148, 163, 184, 0.1);
 
-  /* Color adjustments for dark mode */
-  --color-success-light: #064e3b;
-  --color-danger-light: #7f1d1d;
-  --color-warning-light: #78350f;
-  --color-info-light: #082f49;
+  /* Color adjustments for dark mode - brighter accents */
+  --color-success-light: rgba(6, 78, 59, 0.5);
+  --color-danger-light: rgba(127, 29, 29, 0.5);
+  --color-warning-light: rgba(120, 53, 15, 0.5);
+  --color-info-light: rgba(8, 47, 73, 0.5);
 }
 
 /* ========== BASE STYLES ========== */

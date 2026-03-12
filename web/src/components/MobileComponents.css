@@ -7,8 +7,8 @@
 
 .fab-container {
   position: fixed;
-  bottom: 6rem;
-  right: 1.5rem;
+  bottom: calc(5rem + env(safe-area-inset-bottom));
+  right: max(1.5rem, env(safe-area-inset-right));
   z-index: 50;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

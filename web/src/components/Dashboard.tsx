@@ -99,6 +99,7 @@ interface DashboardProps {
   onConnectBank: () => void;
   onUpgrade: () => void;
   onViewAnalytics: () => void;
+  onInsightAction: (action: string) => void;
 }
 
 export function Dashboard({
@@ -109,6 +110,7 @@ export function Dashboard({
   onConnectBank,
   onUpgrade,
   onViewAnalytics,
+  onInsightAction,
 }: DashboardProps) {
   const progressSteps = [
     { id: 'profile', label: 'Complete profile', completed: true },
@@ -198,7 +200,12 @@ export function Dashboard({
               <div key={insight.title} className="insight-card">
                 <h5>{insight.title}</h5>
                 <p>{insight.detail}</p>
-                <button className="btn-link">{insight.cta}</button>
+                <button 
+                  className="btn-link"
+                  onClick={() => onInsightAction(insight.cta)}
+                >
+                  {insight.cta}
+                </button>
               </div>
             ))}
           </div>

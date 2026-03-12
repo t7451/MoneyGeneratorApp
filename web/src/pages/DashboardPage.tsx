@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dashboard } from '../components/Dashboard';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
 
 export const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile, connectBank, openCheckout } = useAppContext();
   const { showToast } = useToast();
   const { markTutorialWatched, user } = useOnboarding();
@@ -67,7 +69,13 @@ export const DashboardPage: React.FC = () => {
         hasSubscription={!!userProfile.subscription}
         onConnectBank={connectBank}
         onUpgrade={openCheckout}
-        onViewAnalytics={() => showToast('Analytics coming soon!', 'info')}
+        onViewAnalytics={() => navigate('/reports')}
+        onInsightAction={(action) => {
+          if (action.includes('surge')) navigate('/jobs');
+          else if (action.includes('reserve')) navigate('/reports');
+          else if (action.includes('cancel')) navigate('/settings');
+          else navigate('/reports');
+        }}
       />
       {shouldShowTour && (
         <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 40 }}>

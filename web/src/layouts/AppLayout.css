@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh; /* Use dynamic viewport height for mobile browsers */
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color var(--duration-base), color var(--duration-base);
@@ -284,11 +285,14 @@ body.dark .nav-item.active {
 
   /* Improve bottom nav for safe area (notches) */
   .bottom-nav {
-    padding: max(var(--space-2), env(safe-area-inset-left))
-             max(var(--space-2), env(safe-area-inset-right))
-             max(var(--space-2), env(safe-area-inset-bottom))
-             max(var(--space-2), env(safe-area-inset-left));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-top: var(--space-2);
+    padding-right: max(var(--space-2), env(safe-area-inset-right));
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+    padding-left: max(var(--space-2), env(safe-area-inset-left));
+    /* ensure proper height calculation */
+    box-sizing: content-box; 
+    height: auto;
+    min-height: 3.5rem;
     gap: 0;
   }
 
