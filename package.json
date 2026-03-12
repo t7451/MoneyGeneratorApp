@@ -1,7 +1,8 @@
 {
   "name": "MoneyGeneratorApp",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
+  "description": "Money Generator App - Web Application",
   "scripts": {
     "dev": "cd web && npm run dev",
     "build": "cd web && npm run build",
@@ -13,9 +14,8 @@
     "deploy:staging": "scripts/deploy.sh staging"
   },
   "dependencies": {},
-  "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.3",
-    "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "20.0.0",
-    "@react-native-com
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
