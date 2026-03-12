@@ -6,10 +6,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    /* 
-    // Temporarily disabled to resolve Netlify build error: "EISDIR: illegal operation on a directory, read"
-    // This seems to be an issue with vite-plugin-pwa trying to read index.html in the Netlify CI environment.
     VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: {
         name: 'Money Generator App',
         short_name: 'MoneyGen',
@@ -21,7 +20,7 @@ export default defineConfig({
         display: 'standalone',
       },
       workbox: {
-        globPatterns: ['**\/*.{js,css,html,woff2}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg,ico}'],
         maximumFileSizeToCacheInBytes: 5000000,
         cleanupOutdatedCaches: true,
       },
@@ -29,7 +28,6 @@ export default defineConfig({
         enabled: false,
       },
     }),
-    */
   ],
 
   server: {
