@@ -1,24 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'Money Generator App',
-        short_name: 'MoneyGen',
-        description: 'Turn time into money with smart job matching',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait'
-      }
-    })
-  ],
+  plugins: [react()],
   server: {
     port: 3000,
     proxy: {
