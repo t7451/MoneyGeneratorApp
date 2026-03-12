@@ -11,6 +11,9 @@ import { ProductsPage } from './pages/ProductsPage';
 import { JobsPage } from './pages/JobsPage';
 import { TeamPage } from './pages/TeamPage';
 import { SettingsPage } from './pages/SettingsPage';
+import ReferralPage from './pages/ReferralPage';
+import PricingPage from './pages/PricingPage';
+import ReportsPage from './pages/ReportsPage';
 import './index.css';
 import './App.css';
 
@@ -48,6 +51,9 @@ const AppRoutes = () => {
           <Route path="jobs" element={<JobsPage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="referrals" element={<ReferralPage />} />
+          <Route path="pricing" element={<PricingPage />} />
+          <Route path="reports" element={<ReportsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

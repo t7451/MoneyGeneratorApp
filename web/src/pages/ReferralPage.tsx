@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Copy, Users, TrendingUp, Gift, MessageCircle } from 'lucide-react';
+import { Share2, Users, TrendingUp, Gift, MessageCircle } from 'lucide-react';
 import './ReferralPage.css';
 import ReferralCard from '../components/ReferralCard';
 import ReferralStats from '../components/ReferralStats';

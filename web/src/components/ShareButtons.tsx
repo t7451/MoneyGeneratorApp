@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, MessageCircle, Twitter, Mail, MessageSquare, Link } from 'lucide-react';
+import { MessageCircle, Twitter, Mail, MessageSquare, Link } from 'lucide-react';
 import './ShareButtons.css';
 
 interface ShareButtonsProps {
