@@ -5,10 +5,8 @@ publish = "dist"
 
 [build.environment]
 NODE_VERSION = "20"
-NODE_ENV = "production"
 CI = "true"
 VITE_V2_ENABLED = "true"
-NPM_FLAGS = "--legacy-peer-deps"
 
 # Development/Preview context
 [context.deploy-preview]
