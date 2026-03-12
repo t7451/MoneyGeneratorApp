@@ -1,0 +1,609 @@
+/**
+ * Mobile Components Styling
+ * Optimized for touch, small screens, and performance
+ */
+
+/* ============= FLOATING ACTION BUTTON ============= */
+
+.fab-container {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  z-index: 50;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-container.expanded {
+  --scale: 1;
+}
+
+.fab-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  font-size: 0;
+  line-height: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.fab-button:active {
+  transform: scale(0.92);
+}
+
+/* Primary FAB */
+.fab-container.primary .fab-button {
+  background-color: var(--color-primary, #2563eb);
+  color: white;
+}
+
+.fab-container.primary .fab-button:hover {
+  background-color: var(--color-primary-dark, #1d4ed8);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Secondary FAB */
+.fab-container.secondary .fab-button {
+  background-color: var(--color-neutral-200, #e5e7eb);
+  color: var(--color-neutral-900, #111827);
+}
+
+.fab-container.secondary .fab-button:hover {
+  background-color: var(--color-neutral-300, #d1d5db);
+}
+
+/* FAB Menu */
+.fab-menu {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fab-menu-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fab-menu-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.fab-menu-item {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background-color: white;
+  color: var(--color-primary, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 0;
+  line-height: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.fab-menu-item:hover {
+  background-color: var(--color-primary-light, #dbeafe);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transform: scale(1.1);
+}
+
+.fab-menu-item:active {
+  transform: scale(0.95);
+}
+
+.fab-menu-label {
+  position: absolute;
+  right: 70px;
+  white-space: nowrap;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.fab-menu-item:hover .fab-menu-label {
+  opacity: 1;
+}
+
+body.dark .fab-menu-item {
+  background-color: var(--color-dark-surface, #1f2937);
+  color: var(--color-primary, #2563eb);
+}
+
+body.dark .fab-menu-item:hover {
+  background-color: rgba(37, 99, 235, 0.15);
+}
+
+/* ============= BOTTOM SHEET ============= */
+
+.bottom-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  max-height: 90vh;
+  z-index: 1000;
+  overflow-y: auto;
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.dark .bottom-sheet {
+  background-color: var(--color-dark-surface, #1f2937);
+  color: var(--color-dark-text, #f3f4f6);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bottom-sheet-auto {
+  height: auto;
+  max-height: 50vh;
+}
+
+.bottom-sheet-half {
+  height: 50vh;
+}
+
+.bottom-sheet-full {
+  height: 100vh;
+}
+
+.bottom-sheet-handle {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+  background-color: inherit;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.handle-bar {
+  width: 40px;
+  height: 4px;
+  background-color: var(--color-neutral-300, #d1d5db);
+  border-radius: 2px;
+}
+
+body.dark .handle-bar {
+  background-color: var(--color-neutral-600, #4b5563);
+}
+
+.bottom-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-neutral-200, #e5e7eb);
+}
+
+body.dark .bottom-sheet-header {
+  border-bottom-color: var(--color-dark-border, #374151);
+}
+
+.bottom-sheet-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.bottom-sheet-close {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-neutral-600, #4b5563);
+  transition: color 0.2s ease;
+}
+
+.bottom-sheet-close:hover {
+  color: var(--color-neutral-900, #111827);
+}
+
+body.dark .bottom-sheet-close {
+  color: var(--color-neutral-400, #9ca3af);
+}
+
+body.dark .bottom-sheet-close:hover {
+  color: var(--color-dark-text, #f3f4f6);
+}
+
+.bottom-sheet-content {
+  padding: 1.5rem;
+}
+
+/* ============= LOADING INDICATOR ============= */
+
+.mobile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.mobile-loading.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 999;
+}
+
+body.dark .mobile-loading.fullscreen {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.loading-spinner {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.spinner {
+  width: 100%;
+  height: 100%;
+  border: 3px solid var(--color-neutral-200, #e5e7eb);
+  border-top-color: var(--color-primary, #2563eb);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+body.dark .spinner {
+  border-color: var(--color-neutral-700, #374151);
+  border-top-color: var(--color-primary, #2563eb);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-message {
+  margin: 0;
+  color: var(--color-neutral-600, #4b5563);
+  font-size: 0.875rem;
+}
+
+body.dark .loading-message {
+  color: var(--color-neutral-400, #9ca3af);
+}
+
+/* ============= OFFLINE INDICATOR ============= */
+
+.offline-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #ef4444;
+  color: white;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 999;
+  animation: slide-down 0.3s ease;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ============= PULL TO REFRESH ============= */
+
+.pull-to-refresh {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.pull-indicator {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pull-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-neutral-200, #e5e7eb);
+  border-top-color: var(--color-primary, #2563eb);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.pull-spinner.active {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ============= SWIPE CARD ============= */
+
+.swipe-card {
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* ============= MOBILE TABS ============= */
+
+.mobile-tabs-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-tabs-header {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-neutral-200, #e5e7eb);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.dark .mobile-tabs-header {
+  border-bottom-color: var(--color-dark-border, #374151);
+}
+
+.mobile-tab {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-neutral-600, #4b5563);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mobile-tab:hover {
+  color: var(--color-neutral-900, #111827);
+}
+
+.mobile-tab.active {
+  color: var(--color-primary, #2563eb);
+  border-bottom-color: var(--color-primary, #2563eb);
+}
+
+body.dark .mobile-tab {
+  color: var(--color-neutral-400, #9ca3af);
+}
+
+body.dark .mobile-tab:hover {
+  color: var(--color-dark-text, #f3f4f6);
+}
+
+.mobile-tabs-content {
+  width: 100%;
+}
+
+/* ============= MOBILE TOUCH OPTIMIZATION ============= */
+
+/* Increase touch targets on mobile */
+@media (max-width: 768px) {
+  /* Ensure all buttons are at least 44x44px */
+  button,
+  input[type='button'],
+  input[type='submit'],
+  a.btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve spacing between touch targets */
+  .nav-item {
+    min-height: 50px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .fab-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .fab-menu-item {
+    width: 52px;
+    height: 52px;
+  }
+
+  /* Better input spacing */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+
+  /* Improve form spacing */
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* Better link spacing */
+  a {
+    padding: 0.5rem 0;
+    display: inline-block;
+  }
+
+  /* Increase padding for interactive elements */
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Improve bottom nav spacing */
+  .bottom-nav {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .nav-item {
+    min-width: 50px;
+    min-height: 50px;
+  }
+}
+
+/* ============= OPTIMIZED SPACING FOR MOBILE ============= */
+
+@media (max-width: 640px) {
+  /* Larger padding on small screens */
+  body {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  /* Improve readability with better line height */
+  p,
+  li,
+  .card {
+    line-height: 1.6;
+  }
+
+  /* Better visual hierarchy */
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Improve spacing between sections */
+  section,
+  .section {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+
+  /* Better card spacing */
+  .card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  /* Optimize grid on mobile */
+  [class*='grid'] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Better flex wrapping */
+  [class*='flex-wrap'] {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+/* ============= SMOOTH SCROLLING & TRANSITIONS ============= */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ============= SAFE AREA SUPPORT (iPhone notch) ============= */
+
+@supports (padding: max(0px)) {
+  .app-layout {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+
+  .bottom-sheet {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .mobile-header,
+  .bottom-nav {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .layout-main {
+    padding-bottom: max(6rem, calc(6rem + env(safe-area-inset-bottom)));
+  }
+}

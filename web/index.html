@@ -3,16 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Viewport Configuration (Critical for Mobile) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=5" />
+    
+    <!-- SEO & Description -->
     <meta name="description" content="Money Generator App - Turn time into money with smart job matching and financial tools" />
-    <meta name="theme-color" content="#667eea" />
+    <meta name="keywords" content="gig work, job matching, freelance, side income, money making" />
+    
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)" />
+    
+    <!-- Apple iOS Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MoneyGen" />
+    <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, app-argument=moneygen://" />
+    
+    <!-- Android & PWA Support -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    <meta name="format-detection" content="address=no" />
+    
+    <!-- Icons -->
     <link rel="apple-touch-icon" href="/vite.svg" />
-    <title>Money Generator App</title>
+    <link rel="apple-touch-icon" sizes="152x152" href="/vite.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/vite.svg" />
+    
+    <!-- Performance Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://api.moneygenerator.app" />
+    <link rel="prefetch" href="/dist/assets" />
+    
+    <!-- Safe Area Support (iPhone Notch) -->
+    <meta name="viewport-fit" content="cover" />
+    
+    <!-- Permissions -->
+    <meta name="permissions-policy" content="geolocation=(self), microphone=(), camera=()" />
+    
+    <title>Money Generator App - Gig Work Made Simple</title>
   </head>
   <body>
     <div id="root"></div>

@@ -241,7 +241,200 @@ body.dark .nav-item.active {
   background-color: rgba(37, 99, 235, 0.15);
 }
 
-/* Responsive Layout */
+/* ============= MOBILE TOUCH OPTIMIZATION ============= */
+
+/* Ensure touch targets are at least 44x44px */
+@media (max-width: 768px) {
+  /* Improve button touch targets */
+  button,
+  input[type='button'],
+  input[type='submit'],
+  .icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem;
+  }
+
+  /* Improve nav item touch targets */
+  .nav-item {
+    min-height: 50px;
+    padding: 0.75rem 0.5rem;
+    gap: var(--spacing-sm);
+  }
+
+  /* Improve header padding for safety area */
+  .mobile-header {
+    padding: max(var(--spacing-lg), env(safe-area-inset-top)) 
+            max(var(--spacing-lg), env(safe-area-inset-right))
+            var(--spacing-lg)
+            max(var(--spacing-lg), env(safe-area-inset-left));
+    min-height: 56px;
+  }
+
+  /* Better main content padding on mobile */
+  .layout-main {
+    padding: var(--spacing-lg);
+    padding-bottom: calc(6rem + max(0px, env(safe-area-inset-bottom)));
+    scroll-padding-top: 56px; /* Account for sticky header */
+  }
+
+  /* Improve bottom nav for safe area (notches) */
+  .bottom-nav {
+    padding: max(var(--spacing-sm), env(safe-area-inset-left))
+             max(var(--spacing-sm), env(safe-area-inset-right))
+             max(var(--spacing-sm), env(safe-area-inset-bottom))
+             max(var(--spacing-sm), env(safe-area-inset-left));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    gap: 0;
+  }
+
+  /* Better spacing between nav items on mobile */
+  .bottom-nav .nav-item {
+    min-width: 60px;
+  }
+
+  /* Improve input sizing for mobile keyboard */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+
+  /* Better label spacing */
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* Improve link tap targets */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ============= IMPROVED MOBILE TYPOGRAPHY & SPACING ============= */
+
+@media (max-width: 640px) {
+  html {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  body {
+    line-height: 1.5;
+  }
+
+  /* Better heading sizes for small screens */
+  h1 {
+    font-size: 1.75rem;
+    margin: 0 0 1rem 0;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin: 1rem 0 0.75rem 0;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    margin: 0.75rem 0 0.5rem 0;
+  }
+
+  /* Improve paragraph readability */
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  /* Better section spacing */
+  section,
+  .section {
+    margin-bottom: 2rem;
+  }
+
+  /* Improve card spacing */
+  .card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  /* Better list spacing */
+  ul,
+  ol {
+    margin: 1rem 0;
+    padding-left: 1.25rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* Reduce cramped styling */
+  .layout-brand h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Better action spacing */
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  /* Optimize icon size for touch */
+  .icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Better form spacing */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Better button text readability */
+  .nav-item {
+    font-size: 0.75rem;
+  }
+}
+
+/* ============= ULTRA-SMALL SCREENS (< 380px) ============= */
+
+@media (max-width: 380px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Reduce padding on very small screens */
+  .layout-main {
+    padding: 1rem 0.75rem;
+  }
+
+  .mobile-header {
+    padding: 0.75rem;
+  }
+
+  /* Stack header actions vertically if needed */
+  .header-actions {
+    gap: 0.25rem;
+  }
+
+  /* Minimal padding on nav */
+  .nav-item {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+/* ============= RESPONSIVE LAYOUT ============= */
 @media (min-width: 768px) {
   .mobile-header {
     display: none !important;

@@ -11,6 +11,7 @@ import {
   Moon
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { OfflineIndicator } from '../components/MobileComponents';
 import './AppLayout.css';
 
 interface AppLayoutProps {
@@ -30,6 +31,8 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
 
   return (
     <div className="app-layout">
+      <OfflineIndicator />
+
       {/* Mobile Top Header */}
       <header className="mobile-header layout-header">
 
@@ -37,10 +40,19 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
           <h1>Money Generator</h1>
         </div>
         <div className="header-actions">
-          <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle Theme">
+          <button 
+            className="icon-btn" 
+            onClick={toggleTheme} 
+            aria-label="Toggle Theme"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button className="icon-btn">
+          <button 
+            className="icon-btn"
+            aria-label="Notifications"
+            title="View notifications"
+          >
             <Bell size={20} />
           </button>
         </div>
@@ -50,7 +62,12 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
       <aside className="sidebar">
         <div className="sidebar-brand">
           MoneyGen
-          <button className="icon-btn theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+          <button 
+            className="icon-btn theme-toggle" 
+            onClick={toggleTheme} 
+            aria-label="Toggle Theme"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </div>
@@ -60,6 +77,7 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+              title={item.label}
             >
               <item.icon size={20} />
               <span>{item.label}</span>
@@ -80,6 +98,7 @@ export const AppLayout: React.FC<AppLayoutProps> = () => {
             key={item.path}
             to={item.path}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            title={item.label}
           >
             <item.icon className="nav-icon" size={24} />
             <span>{item.label}</span>
