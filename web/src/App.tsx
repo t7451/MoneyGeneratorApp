@@ -35,34 +35,35 @@ const DEMO_PRODUCTS: Product[] = [
 
 function App() {
   const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiConnected, setApiConnected] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
+    // Try to fetch products from API in the background
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`${apiUrl}/api/catalog`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch(`${apiUrl}/api/catalog`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.products || DEMO_PRODUCTS);
-        setApiConnected(true);
-      } else {
-        setProducts(DEMO_PRODUCTS);
+        if (data.products && Array.isArray(data.products)) {
+          setProducts(data.products);
+          setApiConnected(true);
+        }
       }
       setError(null);
     } catch (err) {
-      console.log('Backend not available, using demo products');
-      setProducts(DEMO_PRODUCTS);
+      // Silently fail and keep using demo products
       setApiConnected(false);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -84,9 +85,7 @@ function App() {
           <p>Choose the plan that works best for your gig economy needs</p>
         </div>
 
-        {loading && <div style={{ textAlign: 'center', padding: '2rem' }}>Loading products...</div>}
-
-        {!loading && products.length > 0 && (
+        {products.length > 0 && (
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
