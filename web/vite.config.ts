@@ -68,7 +68,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-charts': ['recharts'],
           'vendor-icons': ['lucide-react'],
-          'vendor-utils': ['axios', 'zod'],
+          // 'vendor-utils': ['axios', 'zod'], // Removed as they are not used in web
         },
         // Optimize chunk filenames
         chunkFileNames: 'assets/chunks/[name]-[hash:8].js',
