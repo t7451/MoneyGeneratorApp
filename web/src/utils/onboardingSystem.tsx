@@ -236,25 +236,28 @@ export interface TourStep {
 
 interface GuidedTourProps {
   steps: TourStep[];
+  isActive: boolean;
+  currentStepIndex: number;
+  onStepChange?: (index: number) => void;
   onComplete?: () => void;
-  autoStart?: boolean;
+  onSkip?: () => void;
   showSkip?: boolean;
 }
 
 export const GuidedTour: React.FC<GuidedTourProps> = ({
   steps,
+  isActive,
+  currentStepIndex,
+  onStepChange,
   onComplete,
-  autoStart = false,
+  onSkip,
   showSkip = true,
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isActive, setIsActive] = useState(autoStart);
   const [highlightElement, setHighlightElement] = useState<HTMLElement | null>(null);
-
-  const step = steps[currentStep];
+  const step = steps[currentStepIndex];
 
   useEffect(() => {
-    if (isActive && step.highlightSelector) {
+    if (isActive && step?.highlightSelector) {
       const element = document.querySelector(step.highlightSelector) as HTMLElement;
       setHighlightElement(element);
 
@@ -265,38 +268,30 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
     } else {
       setHighlightElement(null);
     }
-  }, [isActive, currentStep, step.highlightSelector]);
+  }, [isActive, currentStepIndex, step?.highlightSelector]);
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+    if (currentStepIndex < steps.length - 1) {
+      onStepChange?.(currentStepIndex + 1);
     } else {
-      setIsActive(false);
+      onSkip?.();
       onComplete?.();
     }
   };
 
   const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+    if (currentStepIndex > 0) {
+      onStepChange?.(currentStepIndex - 1);
     }
   };
 
   const handleSkip = () => {
-    setIsActive(false);
+    onSkip?.();
     onComplete?.();
   };
 
-  if (!isActive) {
-    return (
-      <button
-        onClick={() => setIsActive(true)}
-        className="guided-tour-trigger"
-        title="Start guided tour"
-      >
-        <HelpCircle size={20} />
-      </button>
-    );
+  if (!isActive || currentStepIndex >= steps.length) {
+    return null;
   }
 
   return (
@@ -344,18 +339,18 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 
           <div className="tour-progress">
             <span>
-              {currentStep + 1} of {steps.length}
+              {currentStepIndex + 1} of {steps.length}
             </span>
             <div className="tour-progress-bar">
               <div
                 className="tour-progress-fill"
-                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
               />
             </div>
           </div>
 
           <div className="tour-buttons">
-            {currentStep > 0 && (
+            {currentStepIndex > 0 && (
               <button
                 className="tour-btn tour-btn-secondary"
                 onClick={handlePrev}
@@ -372,7 +367,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
               </button>
             )}
             <button className="tour-btn tour-btn-primary" onClick={handleNext}>
-              {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+              {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
               <ChevronRight size={16} />
             </button>
           </div>
@@ -435,7 +430,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
 // Onboarding Checklist Component
 export const OnboardingChecklist: React.FC = () => {
   const {
-    user,
     getCompletionPercentage,
     getAllCheckpoints,
     updateCheckpoint,
@@ -659,7 +653,7 @@ export const useTourNavigation = (steps: TourStep[], onComplete?: () => void) =>
 /**
  * Hook for tracking checkpoint progress with callbacks
  */
-export const useCheckpointProgress = (role?: 'freelancer' | 'business' | 'individual') => {
+export const useCheckpointProgress = () => {
   const { getCompletionPercentage, getAllCheckpoints, updateCheckpoint } = useOnboarding();
   const [completedCount, setCompletedCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);

@@ -4,6 +4,7 @@ import { JobCard } from '../components/JobCard';
 // import { JobMap } from '../components/JobMap'; // TODO: Re-enable when maplibre-gl is installed
 import { MOCK_JOBS, Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
+import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
 
 export const JobsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,7 +16,46 @@ export const JobsPage: React.FC = () => {
   const [jobStatus, setJobStatus] = useState<Record<string, 'saved' | 'applied'>>({});
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const { showToast } = useToast();
+  const { markTutorialWatched, user } = useOnboarding();
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+  const jobBoardTourSteps = [
+    {
+      id: 'jobs-search',
+      title: 'Find Opportunities',
+      description: 'Search and filter jobs based on your skills and preferences.',
+      highlightSelector: '[data-tour="search-bar"]',
+      position: 'bottom' as const,
+    },
+    {
+      id: 'jobs-filters',
+      title: 'Smart Filters',
+      description: 'Filter by pay rate, distance, ratings, and job type.',
+      highlightSelector: '[data-tour="filter-panel"]',
+      position: 'bottom' as const,
+    },
+    {
+      id: 'jobs-cards',
+      title: 'Job Listings',
+      description: 'View opportunities with detailed information about each job.',
+      highlightSelector: '[data-tour="job-cards"]',
+      position: 'top' as const,
+    },
+    {
+      id: 'jobs-alerts',
+      title: 'Job Alerts',
+      description: 'Enable alerts to get notified when new matching jobs appear.',
+      highlightSelector: '[data-tour="alerts-toggle"]',
+      position: 'top' as const,
+    },
+  ];
+
+  const tour = useTourNavigation(jobBoardTourSteps, () => {
+    markTutorialWatched('jobboard-tour');
+    showToast('Job board tour complete! 🎉', 'success');
+  });
+
+  const shouldShowTour = user.role && !user.tutorialsWatched.includes('jobboard-tour');
 
   // Load persisted preferences
   useEffect(() => {
@@ -147,11 +187,40 @@ export const JobsPage: React.FC = () => {
   }), [filterType, maxDistance, minPay, minRating, searchTerm]);
 
   return (
-    <div className="jobs-page">
-      <header className="page-header">
-        <h2>Find Jobs</h2>
-        <div className="actions" style={{ display: 'flex', gap: '0.5rem' }}>
-          <div className="search-box">
+    <>
+      {tour.isActive && (
+        <GuidedTour
+          steps={jobBoardTourSteps}
+          isActive={tour.isActive}
+          currentStepIndex={tour.currentStepIndex}
+          onStepChange={tour.goToStep}
+          onComplete={tour.skipTour}
+          onSkip={tour.skipTour}
+          showSkip
+        />
+      )}
+      <div className="jobs-page">
+        <header className="page-header">
+          <h2>Find Jobs</h2>
+          {shouldShowTour && (
+            <button
+              onClick={tour.startTour}
+              style={{
+                marginLeft: '1rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+              }}
+            >
+              🎯 Start Tour
+            </button>
+          )}
+          <div className="actions" style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="search-box" data-tour="search-bar">
             <Search size={16} />
             <input
               type="search"
@@ -171,7 +240,7 @@ export const JobsPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="job-filters" style={{ padding: '0 1rem 1rem', display: 'flex', gap: '0.5rem', overflowX: 'auto' }}>
+      <div className="job-filters" data-tour="filter-panel" style={{ padding: '0 1rem 1rem', display: 'flex', gap: '0.5rem', overflowX: 'auto' }}>
           <button className={`filter-chip ${filterType === 'all' ? 'active' : ''}`} onClick={() => setFilterType('all')}>All</button>
           <button className={`filter-chip ${filterType === 'high' ? 'active' : ''}`} onClick={() => setFilterType('high')}>Urgent</button>
           <button className={`filter-chip ${filterType === 'delivery' ? 'active' : ''}`} onClick={() => setFilterType('delivery')}>Delivery</button>
@@ -199,7 +268,7 @@ export const JobsPage: React.FC = () => {
             <p className="alert-title"><Bell size={16} /> Smart alerts</p>
             <p className="alert-body">Get notified for high-paying gigs near you and roles matching your tags.</p>
           </div>
-          <button className="btn-secondary" onClick={toggleAlerts}>{alertsEnabled ? 'Pause alerts' : 'Enable alerts'}</button>
+          <button className="btn-secondary" data-tour="alerts-toggle" onClick={toggleAlerts}>{alertsEnabled ? 'Pause alerts' : 'Enable alerts'}</button>
         </div>
       </div>
       
@@ -209,7 +278,7 @@ export const JobsPage: React.FC = () => {
           <p>Map view coming soon! Try the list view instead.</p>
         </div>
       ) : filteredJobs.length > 0 ? (
-        <div className="job-list" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="job-list" data-tour="job-cards" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {filteredJobs.map(job => (
              <JobCard
                key={job.id}
@@ -334,6 +403,7 @@ export const JobsPage: React.FC = () => {
             margin: 0 1rem;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };

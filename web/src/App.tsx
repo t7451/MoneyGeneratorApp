@@ -3,6 +3,7 @@ import { ToastProvider } from './components/Toast';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AppLayout } from './layouts/AppLayout';
 import { ThemeProvider } from './context/ThemeContext';
+import { OnboardingProvider } from './utils/onboardingSystem';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { Checkout } from './components/Checkout';
 import { DashboardPage } from './pages/DashboardPage';
@@ -76,7 +77,9 @@ export default function App() {
       <ThemeProvider>
         <ToastProvider>
           <AppProvider>
-            <AppRoutes />
+            <OnboardingProvider>
+              <AppRoutes />
+            </OnboardingProvider>
           </AppProvider>
         </ToastProvider>
       </ThemeProvider>

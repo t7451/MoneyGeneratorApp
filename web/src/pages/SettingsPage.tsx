@@ -2,15 +2,57 @@ import React, { useState } from 'react';
 import { Globe, Shield, CreditCard, LogOut, Download, KeyRound } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
+import { GuidedTour, useTourNavigation, useOnboarding, EducationalHint } from '../utils/onboardingSystem';
 
 export const SettingsPage: React.FC = () => {
     const { userProfile, openCheckout } = useAppContext();
     const { showToast } = useToast();
+    const { markTutorialWatched, user } = useOnboarding();
     const [language, setLanguage] = useState('en-US');
     const [currency, setCurrency] = useState('USD');
     const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
     const [exportFormat, setExportFormat] = useState<'csv' | 'json'>('csv');
     const [isExporting, setIsExporting] = useState(false);
+    const [dismissedHints, setDismissedHints] = useState<string[]>([]);
+
+    const settingsTourSteps = [
+      {
+        id: 'settings-profile',
+        title: 'Profile Settings',
+        description: 'Update your personal information and preferences here.',
+        highlightSelector: '[data-tour="profile-section"]',
+        position: 'bottom' as const,
+      },
+      {
+        id: 'settings-security',
+        title: 'Security & Privacy',
+        description: 'Enable 2FA to secure your account from unauthorized access.',
+        highlightSelector: '[data-tour="security-section"]',
+        position: 'bottom' as const,
+      },
+      {
+        id: 'settings-billing',
+        title: 'Billing & Subscription',
+        description: 'Manage your payment methods and upgrade your plan.',
+        highlightSelector: '[data-tour="billing-section"]',
+        position: 'bottom' as const,
+      },
+      {
+        id: 'settings-data',
+        title: 'Data & Export',
+        description: 'Export your data anytime or delete your account.',
+        highlightSelector: '[data-tour="data-section"]',
+        position: 'top' as const,
+      },
+    ];
+
+    const tour = useTourNavigation(settingsTourSteps, () => {
+      markTutorialWatched('settings-tour');
+      showToast('Settings tour complete! 🎉', 'success');
+    });
+
+    const shouldShowTour = user.role && !user.tutorialsWatched.includes('settings-tour');
+    const shouldShow2FAHint = !dismissedHints.includes('2fa') && !twoFactorEnabled;
 
     const handleEnable2FA = () => {
       setTwoFactorEnabled(true);
@@ -59,11 +101,50 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="settings-page">
+      {tour.isActive && (
+        <GuidedTour
+          steps={settingsTourSteps}
+          isActive={tour.isActive}
+          currentStepIndex={tour.currentStepIndex}
+          onStepChange={tour.goToStep}
+          onComplete={tour.skipTour}
+          onSkip={tour.skipTour}
+          showSkip
+        />
+      )}
+      
+      {shouldShow2FAHint && (
+        <EducationalHint
+          type="warning"
+          title="Enhance Your Security"
+          description="Enable two-factor authentication to protect your account from unauthorized access."
+          icon={<Shield size={20} />}
+          onDismiss={() => setDismissedHints([...dismissedHints, '2fa'])}
+        />
+      )}
+      
       <header className="page-header">
         <h2>Settings</h2>
+        {shouldShowTour && (
+          <button
+            onClick={tour.startTour}
+            style={{
+              marginLeft: '1rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+            }}
+          >
+            🎯 Start Tour
+          </button>
+        )}
       </header>
       
-      <div className="settings-section">
+      <div className="settings-section" data-tour="profile-section">
         <h3>Account</h3>
         <div className="settings-item">
           <div className="icon"><CreditCard size={20} /></div>
@@ -75,7 +156,7 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="settings-section">
+      <div className="settings-section" data-tour="security-section">
         <h3>Preferences</h3>
          <div className="settings-item">
           <div className="icon"><Globe size={20} /></div>
@@ -113,7 +194,7 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="settings-section">
+      <div className="settings-section" data-tour="billing-section">
         <h3>Data Export</h3>
         <div className="settings-item">
           <div className="icon"><Download size={20} /></div>
