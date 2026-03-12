@@ -1,8 +1,8 @@
 # Money Generator App - Full-Stack Web Edition
 
 **Full-Stack Web Application** | React 18 Frontend + Node.js/Express Backend  
-**Status:** Active Development | Deployed to Railway  
-**Latest:** v1.3.0 (March 12, 2026)
+**Status:** Active Development | Deployed to Railway + Netlify  
+**Latest:** v1.3.1 (March 12, 2026)
 
 ---
 
