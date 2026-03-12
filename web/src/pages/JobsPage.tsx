@@ -5,7 +5,7 @@ import { MOCK_JOBS, Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
 
 export const JobsPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const { showToast } = useToast();
 
