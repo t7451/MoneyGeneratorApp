@@ -8,6 +8,7 @@ interface JobMapProps {
   center?: [number, number];
 }
 
+// Convert jobs to GeoJSON format for maplibre
 function buildGeoJson(jobs: Job[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
@@ -22,7 +23,7 @@ function buildGeoJson(jobs: Job[]): GeoJSON.FeatureCollection {
         properties: {
           id: job.id,
           title: job.title,
-          pay: `${job.pay.amount}/${job.pay.unit}`,
+          pay: `$${job.pay.amount}/${job.pay.unit}`,
           company: job.company,
         },
       })),

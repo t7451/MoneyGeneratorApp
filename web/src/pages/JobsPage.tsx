@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Briefcase, Search, Bell, MapPin, Star, DollarSign } from 'lucide-react';
 import { JobCard } from '../components/JobCard';
-// import { JobMap } from '../components/JobMap'; // TODO: Re-enable when maplibre-gl is installed
+import { JobMap } from '../components/JobMap';
 import { MOCK_JOBS, Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
 import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
@@ -186,6 +186,14 @@ export const JobsPage: React.FC = () => {
     return matchesSearch && matchesFilter && matchesPay && matchesDistance && matchesRating;
   }), [filterType, maxDistance, minPay, minRating, searchTerm]);
 
+  // Derive map center from the first filtered job or default to SF
+  const mapCenter: [number, number] = useMemo(() => {
+    if (filteredJobs.length > 0 && filteredJobs[0].longitude && filteredJobs[0].latitude) {
+      return [filteredJobs[0].longitude, filteredJobs[0].latitude];
+    }
+    return [-122.4194, 37.7749];
+  }, [filteredJobs]);
+
   return (
     <>
       {tour.isActive && (
@@ -273,9 +281,8 @@ export const JobsPage: React.FC = () => {
       </div>
       
       {viewMode === 'map' ? (
-        <div className="map-view" style={{ padding: '2rem 1rem', textAlign: 'center', color: '#666' }}>
-          <MapPin size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-          <p>Map view coming soon! Try the list view instead.</p>
+        <div className="map-view" style={{ padding: '1rem' }}>
+          <JobMap jobs={filteredJobs} center={mapCenter} />
         </div>
       ) : filteredJobs.length > 0 ? (
         <div className="job-list" data-tour="job-cards" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
