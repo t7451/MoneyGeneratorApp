@@ -3,6 +3,7 @@ import { Globe, Shield, CreditCard, LogOut, Download, KeyRound, Wallet } from 'l
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { GuidedTour, useTourNavigation, useOnboarding, EducationalHint } from '../utils/onboardingSystem';
+import './SettingsPage.css';
 
 export const SettingsPage: React.FC = () => {
     const { userProfile, openCheckout } = useAppContext();
@@ -102,7 +103,7 @@ export const SettingsPage: React.FC = () => {
     };
 
   return (
-    <div className="settings-page" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div className="settings-page">
       {tour.isActive && (
         <GuidedTour
           steps={settingsTourSteps}
@@ -125,8 +126,8 @@ export const SettingsPage: React.FC = () => {
         />
       )}
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 700 }}>Settings</h1>
+      <div className="page-header">
+        <h1>Settings</h1>
         {shouldShowTour && (
           <button
             className="button primary"
@@ -138,17 +139,17 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Account Settings */}
-      <div className="card elevated" data-tour="profile-section" style={{ marginBottom: 'var(--space-6)' }}>
-        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-          <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 600 }}>Account Settings</h3>
+      <div className="card elevated settings-card" data-tour="profile-section">
+        <div className="settings-section-header">
+          <h3>Account Settings</h3>
         </div>
-        <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 'var(--space-4)', borderBottom: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <CreditCard size={20} style={{ color: 'var(--color-emerald-600)' }} />
+        <div className="settings-grid">
+          <div className="setting-row">
+            <div className="setting-info">
+              <CreditCard size={20} className="setting-icon" />
               <div>
-                <div style={{ fontWeight: 600 }}>Subscription</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>{userProfile.subscription || 'Free Plan'}</div>
+                <div className="setting-label">Subscription</div>
+                <div className="setting-value">{userProfile.subscription || 'Free Plan'}</div>
               </div>
             </div>
             <button className="button primary" onClick={openCheckout}>Upgrade</button>
@@ -157,39 +158,39 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Preferences */}
-      <div className="card elevated" data-tour="security-section" style={{ marginBottom: 'var(--space-6)' }}>
-        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-          <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 600 }}>Preferences</h3>
+      <div className="card elevated settings-card" data-tour="security-section">
+        <div className="settings-section-header">
+          <h3>Preferences</h3>
         </div>
-        <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
-          <div style={{ paddingBottom: 'var(--space-4)', borderBottom: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
-              <Globe size={20} style={{ color: 'var(--color-emerald-600)' }} />
-              <label style={{ fontWeight: 600 }}>Language</label>
+        <div className="settings-grid">
+          <div className="setting-input-group">
+            <div className="setting-label-row">
+              <Globe size={20} className="setting-icon" />
+              <label className="setting-label">Language</label>
             </div>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', width: '100%', maxWidth: '300px' }}>
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="setting-select">
               <option value="en-US">English (US)</option>
               <option value="es-MX">Español (LatAm)</option>
               <option value="fr-FR">Français</option>
             </select>
           </div>
-          <div style={{ paddingBottom: 'var(--space-4)', borderBottom: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
-              <Globe size={20} style={{ color: 'var(--color-emerald-600)' }} />
-              <label style={{ fontWeight: 600 }}>Currency</label>
+          <div className="setting-input-group">
+            <div className="setting-label-row">
+              <Globe size={20} className="setting-icon" />
+              <label className="setting-label">Currency</label>
             </div>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', width: '100%', maxWidth: '300px' }}>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="setting-select">
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="MXN">MXN</option>
             </select>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <Shield size={20} style={{ color: 'var(--color-emerald-600)' }} />
+          <div className="setting-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <div className="setting-info">
+              <Shield size={20} className="setting-icon" />
               <div>
-                <div style={{ fontWeight: 600 }}>Two-Factor Authentication</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>{twoFactorEnabled ? '✓ Enabled' : '○ Not Enabled'}</div>
+                <div className="setting-label">Two-Factor Authentication</div>
+                <div className="setting-value">{twoFactorEnabled ? '✓ Enabled' : '○ Not Enabled'}</div>
               </div>
             </div>
             {!twoFactorEnabled ? (
@@ -202,18 +203,18 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Payout Preferences */}
-      <div className="card elevated" style={{ marginBottom: 'var(--space-6)' }}>
-        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-          <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Wallet size={20} style={{ color: 'var(--color-emerald-600)' }} /> Payout Preferences
+      <div className="card elevated settings-card">
+        <div className="settings-section-header">
+          <h3>
+            <Wallet size={20} className="setting-icon" /> Payout Preferences
           </h3>
         </div>
         
-        <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
+        <div className="settings-grid">
           <div>
-            <label style={{ fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>Preferred Payment Methods</label>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <label className="setting-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Preferred Payment Methods</label>
+            <div className="payout-methods-group">
+              <label className="checkbox-label">
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.paypal} 
@@ -221,7 +222,7 @@ export const SettingsPage: React.FC = () => {
                 /> 
                 PayPal
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <label className="checkbox-label">
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.crypto} 
@@ -229,7 +230,7 @@ export const SettingsPage: React.FC = () => {
                 /> 
                 Crypto (BTC/ETH)
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <label className="checkbox-label">
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.giftcard} 
@@ -241,9 +242,9 @@ export const SettingsPage: React.FC = () => {
           </div>
           
           <div>
-            <label style={{ fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>Minimum Withdrawal Threshold</label>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <label className="setting-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Minimum Withdrawal Threshold</label>
+            <div className="payout-methods-group">
+              <label className="checkbox-label">
                 <input 
                   type="radio" 
                   name="threshold" 
@@ -253,7 +254,7 @@ export const SettingsPage: React.FC = () => {
                 /> 
                 Low ($0.50 - $2)
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <label className="checkbox-label">
                 <input 
                   type="radio" 
                   name="threshold" 
@@ -263,7 +264,7 @@ export const SettingsPage: React.FC = () => {
                 /> 
                 Standard ($5 - $20)
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <label className="checkbox-label">
                 <input 
                   type="radio" 
                   name="threshold" 
@@ -274,7 +275,7 @@ export const SettingsPage: React.FC = () => {
                 High ($20+)
               </label>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+            <p className="payout-footer">
               We'll highlight jobs that match your cashout preferences first.
             </p>
           </div>
@@ -282,20 +283,20 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Data Export */}
-      <div className="card elevated" data-tour="billing-section" style={{ marginBottom: 'var(--space-6)' }}>
-        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-          <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 600 }}>Data & Export</h3>
+      <div className="card elevated settings-card" data-tour="billing-section">
+        <div className="settings-section-header">
+          <h3>Data & Export</h3>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-4)' }}>
+        <div className="export-section">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-              <Download size={20} style={{ color: 'var(--color-emerald-600)' }} />
-              <span style={{ fontWeight: 600 }}>Export your data</span>
+            <div className="export-header">
+              <Download size={20} className="setting-icon" />
+              <span>Export your data</span>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>CSV or JSON with all transactions, goals, and insights</p>
+            <p className="export-description">CSV or JSON with all transactions, goals, and insights</p>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-            <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json')} style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+          <div className="export-actions">
+            <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json')} className="setting-select">
               <option value="csv">CSV</option>
               <option value="json">JSON</option>
             </select>
@@ -305,9 +306,9 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Account Actions */}
-      <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-6)', paddingTop: 'var(--space-6)', borderTop: '1px solid var(--border-color)' }}>
-        <button className="button danger" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}><LogOut size={16} /> Sign Out</button>
-        <div style={{ marginLeft: 'auto', alignSelf: 'center', color: 'var(--text-secondary)', fontSize: 'var(--text-xs)' }}>Version 1.0.0 (Build 2026.03.12)</div>
+      <div className="account-footer">
+        <button className="button danger"><LogOut size={16} /> Sign Out</button>
+        <div className="version-info">Version 1.0.0 (Build 2026.03.12)</div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { JobMap } from '../components/JobMap';
 import { MOCK_JOBS, Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
 import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
+import './JobsPage.css';
 
 export const JobsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -302,39 +303,39 @@ export const JobsPage: React.FC = () => {
       </div>
 
       {showComparison && (
-        <div className="comparison-tool" style={{ padding: '1rem', margin: '0 1rem 1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-          <h4 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
+        <div className="comparison-tool">
+          <h4 className="comparison-header">
             <Wallet size={16} /> Platform Comparison (Scrimpr Data)
           </h4>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div className="compare-card" style={{ background: 'white', padding: '1rem', borderRadius: '0.375rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Survey Junkie</div>
-              <div style={{ color: '#16a34a', fontWeight: 700 }}>$12/hr avg</div>
-              <div style={{ fontSize: '0.875rem', color: '#64748b' }}>Low threshold: $5.00</div>
+          <div className="comparison-grid">
+            <div className="compare-card">
+              <div className="compare-platform">Survey Junkie</div>
+              <div className="compare-rate">$12/hr avg</div>
+              <div className="compare-meta">Low threshold: $5.00</div>
             </div>
-            <div className="compare-card" style={{ background: 'white', padding: '1rem', borderRadius: '0.375rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>UserTesting</div>
-              <div style={{ color: '#16a34a', fontWeight: 700 }}>$60/hr avg</div>
-              <div style={{ fontSize: '0.875rem', color: '#64748b' }}>Best for: Tech Tests</div>
+            <div className="compare-card">
+              <div className="compare-platform">UserTesting</div>
+              <div className="compare-rate">$60/hr avg</div>
+              <div className="compare-meta">Best for: Tech Tests</div>
             </div>
-            <div className="compare-card" style={{ background: 'white', padding: '1rem', borderRadius: '0.375rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Swagbucks</div>
-              <div style={{ color: '#16a34a', fontWeight: 700 }}>$8/hr avg</div>
-              <div style={{ fontSize: '0.875rem', color: '#64748b' }}>Best for: Games</div>
+            <div className="compare-card">
+              <div className="compare-platform">Swagbucks</div>
+              <div className="compare-rate">$8/hr avg</div>
+              <div className="compare-meta">Best for: Games</div>
             </div>
           </div>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+          <p className="comparison-disclaimer">
             * Rates based on user reports. Use Scrimpr to compare current offers.
           </p>
         </div>
       )}
       
       {viewMode === 'map' ? (
-        <div className="map-view" style={{ padding: '1rem' }}>
+        <div className="map-view">
           <JobMap jobs={filteredJobs} center={mapCenter} />
         </div>
       ) : filteredJobs.length > 0 ? (
-        <div className="job-list" data-tour="job-cards" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="job-list" data-tour="job-cards">
           {filteredJobs.map(job => (
              <JobCard
                key={job.id}
@@ -353,50 +354,9 @@ export const JobsPage: React.FC = () => {
             <button className="btn-primary mt-4" onClick={() => setFilterType('all')}>Update Preferences</button>
         </div>
       )}
-      
-      <style>{`
-        .filter-chip {
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            font-size: 0.85rem;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .filter-chip.active {
-            background-color: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
-        .search-box {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            background: white;
-        }
-        .search-box input {
-            border: none;
-            outline: none;
-            background: transparent;
-            min-width: 180px;
-        }
-        .view-toggle {
-            display: inline-flex;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .toggle-chip {
-            background: transparent;
-            border: none;
-            padding: 0.5rem 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
+    </div>
+  );
+};
             cursor: pointer;
             color: #475569;
         }
@@ -449,16 +409,6 @@ export const JobsPage: React.FC = () => {
             color: #475569;
             font-size: 0.9rem;
         }
-        .map-placeholder {
-            background: linear-gradient(135deg, #eef2ff, #f8fafc);
-            border: 1px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 2rem;
-            color: #1f2937;
-            text-align: center;
-            margin: 0 1rem;
-        }
-      `}</style>
       </div>
     </>
   );
