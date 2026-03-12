@@ -1,5 +1,6 @@
 [build]
 base = "web"
+# TypeScript is a required dev dependency for the build: tsc && vite build
 command = "npm ci && npm run build"
 publish = "dist"
 
