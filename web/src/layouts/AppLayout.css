@@ -2,20 +2,21 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: var(--color-neutral-50);
-  color: var(--color-neutral-900);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--duration-base), color var(--duration-base);
 }
 
 body.dark .app-layout {
-  background-color: var(--color-dark-bg);
-  color: var(--color-dark-text);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* Top Header (Mobile) */
 .mobile-header.layout-header {
-  background-color: white;
-  border-bottom: 1px solid var(--color-neutral-200);
-  padding: var(--spacing-lg);
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-4);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -26,26 +27,27 @@ body.dark .app-layout {
 }
 
 body.dark .mobile-header.layout-header {
-  background-color: var(--color-dark-surface);
-  border-bottom-color: var(--color-dark-border);
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-color);
 }
 
 .layout-brand h1 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
-  color: var(--color-primary);
+  color: var(--color-emerald-600);
+  font-family: var(--font-display);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--space-3);
 }
 
 .layout-main {
   flex: 1;
-  padding: var(--spacing-lg);
+  padding: var(--space-4);
   padding-bottom: 6rem; /* Space for bottom nav */
   overflow-y: auto;
 }
@@ -59,9 +61,9 @@ body.dark .mobile-header.layout-header {
 .sidebar {
   display: none;
   width: 260px;
-  background-color: white;
-  border-right: 1px solid var(--color-neutral-200);
-  padding: var(--spacing-xl);
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: var(--space-6);
   position: sticky;
   top: 0;
   height: 100vh;
@@ -71,88 +73,89 @@ body.dark .mobile-header.layout-header {
 }
 
 body.dark .sidebar {
-  background-color: var(--color-dark-surface);
-  border-right-color: var(--color-dark-border);
+  background-color: var(--bg-secondary);
+  border-right-color: var(--border-color);
 }
 
 .sidebar-brand {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-2xl);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-emerald-600);
+  margin-bottom: var(--space-6);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-family: var(--font-display);
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--color-neutral-600);
-  transition: all var(--transition-fast);
-  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: all var(--duration-base);
+  font-weight: 500;
 }
 
 .sidebar-item:hover {
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-900);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .sidebar-item.active {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+  background-color: var(--color-emerald-100);
+  color: var(--color-emerald-600);
+  font-weight: 600;
 }
 
 body.dark .sidebar-item {
-  color: var(--color-neutral-400);
+  color: var(--text-secondary);
 }
 
 body.dark .sidebar-item:hover {
-  background-color: var(--color-neutral-700);
-  color: var(--color-dark-text);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 body.dark .sidebar-item.active {
-  background-color: rgba(37, 99, 235, 0.15);
-  color: var(--color-primary);
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--color-emerald-400);
 }
 
 .theme-toggle {
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--spacing-sm);
-  color: var(--color-neutral-500);
+  padding: var(--space-2);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all var(--duration-base);
 }
 
 .theme-toggle:hover {
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-900);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 body.dark .theme-toggle {
-  color: var(--color-neutral-400);
+  color: var(--text-secondary);
 }
 
 body.dark .theme-toggle:hover {
-  background-color: var(--color-neutral-700);
-  color: var(--color-dark-text);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* Icon Button */
@@ -160,27 +163,27 @@ body.dark .theme-toggle:hover {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: var(--spacing-sm);
+  padding: var(--space-2);
   border-radius: var(--radius-md);
-  color: var(--color-neutral-600);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition: all var(--duration-base);
 }
 
 .icon-btn:hover {
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-900);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 body.dark .icon-btn {
-  color: var(--color-neutral-400);
+  color: var(--text-secondary);
 }
 
 body.dark .icon-btn:hover {
-  background-color: var(--color-neutral-700);
-  color: var(--color-dark-text);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* Mobile Bottom Navigation */
@@ -189,18 +192,18 @@ body.dark .icon-btn:hover {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: white;
-  border-top: 1px solid var(--color-neutral-200);
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-around;
-  padding: var(--spacing-sm);
+  padding: var(--space-2);
   z-index: 40;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
 }
 
 body.dark .bottom-nav {
-  background-color: var(--color-dark-surface);
-  border-top-color: var(--color-dark-border);
+  background-color: var(--bg-secondary);
+  border-top-color: var(--border-color);
 }
 
 .nav-item {
@@ -208,24 +211,24 @@ body.dark .bottom-nav {
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: var(--color-neutral-600);
-  font-size: var(--font-size-xs);
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all var(--duration-base);
   flex: 1;
   text-align: center;
 }
 
 .nav-item:hover {
-  color: var(--color-primary);
+  color: var(--color-emerald-600);
 }
 
 .nav-item.active {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-  background-color: var(--color-primary-light);
+  color: var(--color-emerald-600);
+  font-weight: 600;
+  background-color: var(--color-emerald-100);
 }
 
 .nav-icon {
@@ -234,11 +237,12 @@ body.dark .bottom-nav {
 }
 
 body.dark .nav-item {
-  color: var(--color-neutral-400);
+  color: var(--text-secondary);
 }
 
 body.dark .nav-item.active {
-  background-color: rgba(37, 99, 235, 0.15);
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--color-emerald-400);
 }
 
 /* ============= MOBILE TOUCH OPTIMIZATION ============= */
@@ -259,31 +263,31 @@ body.dark .nav-item.active {
   .nav-item {
     min-height: 50px;
     padding: 0.75rem 0.5rem;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
   }
 
   /* Improve header padding for safety area */
   .mobile-header {
-    padding: max(var(--spacing-lg), env(safe-area-inset-top)) 
-            max(var(--spacing-lg), env(safe-area-inset-right))
-            var(--spacing-lg)
-            max(var(--spacing-lg), env(safe-area-inset-left));
+    padding: max(var(--space-4), env(safe-area-inset-top)) 
+            max(var(--space-4), env(safe-area-inset-right))
+            var(--space-4)
+            max(var(--space-4), env(safe-area-inset-left));
     min-height: 56px;
   }
 
   /* Better main content padding on mobile */
   .layout-main {
-    padding: var(--spacing-lg);
+    padding: var(--space-4);
     padding-bottom: calc(6rem + max(0px, env(safe-area-inset-bottom)));
     scroll-padding-top: 56px; /* Account for sticky header */
   }
 
   /* Improve bottom nav for safe area (notches) */
   .bottom-nav {
-    padding: max(var(--spacing-sm), env(safe-area-inset-left))
-             max(var(--spacing-sm), env(safe-area-inset-right))
-             max(var(--spacing-sm), env(safe-area-inset-bottom))
-             max(var(--spacing-sm), env(safe-area-inset-left));
+    padding: max(var(--space-2), env(safe-area-inset-left))
+             max(var(--space-2), env(safe-area-inset-right))
+             max(var(--space-2), env(safe-area-inset-bottom))
+             max(var(--space-2), env(safe-area-inset-left));
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
     gap: 0;
   }
@@ -454,7 +458,7 @@ body.dark .nav-item.active {
   }
   
   .layout-main {
-    padding-bottom: var(--spacing-xl);
+    padding-bottom: var(--space-6);
     flex: 1;
     overflow-y: auto;
     max-height: 100vh;
@@ -471,19 +475,19 @@ body.dark .nav-item.active {
 }
 
 .layout-main::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-300);
+  background: var(--color-charcoal-300);
   border-radius: 4px;
 }
 
 .layout-main::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-400);
+  background: var(--color-charcoal-400);
 }
 
 body.dark .layout-main::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-600);
+  background: var(--color-charcoal-600);
 }
 
 body.dark .layout-main::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-500);
+  background: var(--color-charcoal-500);
 }
 

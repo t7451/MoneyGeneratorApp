@@ -11,7 +11,7 @@ import { ProductsPage } from './pages/ProductsPage';
 import { JobsPage } from './pages/JobsPage';
 import { TeamPage } from './pages/TeamPage';
 import { SettingsPage } from './pages/SettingsPage';
-import './design-system.css';
+import './index.css';
 import './App.css';
 
 const AppRoutes = () => {
