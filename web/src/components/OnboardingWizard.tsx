@@ -138,11 +138,11 @@ export function OnboardingWizard({
   return (
     <div className="onboarding-overlay">
       <div className="onboarding-wizard">
-        <div className="onboarding-progress">
+        <div className="onboarding-progress" aria-hidden="true">
           <div className="progress-bar" style={{ width: `${progress}%` }} />
         </div>
 
-        <div className="onboarding-step-label">
+        <div className="onboarding-step-label" aria-live="polite">
           Step {currentIndex + 1} of {steps.length}: {STEP_LABELS[step]}
         </div>
 
@@ -169,23 +169,41 @@ export function OnboardingWizard({
               <p>We'll tailor your experience based on your selection.</p>
               
               <div className="role-cards">
-                <div className={`role-card ${role === 'freelancer' ? 'selected' : ''}`} onClick={() => handleRoleSelect('freelancer')}>
+                <button
+                  type="button"
+                  className={`role-card ${role === 'freelancer' ? 'selected' : ''}`}
+                  onClick={() => handleRoleSelect('freelancer')}
+                  aria-pressed={role === 'freelancer'}
+                  aria-label="Select Freelancer or Gig Worker role"
+                >
                     <div className="role-icon"><Briefcase size={24} /></div>
                     <h3>Freelancer / Gig Worker</h3>
                     <p>I want to track gig earnings, mileage, and optimize my schedule.</p>
-                </div>
+                </button>
 
-                <div className={`role-card ${role === 'business' ? 'selected' : ''}`} onClick={() => handleRoleSelect('business')}>
+                <button
+                  type="button"
+                  className={`role-card ${role === 'business' ? 'selected' : ''}`}
+                  onClick={() => handleRoleSelect('business')}
+                  aria-pressed={role === 'business'}
+                  aria-label="Select Business Owner role"
+                >
                     <div className="role-icon"><Building size={24} /></div>
                     <h3>Business Owner</h3>
                     <p>I manage a team and need to track shared expenses and payouts.</p>
-                </div>
+                </button>
 
-                <div className={`role-card ${role === 'individual' ? 'selected' : ''}`} onClick={() => handleRoleSelect('individual')}>
+                <button
+                  type="button"
+                  className={`role-card ${role === 'individual' ? 'selected' : ''}`}
+                  onClick={() => handleRoleSelect('individual')}
+                  aria-pressed={role === 'individual'}
+                  aria-label="Select Individual role"
+                >
                     <div className="role-icon"><User size={24} /></div>
                     <h3>Individual</h3>
                     <p>I want to track personal finances, subscriptions, and savings goals.</p>
-                </div>
+                </button>
               </div>
             </div>
           )}
@@ -199,10 +217,13 @@ export function OnboardingWizard({
               </p>
               <div className="platforms-grid">
                 {PLATFORMS.map((platform) => (
-                  <div
+                  <button
+                    type="button"
                     key={platform.id}
                     className={`platform-card ${connectedPlatforms.includes(platform.id) ? 'selected' : ''}`}
                     onClick={() => handlePlatformToggle(platform.id)}
+                    aria-pressed={connectedPlatforms.includes(platform.id)}
+                    aria-label={`Toggle ${platform.name}`}
                   >
                     <span className="platform-icon">{platform.icon}</span>
                     <span className="platform-name">{platform.name}</span>
@@ -210,7 +231,7 @@ export function OnboardingWizard({
                     {connectedPlatforms.includes(platform.id) && (
                       <span className="platform-check">✓</span>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
               <div className="step-nav">
@@ -258,10 +279,11 @@ export function OnboardingWizard({
               </p>
               
               <div className="goal-input-group">
-                <label>Weekly {role === 'business' ? 'Revenue' : 'Earnings'} Goal</label>
+                <label htmlFor="weekly-goal">Weekly {role === 'business' ? 'Revenue' : 'Earnings'} Goal</label>
                 <div className="goal-slider-row">
                   <span className="goal-value">${weeklyGoal}</span>
                   <input
+                    id="weekly-goal"
                     type="range"
                     min="100"
                     max="5000"
@@ -269,15 +291,20 @@ export function OnboardingWizard({
                     value={weeklyGoal}
                     onChange={(e) => setWeeklyGoal(Number(e.target.value))}
                     className="goal-slider"
+                    aria-valuemin={100}
+                    aria-valuemax={5000}
+                    aria-valuenow={weeklyGoal}
+                    aria-label="Weekly goal"
                   />
                 </div>
               </div>
 
                <div className="goal-input-group">
-                <label>Tax Reserve Percentage</label>
+                <label htmlFor="tax-reserve">Tax Reserve Percentage</label>
                 <div className="goal-slider-row">
                   <span className="goal-value">{taxReserve}%</span>
                   <input
+                    id="tax-reserve"
                     type="range"
                     min="10"
                     max="40"
@@ -285,6 +312,10 @@ export function OnboardingWizard({
                     value={taxReserve}
                     onChange={(e) => setTaxReserve(Number(e.target.value))}
                     className="goal-slider"
+                    aria-valuemin={10}
+                    aria-valuemax={40}
+                    aria-valuenow={taxReserve}
+                    aria-label="Tax reserve percentage"
                   />
                 </div>
                 <p className="goal-hint">
@@ -306,7 +337,13 @@ export function OnboardingWizard({
               <h2>Choose Your Plan</h2>
               <p>Start with a plan that fits your current stage.</p>
               <div className="plans-grid">
-                  <div className={`plan-card ${selectedPlan === 'plan_free' ? 'selected' : ''}`} onClick={() => handlePlanSelect('plan_free')}>
+                    <button
+                    type="button"
+                    className={`plan-card ${selectedPlan === 'plan_free' ? 'selected' : ''}`}
+                    onClick={() => handlePlanSelect('plan_free')}
+                    aria-pressed={selectedPlan === 'plan_free'}
+                    aria-label="Select Free plan"
+                    >
                       <h3>Free</h3>
                       <div className="price">$0<span>/mo</span></div>
                       <ul>
@@ -314,8 +351,14 @@ export function OnboardingWizard({
                           <li>Manual Entry</li>
                       </ul>
                       {selectedPlan === 'plan_free' && <span className="check">✓</span>}
-                  </div>
-                  <div className={`plan-card ${selectedPlan === 'plan_pro' ? 'selected' : ''}`} onClick={() => handlePlanSelect('plan_pro')}>
+                    </button>
+                    <button
+                    type="button"
+                    className={`plan-card ${selectedPlan === 'plan_pro' ? 'selected' : ''}`}
+                    onClick={() => handlePlanSelect('plan_pro')}
+                    aria-pressed={selectedPlan === 'plan_pro'}
+                    aria-label="Select Pro plan"
+                    >
                       <h3>Pro</h3>
                       <div className="price">$14.99<span>/mo</span></div>
                       <ul>
@@ -323,7 +366,7 @@ export function OnboardingWizard({
                           <li>Automation</li>
                       </ul>
                       {selectedPlan === 'plan_pro' && <span className="check">✓</span>}
-                  </div>
+                    </button>
               </div>
                <div className="step-nav">
                 <button className="btn-back" onClick={handleBack}>Back</button>

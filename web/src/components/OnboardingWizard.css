@@ -5,6 +5,74 @@
   margin: 2rem 0;
 }
 
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.onboarding-wizard {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--card-shadow);
+}
+
+.onboarding-progress {
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+.onboarding-step-label {
+  padding: 0.75rem 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.onboarding-content {
+  padding: 2rem;
+}
+
+.onboarding-step {
+  text-align: center;
+}
+
+.onboarding-step-wide {
+  max-width: 900px;
+}
+
+.step-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.setup-time {
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+}
+
+.btn-large {
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
+  width: 100%;
+}
+
 .role-card {
   padding: 1.5rem;
   border: 2px solid var(--border-color);
@@ -16,6 +84,7 @@
   gap: 0.5rem;
   text-align: left;
   background: var(--bg-primary);
+  width: 100%;
 }
 
 .role-card:hover {
@@ -28,6 +97,35 @@
   border-color: var(--accent-color);
   background: var(--bg-tertiary); /* Using tertiary as selected state or define custom tint */
   /* For better control, consider --bg-selected if needed, but tertiary usually works */
+}
+
+.role-card,
+.platform-card,
+.plan-card {
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.role-card:focus-visible,
+.platform-card:focus-visible,
+.plan-card:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.role-card,
+.platform-card,
+.plan-card,
+.btn-primary,
+.btn-secondary,
+.btn-back,
+.btn-text {
+  border: none;
 }
 
 .role-card h3 {
@@ -127,6 +225,33 @@
   gap: 1rem;
 }
 
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-back,
+.btn-text {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-back:hover,
+.btn-text:hover {
+  color: var(--text-primary);
+}
+
 .btn-secondary, .btn-primary {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -163,6 +288,7 @@
 }
 
 /* Platform Grid */
+.platforms-grid,
 .platform-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -191,6 +317,48 @@
 }
 
 .platform-card.selected {
+  border-color: var(--accent-color);
+  background: var(--bg-tertiary);
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.plan-card {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plan-card h3 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.plan-card .price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  color: var(--text-secondary);
+}
+
+.plan-card li + li {
+  margin-top: 0.25rem;
+}
+
+.plan-card.selected {
   border-color: var(--accent-color);
   background: var(--bg-tertiary);
   color: var(--accent-hover);
