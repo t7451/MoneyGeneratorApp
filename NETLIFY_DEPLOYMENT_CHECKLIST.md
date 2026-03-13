@@ -50,7 +50,7 @@
 ```
 Basic settings:
 - Base directory: web
-- Build command: npm run build
+- Build command: npm ci --include=dev && npm run build
 - Publish directory: dist
 - Node version: 20
 ```

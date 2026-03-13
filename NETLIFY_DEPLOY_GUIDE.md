@@ -30,8 +30,8 @@
 
 3. **Configure Build**
    - **Base directory**: `web`
-   - **Build command**: `npm run build`
-   - **Publish directory**: `web/dist`
+   - **Build command**: `npm ci --include=dev && npm run build`
+   - **Publish directory**: `dist`
    - **Node version**: 20 (shown in netlify.toml)
 
 4. **Set Environment Variables**

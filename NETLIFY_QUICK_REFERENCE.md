@@ -1,5 +1,22 @@
 # Netlify Deployment Quick Reference
 
+## ✅ Setup Verification Checklist (2 minutes)
+
+### Build Settings (Netlify UI → Site configuration → Build & deploy)
+- [ ] Base directory is `web` (or leave blank and let `netlify.toml` drive it)
+- [ ] Build command is `npm ci --include=dev && npm run build`
+- [ ] Publish directory is `dist`
+- [ ] Node version is 20
+
+### Environment Variables (Netlify UI → Site configuration → Environment)
+- [ ] `VITE_API_URL` points to your backend (`https://api.moneygenerator.app` for prod)
+- [ ] `VITE_V2_ENABLED=true`
+
+### Smoke Tests (after a deploy)
+- [ ] App loads and SPA routing works on refresh (deep link → reload)
+- [ ] API proxy works: open `https://<your-site>.netlify.app/api/v2/features/flags?userId=demo-user`
+- [ ] No console errors on first load
+
 ## 🚀 Deploy in 5 Minutes
 
 ```bash
@@ -21,7 +38,7 @@ git push origin main
 | Setting | Value |
 |---------|-------|
 | **Base Directory** | `web` |
-| **Build Command** | `npm run build` |
+| **Build Command** | `npm ci --include=dev && npm run build` |
 | **Publish Directory** | `dist` |
 | **Node Version** | 20 |
 | **Build Time** | ~45 seconds |
@@ -51,8 +68,7 @@ VITE_PLAID_ENV = sandbox
 |------|---------|
 | `netlify.toml` | Build & deploy config |
 | `vite.config.ts` | Build optimization |
-| `web/_redirects` | Route configuration |
-| `netlify/functions/proxy-api.js` | API proxy |
+| `netlify.toml` redirects | SPA routing + API proxy |
 | `.env.example` | Environment template |
 
 ---
