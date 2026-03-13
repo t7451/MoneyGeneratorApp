@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Shield, CreditCard, LogOut, Download, KeyRound, Wallet, Moon, Sun } from 'lucide-react';
+import { Globe, Shield, CreditCard, LogOut, Download, KeyRound, Wallet, Moon, Sun, Check } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useTheme } from '../context/ThemeContext';
@@ -9,7 +9,6 @@ import './SettingsPage.css';
 export const SettingsPage: React.FC = () => {
     const { userProfile, openCheckout } = useAppContext();
         // --- Billing/Subscription Management Enhancements ---
-        const [showPlanDetails, setShowPlanDetails] = useState(false);
         const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
         const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
         const PLANS = [
