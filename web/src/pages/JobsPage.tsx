@@ -351,65 +351,9 @@ export const JobsPage: React.FC = () => {
             <Briefcase size={48} className="text-gray-400" />
             <h3>No jobs found nearby</h3>
             <p>Try expanding your search radius or update your filters.</p>
-            <button className="btn-primary mt-4" onClick={() => setFilterType('all')}>Update Preferences</button>
+            <button className="button primary mt-4" onClick={() => setFilterType('all')}>Update Preferences</button>
         </div>
       )}
     </div>
-  );
-};
-            cursor: pointer;
-            color: #475569;
-        }
-        .toggle-chip.active {
-            background: #eef2ff;
-            color: #4338ca;
-        }
-        .advanced-filters {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0 1rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.75rem;
-        }
-        .filter-row label {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            font-size: 0.9rem;
-            color: #1f2937;
-        }
-        .alerts-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            background: #f8fafc;
-            border: 1px dashed #e2e8f0;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-        }
-        .alert-title {
-            display: flex;
-            gap: 0.35rem;
-            align-items: center;
-            font-weight: 700;
-            margin: 0;
-            color: #1f2937;
-        }
-        .alert-body {
-            margin: 0.15rem 0 0;
-            color: #475569;
-            font-size: 0.9rem;
-        }
-      </div>
-    </>
   );
 };
