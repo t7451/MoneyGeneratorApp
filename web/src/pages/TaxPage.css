@@ -1,0 +1,155 @@
+.tax-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.tax-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.tax-header h2 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tax-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.tax-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+}
+
+.tax-card.highlight {
+  background: var(--bg-secondary);
+  border-color: var(--color-emerald-300);
+}
+
+.card-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card-amount {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.card-subtext {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.amount-positive { color: var(--color-emerald-600); }
+.amount-negative { color: var(--color-danger); }
+
+.tax-progress-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.progress-bar-bg {
+  height: 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+}
+
+.progress-segment {
+  height: 100%;
+}
+
+.dates-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.date-card {
+  text-align: center;
+  padding: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  opacity: 0.6;
+}
+
+.date-card.active {
+  opacity: 1;
+  border-color: var(--color-emerald-500);
+  background: var(--color-emerald-50);
+  color: var(--color-emerald-900);
+}
+
+body.dark .date-card.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-emerald-400);
+}
+
+.deductions-list {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.deduction-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.deduction-item:last-child { border-bottom: none; }
+
+.deduction-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-4);
+}
+
+.deduction-info {
+  flex: 1;
+}
+
+.deduction-title { font-weight: 600; }
+.deduction-desc { font-size: var(--text-sm); color: var(--text-secondary); }
+.deduction-value { font-weight: 700; }
