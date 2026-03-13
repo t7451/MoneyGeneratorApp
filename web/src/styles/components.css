@@ -585,14 +585,10 @@ body.dark .badge.danger {
   gap: var(--space-4);
   margin-bottom: var(--space-6);
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  scrollbar-width: none;
 }
 
-.tabs::-webkit-scrollbar {
-  display: none;
-}
+.tabs::-webkit-scrollbar { display: none; }
 
 .tab-button {
   padding: var(--space-3) var(--space-4);
@@ -691,8 +687,8 @@ body.dark .badge.danger {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   z-index: var(--z-modal-backdrop);
   animation: fadeIn var(--duration-fast) var(--easing-ease-out);
 }

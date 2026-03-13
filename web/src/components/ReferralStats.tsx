@@ -21,6 +21,7 @@ interface ReferralStatsProps {
 }
 
 const ReferralStats: React.FC<ReferralStatsProps> = ({ stats }) => {
+  const maxShares = Math.max(...Object.values(stats.shareStats), 1);
   const statCards = [
     {
       label: 'Invites Sent',
@@ -83,66 +84,31 @@ const ReferralStats: React.FC<ReferralStatsProps> = ({ stats }) => {
         <div className="channel-stats">
           <div className="channel-item">
             <span className="channel-name">WhatsApp</span>
-            <div className="channel-bar">
-              <div
-                className="channel-fill"
-                style={{
-                  width: `${Math.min((stats.shareStats.whatsapp / Math.max(...Object.values(stats.shareStats), 1)) * 100, 100)}%`,
-                }}
-              ></div>
-            </div>
+            <progress className="channel-progress" value={stats.shareStats.whatsapp} max={maxShares} />
             <span className="channel-count">{stats.shareStats.whatsapp}</span>
           </div>
 
           <div className="channel-item">
             <span className="channel-name">Twitter</span>
-            <div className="channel-bar">
-              <div
-                className="channel-fill"
-                style={{
-                  width: `${Math.min((stats.shareStats.twitter / Math.max(...Object.values(stats.shareStats), 1)) * 100, 100)}%`,
-                }}
-              ></div>
-            </div>
+            <progress className="channel-progress" value={stats.shareStats.twitter} max={maxShares} />
             <span className="channel-count">{stats.shareStats.twitter}</span>
           </div>
 
           <div className="channel-item">
             <span className="channel-name">Email</span>
-            <div className="channel-bar">
-              <div
-                className="channel-fill"
-                style={{
-                  width: `${Math.min((stats.shareStats.email / Math.max(...Object.values(stats.shareStats), 1)) * 100, 100)}%`,
-                }}
-              ></div>
-            </div>
+            <progress className="channel-progress" value={stats.shareStats.email} max={maxShares} />
             <span className="channel-count">{stats.shareStats.email}</span>
           </div>
 
           <div className="channel-item">
             <span className="channel-name">SMS</span>
-            <div className="channel-bar">
-              <div
-                className="channel-fill"
-                style={{
-                  width: `${Math.min((stats.shareStats.sms / Math.max(...Object.values(stats.shareStats), 1)) * 100, 100)}%`,
-                }}
-              ></div>
-            </div>
+            <progress className="channel-progress" value={stats.shareStats.sms} max={maxShares} />
             <span className="channel-count">{stats.shareStats.sms}</span>
           </div>
 
           <div className="channel-item">
             <span className="channel-name">Direct Link</span>
-            <div className="channel-bar">
-              <div
-                className="channel-fill"
-                style={{
-                  width: `${Math.min((stats.shareStats.directLink / Math.max(...Object.values(stats.shareStats), 1)) * 100, 100)}%`,
-                }}
-              ></div>
-            </div>
+            <progress className="channel-progress" value={stats.shareStats.directLink} max={maxShares} />
             <span className="channel-count">{stats.shareStats.directLink}</span>
           </div>
         </div>

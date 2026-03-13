@@ -51,6 +51,8 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ code, onCopy, copied }) => 
               alert('Link copied!');
             }}
             className="link-copy-btn"
+            aria-label="Copy referral link"
+            title="Copy referral link"
           >
             <Copy size={16} />
           </button>

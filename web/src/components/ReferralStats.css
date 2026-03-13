@@ -162,18 +162,28 @@
   color: var(--text-secondary);
 }
 
-.channel-bar {
+.channel-progress {
+  width: 100%;
   height: 8px;
+  border: none;
   background: var(--bg-primary);
   border-radius: 4px;
   overflow: hidden;
 }
 
-.channel-fill {
-  height: 100%;
+.channel-progress::-webkit-progress-bar {
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.channel-progress::-webkit-progress-value {
   background: linear-gradient(90deg, var(--color-emerald-600), var(--color-emerald-500));
   border-radius: 4px;
-  transition: width var(--transition-normal);
+}
+
+.channel-progress::-moz-progress-bar {
+  background: linear-gradient(90deg, var(--color-emerald-600), var(--color-emerald-500));
+  border-radius: 4px;
 }
 
 .channel-count {

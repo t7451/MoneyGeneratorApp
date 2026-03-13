@@ -104,7 +104,6 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  scrollbar-width: none; /* Hide scrollbar Firefox */
   -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
 }
 

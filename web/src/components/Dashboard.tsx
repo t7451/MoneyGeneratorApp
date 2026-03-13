@@ -13,7 +13,6 @@ interface ProgressTrackerProps {
 
 export function ProgressTracker({ steps, onStepClick }: ProgressTrackerProps) {
   const completedCount = steps.filter((s) => s.completed).length;
-  const progress = (completedCount / steps.length) * 100;
 
   return (
     <div className="progress-tracker">
@@ -24,7 +23,7 @@ export function ProgressTracker({ steps, onStepClick }: ProgressTrackerProps) {
         </span>
       </div>
       <div className="progress-bar-container">
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+        <progress className="progress-bar" value={completedCount} max={steps.length} />
       </div>
       <div className="progress-steps">
         {steps.map((step) => (
@@ -175,7 +174,7 @@ export function Dashboard({
             <span className="score-value">{healthScore}</span>
           </div>
           <div className="score-meter">
-            <div className="score-fill" style={{ width: `${healthScore}%` }} />
+            <progress className="score-meter" value={healthScore} max={100} />
           </div>
           <div className="signal-list">
             {healthSignals.map((signal) => (

@@ -183,6 +183,13 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, childre
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [pullDistance, setPullDistance] = React.useState(0);
   const startY = React.useRef(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.transform = `translateY(${pullDistance}px)`;
+    }
+  }, [pullDistance]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const element = e.currentTarget as HTMLElement;
@@ -219,7 +226,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, childre
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ transform: `translateY(${pullDistance}px)` }}
+      ref={containerRef}
     >
       {pullDistance > 60 && (
         <div className="pull-indicator">
@@ -250,6 +257,13 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
 }) => {
   const [offset, setOffset] = React.useState(0);
   const startX = React.useRef(0);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = `translateX(${offset}px)`;
+    }
+  }, [offset]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
@@ -277,7 +291,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   return (
     <div
       className="swipe-card"
-      style={{ transform: `translateX(${offset}px)` }}
+      ref={cardRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

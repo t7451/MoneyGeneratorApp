@@ -672,7 +672,13 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
                   <h4>🎁 Refer Friends</h4>
                   <p>Earn 500 credits ($5) for each friend who signs up!</p>
                   <div className="referral-code-box">
-                    <input type="text" value={`moneygenerator.com/join?ref=${referralCode}`} readOnly />
+                    <input
+                      type="text"
+                      value={`moneygenerator.com/join?ref=${referralCode}`}
+                      readOnly
+                      aria-label="Referral link"
+                      title="Referral link"
+                    />
                     <button onClick={handleCopyReferral}>Copy</button>
                   </div>
                 </div>

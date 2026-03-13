@@ -407,12 +407,6 @@ input::placeholder, textarea::placeholder {
   background: var(--color-emerald-400);
 }
 
-/* Firefox scrollbar */
-* {
-  scrollbar-color: var(--border-color) var(--bg-secondary);
-  scrollbar-width: thin;
-}
-
 /* ========== SELECTION STYLES ========== */
 ::selection {
   background-color: var(--color-emerald-500);

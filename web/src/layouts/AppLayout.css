@@ -288,7 +288,6 @@ body.dark .nav-item.active {
     /* Prevent right-side items from being cut off when there are many tabs */
     justify-content: flex-start;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     white-space: nowrap;
 
