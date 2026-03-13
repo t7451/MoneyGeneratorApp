@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useTheme } from '../context/ThemeContext';
 import { GuidedTour, useTourNavigation, useOnboarding, EducationalHint } from '../utils/onboardingSystem';
+import { apiFetchJson, apiFetchText, getUserId } from '../lib/apiClient';
 import './SettingsPage.css';
 
 export const SettingsPage: React.FC = () => {
@@ -153,16 +154,16 @@ export const SettingsPage: React.FC = () => {
 
     const handleExport = async () => {
       setIsExporting(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const userId = getUserId();
+      const year = new Date().getFullYear();
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
 
       try {
         if (exportFormat === 'csv') {
-          const res = await fetch(`${apiUrl}/api/v1/expenses/export?userId=demo-user&year=${new Date().getFullYear()}&format=csv`);
-          if (!res.ok) throw new Error('export_failed');
-          const data = await res.json();
-          const expenseRows = data.expenses?.map((e: any) => [e.date, e.categoryName, e.amount, e.description].join(',')) || [];
-          const header = 'date,category,amount,description';
-          const csv = [header, ...expenseRows].join('\n');
+          const csv = await apiFetchText(
+            `/api/v2/reporting/export-csv?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&type=all&userId=${encodeURIComponent(userId)}`
+          );
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -171,9 +172,7 @@ export const SettingsPage: React.FC = () => {
           a.click();
           URL.revokeObjectURL(url);
         } else {
-          const res = await fetch(`${apiUrl}/api/v1/compliance/export?userId=demo-user`);
-          if (!res.ok) throw new Error('export_failed');
-          const data = await res.json();
+          const data = await apiFetchJson<any>(`/api/v1/compliance/export?userId=${encodeURIComponent(userId)}`);
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');

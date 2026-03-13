@@ -123,6 +123,7 @@ const PricingPage: React.FC = () => {
   const [billingAction, setBillingAction] = useState<null | 'cancel' | 'downgrade'>(null);
 
   const currentPlanId = userProfile?.subscription ?? 'plan_free';
+  const currentPlanName = PLANS.find((p) => p.id === currentPlanId)?.name || 'Free';
 
   const annualSavings = Math.round(((14.99 * 12 - 119.88) / (14.99 * 12)) * 100);
 
@@ -177,7 +178,7 @@ const PricingPage: React.FC = () => {
           <p>Choose the plan that fits your gig economy lifestyle. All plans include a 14-day free trial.</p>
           {/* Current Plan Status */}
           <div className="current-plan-status">
-            <strong>Current Plan:</strong> {currentPlanId}
+            <strong>Current Plan:</strong> {currentPlanName}
             {currentPlanId !== 'plan_free' && (
               <div className="current-plan-actions">
                 <button className="btn-secondary" onClick={handleCancelPlan} disabled={billingAction === 'cancel'}>

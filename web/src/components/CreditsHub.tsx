@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import './CreditsHub.css';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+import { apiFetchJson, getUserId } from '../lib/apiClient';
 
 interface CreditBalance {
   available: number;
@@ -120,6 +119,7 @@ type TabType = 'earn' | 'redeem' | 'history' | 'achievements';
 type EarnSection = 'all' | 'surveys' | 'games' | 'offers' | 'tasks' | 'videos' | 'social' | 'cashback';
 
 export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHubProps) {
+  const effectiveUserId = userId || getUserId();
   const [activeTab, setActiveTab] = useState<TabType>('earn');
   const [earnSection, setEarnSection] = useState<EarnSection>('all');
   const [balance, setBalance] = useState<CreditBalance | null>(null);
@@ -141,12 +141,10 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
 
   // API helper
   const api = useCallback(async (path: string, options?: RequestInit) => {
-    const res = await fetch(`${API_BASE}/api/v1${path}`, {
+    return await apiFetchJson<any>(`/api/v1${path}`, {
       ...options,
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+      body: (options as any)?.body,
+    } as any);
   }, []);
 
   // Show toast notification
@@ -159,16 +157,16 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
   const loadDashboard = useCallback(async () => {
     try {
       const [dashboard, surveysData, gamesData, offersData, tasksData, redemptions, achievementsData, retailersData, videoData, referralData] = await Promise.all([
-        api(`/credits/dashboard?userId=${userId}`),
-        api(`/credits/surveys?userId=${userId}`),
+        api(`/credits/dashboard?userId=${effectiveUserId}`),
+        api(`/credits/surveys?userId=${effectiveUserId}`),
         api(`/credits/games`),
-        api(`/credits/offers?userId=${userId}`),
-        api(`/credits/tasks?userId=${userId}`),
+        api(`/credits/offers?userId=${effectiveUserId}`),
+        api(`/credits/tasks?userId=${effectiveUserId}`),
         api(`/credits/redemptions/options`),
-        api(`/credits/achievements?userId=${userId}`),
+        api(`/credits/achievements?userId=${effectiveUserId}`),
         api(`/credits/cashback/retailers`),
-        api(`/credits/ads/video?userId=${userId}`),
-        api(`/credits/referral?userId=${userId}`),
+        api(`/credits/ads/video?userId=${effectiveUserId}`),
+        api(`/credits/referral?userId=${effectiveUserId}`),
       ]);
 
       setBalance(dashboard.balance);
@@ -189,17 +187,17 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     } finally {
       setLoading(false);
     }
-  }, [api, userId, onBalanceChange]);
+  }, [api, effectiveUserId, onBalanceChange]);
 
   // Load transactions
   const loadTransactions = useCallback(async () => {
     try {
-      const data = await api(`/credits/transactions?userId=${userId}&limit=50`);
+      const data = await api(`/credits/transactions?userId=${effectiveUserId}&limit=50`);
       setTransactions(data.transactions || []);
     } catch (error) {
       console.error('Failed to load transactions:', error);
     }
-  }, [api, userId]);
+  }, [api, effectiveUserId]);
 
   useEffect(() => {
     loadDashboard();
@@ -218,7 +216,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api('/credits/checkin', {
         method: 'POST',
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId: effectiveUserId }),
       });
       setStreak({ ...streak, canCheckin: false, currentStreak: result.currentStreak });
       setBalance(result.balance);
@@ -238,7 +236,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api('/credits/ads/video/watch', {
         method: 'POST',
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId: effectiveUserId }),
       });
       if (result.credits > 0) {
         setBalance(result.balance);
@@ -261,7 +259,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api(`/credits/surveys/${surveyId}/complete`, {
         method: 'POST',
-        body: JSON.stringify({ userId, answers: { demo: true } }),
+        body: JSON.stringify({ userId: effectiveUserId, answers: { demo: true } }),
       });
       setSurveys(surveys.filter(s => s.id !== surveyId));
       setBalance(result.balance);
@@ -280,7 +278,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api(`/credits/games/${gameId}/play`, {
         method: 'POST',
-        body: JSON.stringify({ userId, result: 'win', score: Math.floor(Math.random() * 1000) }),
+        body: JSON.stringify({ userId: effectiveUserId, result: 'win', score: Math.floor(Math.random() * 1000) }),
       });
       if (result.credits > 0) {
         setBalance(result.balance);
@@ -302,7 +300,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api(`/credits/tasks/${taskId}/complete`, {
         method: 'POST',
-        body: JSON.stringify({ userId, result: { completed: true } }),
+        body: JSON.stringify({ userId: effectiveUserId, result: { completed: true } }),
       });
       setTasks(tasks.filter(t => t.id !== taskId));
       setBalance(result.balance);
@@ -321,7 +319,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api(`/credits/offers/${offerId}/complete`, {
         method: 'POST',
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId: effectiveUserId }),
       });
       setOffers(offers.filter(o => o.id !== offerId));
       setBalance(result.balance);
@@ -340,7 +338,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api('/credits/social/share', {
         method: 'POST',
-        body: JSON.stringify({ userId, platform, contentType: 'app' }),
+        body: JSON.stringify({ userId: effectiveUserId, platform, contentType: 'app' }),
       });
       setBalance(result.balance);
       showToast(`Shared on ${platform}! +${result.activity.credits} credits`);
@@ -362,7 +360,7 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     try {
       const result = await api('/credits/redemptions', {
         method: 'POST',
-        body: JSON.stringify({ userId, type, credits }),
+        body: JSON.stringify({ userId: effectiveUserId, type, credits }),
       });
       setBalance(result.balance);
       showToast(`Redemption requested! $${result.redemption.usdValue} on the way`);
