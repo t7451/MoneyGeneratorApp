@@ -70,6 +70,20 @@ table {
   font-size: var(--text-sm);
 }
 
+@media (max-width: 768px) {
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+}
+
 thead {
   background: var(--bg-secondary);
   border-bottom: 2px solid var(--border-color);

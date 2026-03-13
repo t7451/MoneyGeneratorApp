@@ -585,6 +585,13 @@ body.dark .badge.danger {
   gap: var(--space-4);
   margin-bottom: var(--space-6);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-button {
@@ -875,6 +882,7 @@ body.dark .badge.danger {
   .modal {
     max-width: 95vw;
     max-height: 95vh;
+    max-height: 95dvh;
   }
 
   .toast {
