@@ -100,3 +100,29 @@
   font-weight: 700;
   color: var(--color-emerald-600);
 }
+
+@media (max-width: 768px) {
+  .products-banner {
+    padding: var(--space-4);
+  }
+
+  .products-banner h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-footer {
+    gap: var(--space-3);
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}

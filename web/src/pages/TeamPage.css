@@ -91,6 +91,25 @@
   min-width: 250px;
 }
 
+@media (max-width: 640px) {
+  .page-header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .invite-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .team-plan-row,
+  .team-budget-row {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+}
+
 .btn-primary-sm {
   background-color: var(--color-emerald-600);
   color: white;

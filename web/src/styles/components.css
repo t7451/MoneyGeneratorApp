@@ -886,7 +886,7 @@ body.dark .badge.danger {
   }
 
   .toast {
-    bottom: var(--space-4);
+    bottom: calc(var(--space-4) + 4.25rem + max(0px, env(safe-area-inset-bottom)));
     right: var(--space-4);
     left: var(--space-4);
     max-width: none;

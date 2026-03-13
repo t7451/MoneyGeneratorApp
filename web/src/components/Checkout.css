@@ -514,6 +514,7 @@
   justify-content: flex-end;
   gap: 1rem;
   padding: 1.5rem 2rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
   border-radius: 0 0 16px 16px;

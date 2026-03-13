@@ -153,3 +153,35 @@ body.dark .date-card.active {
 .deduction-title { font-weight: 600; }
 .deduction-desc { font-size: var(--text-sm); color: var(--text-secondary); }
 .deduction-value { font-weight: 700; }
+
+@media (max-width: 768px) {
+  .tax-page {
+    padding: var(--space-3);
+  }
+
+  .tax-header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .dates-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .progress-header {
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .dates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deduction-item {
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}
