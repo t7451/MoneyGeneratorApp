@@ -1,5 +1,6 @@
 import React from 'react';
 import { Copy, Check } from 'lucide-react';
+import { useToast } from './Toast';
 import './ReferralCard.css';
 
 interface ReferralCardProps {
@@ -9,6 +10,8 @@ interface ReferralCardProps {
 }
 
 const ReferralCard: React.FC<ReferralCardProps> = ({ code, onCopy, copied }) => {
+  const { showToast } = useToast();
+
   return (
     <div className="referral-card code-card">
       <div className="code-header">
@@ -48,7 +51,7 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ code, onCopy, copied }) => 
               navigator.clipboard.writeText(
                 `https://moneygenerator.app?ref=${code}`
               );
-              alert('Link copied!');
+              showToast('Link copied!', 'success');
             }}
             className="link-copy-btn"
             aria-label="Copy referral link"

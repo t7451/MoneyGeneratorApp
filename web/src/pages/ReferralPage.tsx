@@ -29,6 +29,7 @@ const ReferralPage: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReferralData();
@@ -63,27 +64,13 @@ const ReferralPage: React.FC = () => {
 
   const fetchReferralData = async () => {
     try {
+      setLoadError(null);
       const data = await apiFetchJson<any>('/api/v2/referrals/me');
       setReferralData(normalizeReferralResponse(data));
     } catch (error) {
-      console.warn('Failed to fetch referral data, using mock:', error);
-      // Fallback mock data
-      setReferralData({
-        code: 'MONEYGEN2026',
-        stats: {
-          totalInvites: 12,
-          totalSignups: 4,
-          conversionRate: 33,
-          creditsEarned: 20,
-          shareStats: {
-            whatsapp: 5,
-            twitter: 3,
-            email: 2,
-            sms: 2,
-            directLink: 0,
-          }
-        }
-      });
+      console.warn('Failed to fetch referral data:', error);
+      setReferralData(null);
+      setLoadError('Unable to load referral program right now.');
     } finally {
       setLoading(false);
     }
@@ -95,13 +82,7 @@ const ReferralPage: React.FC = () => {
       setLeaderboard(Array.isArray(data?.data) ? data.data : []);
     } catch (error) {
       console.warn('Failed to fetch leaderboard:', error);
-      // Fallback mock data
-      setLeaderboard([
-        { rank: 1, userId: 'sarah', totalSignups: 12, creditsEarned: 60, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' },
-        { rank: 2, userId: 'mike', totalSignups: 10, creditsEarned: 50, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mike' },
-        { rank: 3, userId: 'priya', totalSignups: 8, creditsEarned: 40, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=priya' },
-        { rank: 4, userId: 'you', totalSignups: 4, creditsEarned: 20, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=you' },
-      ]);
+      setLeaderboard([]);
     }
   };
 
@@ -127,6 +108,10 @@ const ReferralPage: React.FC = () => {
 
   if (loading) {
     return <div className="referral-loading">Loading referral program...</div>;
+  }
+
+  if (loadError && !referralData) {
+    return <div className="referral-loading">{loadError}</div>;
   }
 
   return (

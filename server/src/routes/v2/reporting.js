@@ -9,6 +9,48 @@ import { logger } from '../../logger.js';
 
 const router = express.Router();
 
+function escapePdfText(text) {
+  return String(text ?? '').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+}
+
+function buildSimplePdf(lines) {
+  const safeLines = Array.isArray(lines) ? lines : [String(lines ?? '')];
+
+  const contentLines = [];
+  let y = 720;
+  for (const line of safeLines.slice(0, 60)) {
+    contentLines.push(`72 ${y} Td (${escapePdfText(line)}) Tj`);
+    y -= 16;
+  }
+
+  const streamBody = `BT\n/F1 12 Tf\n${contentLines.join('\n')}\nET\n`;
+
+  const objects = [];
+  objects.push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  objects.push('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+  objects.push('3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n');
+  objects.push(`4 0 obj\n<< /Length ${Buffer.byteLength(streamBody, 'utf8')} >>\nstream\n${streamBody}endstream\nendobj\n`);
+  objects.push('5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n');
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for (const obj of objects) {
+    offsets.push(Buffer.byteLength(pdf, 'utf8'));
+    pdf += obj;
+  }
+
+  const xrefStart = Buffer.byteLength(pdf, 'utf8');
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += '0000000000 65535 f \n';
+  for (let i = 1; i <= objects.length; i++) {
+    const off = String(offsets[i]).padStart(10, '0');
+    pdf += `${off} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
+  return Buffer.from(pdf, 'utf8');
+}
+
 /**
  * POST /api/v2/reporting/transaction
  * Record a transaction for analytics
@@ -321,6 +363,47 @@ router.get('/export-csv', async (req, res) => {
       success: false,
       error: error.message || 'Failed to export CSV'
     });
+  }
+});
+
+/**
+ * GET /api/v2/reporting/export-pdf
+ * Server-generated PDF (simple) for a given report type/date range.
+ * Query: ?reportType=summary&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+ */
+router.get('/export-pdf', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'] || req.query.userId;
+    const { reportType = 'summary', startDate, endDate } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ success: false, error: 'startDate and endDate are required' });
+    }
+
+    // Leverage existing generator for numbers; we emit a minimal PDF.
+    const generated = await ReportingService.generateReport(userId, String(reportType), String(startDate), String(endDate), 'json');
+
+    const lines = [
+      'Money Generator Report',
+      `Type: ${reportType}`,
+      `Period: ${startDate} to ${endDate}`,
+      '',
+      `Generated: ${new Date().toISOString()}`,
+      '',
+      `Payload keys: ${Object.keys(generated?.report?.data || {}).join(', ') || 'n/a'}`,
+    ];
+
+    const pdf = buildSimplePdf(lines);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="moneygen-report.pdf"');
+    res.send(pdf);
+  } catch (error) {
+    logger.error('Error in GET /export-pdf:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to export PDF' });
   }
 });
 

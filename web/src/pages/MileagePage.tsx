@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Play, StopCircle, Navigation2, FileText, Settings, Download } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { apiFetchJson, apiFetchText, getUserId } from '../lib/apiClient';
 import './MileagePage.css';
 
 interface Trip {
   id: string;
-  date: Date;
+  date: string;
   distance: number;
   duration: string;
   startLocation: string;
@@ -23,40 +24,74 @@ export const MileagePage: React.FC = () => {
 
   const IRS_RATE = 0.67; // 2024 IRS Rate
 
-  // Mock tracking simulation
+  const userId = getUserId();
+
+  // Load current tracking state + recent trips
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    (async () => {
+      try {
+        const [currentRes, tripsRes] = await Promise.all([
+          apiFetchJson<{ success: boolean; current: any }>(`/api/v2/mileage/current?userId=${encodeURIComponent(userId)}`),
+          apiFetchJson<{ success: boolean; trips: Trip[] }>(`/api/v2/mileage/trips?userId=${encodeURIComponent(userId)}&limit=50`),
+        ]);
+
+        const current = currentRes?.current;
+        setIsTracking(Boolean(current?.active));
+        setCurrentDistance(Number(current?.distanceMiles) || 0);
+        setElapsedTime(Number(current?.elapsedSeconds) || 0);
+        setTrips(Array.isArray(tripsRes?.trips) ? tripsRes.trips : []);
+      } catch {
+        // keep defaults
+      }
+    })();
+  }, [userId]);
+
+  // Poll backend while tracking
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isTracking) {
       interval = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
-        setCurrentDistance(prev => Number((prev + 0.01).toFixed(2))); // Simulate driving
+        apiFetchJson<{ success: boolean; current: any }>(`/api/v2/mileage/current?userId=${encodeURIComponent(userId)}`)
+          .then((res) => {
+            const current = res?.current;
+            if (!current?.active) {
+              setIsTracking(false);
+              return;
+            }
+            setCurrentDistance(Number(current?.distanceMiles) || 0);
+            setElapsedTime(Number(current?.elapsedSeconds) || 0);
+          })
+          .catch(() => null);
       }, 1000);
     }
-    return () => clearInterval(interval);
-  }, [isTracking]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTracking, userId]);
 
-  const toggleTracking = () => {
+  const toggleTracking = async () => {
     if (isTracking) {
-      // Stop Tracking
-      const newTrip: Trip = {
-        id: Date.now().toString(),
-        date: new Date(),
-        distance: currentDistance,
-        duration: formatTime(elapsedTime),
-        startLocation: 'Current Location',
-        endLocation: 'Destination',
-        type: 'business',
-        deduction: currentDistance * IRS_RATE
-      };
-      setTrips([newTrip, ...trips]);
-      setIsTracking(false);
-      setCurrentDistance(0);
-      setElapsedTime(0);
-      showToast('Trip saved! ' + newTrip.distance + ' miles logged.', 'success');
+      try {
+        const res = await apiFetchJson<{ success: boolean; trip: Trip; trips: Trip[] }>(
+          '/api/v2/mileage/stop',
+          { method: 'POST', body: { userId, type: 'business' } }
+        );
+        if (Array.isArray(res?.trips)) setTrips(res.trips);
+        setIsTracking(false);
+        setCurrentDistance(0);
+        setElapsedTime(0);
+        showToast(`Trip saved! ${res.trip.distance} miles logged.`, 'success');
+      } catch {
+        showToast('Unable to stop trip. Please retry.', 'error');
+      }
     } else {
-      // Start Tracking
-      setIsTracking(true);
-      showToast('Tracking started. Drive safely!', 'info');
+      try {
+        await apiFetchJson('/api/v2/mileage/start', { method: 'POST', body: { userId } });
+        setIsTracking(true);
+        showToast('Tracking started. Drive safely!', 'info');
+      } catch {
+        showToast('Unable to start tracking. Please retry.', 'error');
+      }
     }
   };
 
@@ -66,47 +101,33 @@ export const MileagePage: React.FC = () => {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  const toggleTripType = (id: string, type: 'business' | 'personal') => {
-    setTrips(trips.map(t => 
-      t.id === id ? { ...t, type, deduction: type === 'business' ? t.distance * IRS_RATE : 0 } : t
-    ));
+  const toggleTripType = async (id: string, type: 'business' | 'personal') => {
+    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, type, deduction: type === 'business' ? t.distance * IRS_RATE : 0 } : t)));
+    try {
+      await apiFetchJson(`/api/v2/mileage/trips/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: { userId, type },
+      });
+    } catch {
+      // best effort
+    }
   };
 
-  // Mock initial data
-  useEffect(() => {
-    setTrips([
-      {
-        id: '1',
-        date: new Date(2024, 2, 10),
-        distance: 12.4,
-        duration: '24:00',
-        startLocation: 'Home Office',
-        endLocation: 'Downtown Client',
-        type: 'business',
-        deduction: 12.4 * IRS_RATE
-      },
-      {
-        id: '2',
-        date: new Date(2024, 2, 9),
-        distance: 8.2,
-        duration: '15:30',
-        startLocation: 'Downtown',
-        endLocation: 'Supply Store',
-        type: 'business',
-        deduction: 8.2 * IRS_RATE
-      },
-      {
-        id: '3',
-        date: new Date(2024, 2, 8),
-        distance: 45.0,
-        duration: '55:00',
-        startLocation: 'Airport',
-        endLocation: 'Home',
-        type: 'personal',
-        deduction: 0
-      }
-    ]);
-  }, []);
+  const handleExportLog = async () => {
+    try {
+      const csv = await apiFetchText(`/api/v2/mileage/export-csv?userId=${encodeURIComponent(userId)}`);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mileage-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Mileage log exported.', 'success');
+    } catch {
+      showToast('Export failed. Please retry.', 'error');
+    }
+  };
 
   const totalDeduction = trips.reduce((sum, t) => sum + t.deduction, 0);
   const businessMiles = trips.filter(t => t.type === 'business').reduce((sum, t) => sum + t.distance, 0);
@@ -172,7 +193,7 @@ export const MileagePage: React.FC = () => {
       <div className="trips-section">
         <div className="section-header">
           <h3>Recent Trips</h3>
-          <button className="button ghost small">
+          <button className="button ghost small" onClick={handleExportLog}>
             <Download size={16} /> Export Log
           </button>
         </div>
@@ -181,8 +202,8 @@ export const MileagePage: React.FC = () => {
             <div key={trip.id} className="trip-item">
               <div className="trip-info">
                 <div className="trip-date">
-                  <span className="month">{trip.date.toLocaleString('default', { month: 'short' })}</span>
-                  <span className="day">{trip.date.getDate()}</span>
+                  <span className="month">{new Date(trip.date).toLocaleString('default', { month: 'short' })}</span>
+                  <span className="day">{new Date(trip.date).getDate()}</span>
                 </div>
                 <div className="trip-details">
                   <h4>{trip.startLocation} → {trip.endLocation}</h4>

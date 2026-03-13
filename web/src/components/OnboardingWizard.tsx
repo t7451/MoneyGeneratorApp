@@ -7,7 +7,7 @@ type OnboardingStep = 'welcome' | 'role' | 'platforms' | 'bank' | 'goals' | 'pla
 
 interface OnboardingWizardProps {
   onComplete: () => void;
-  onConnectBank: () => void;
+  onConnectBank: () => Promise<boolean>;
   onSelectPlan: (planId: string) => void;
   onSelectRole: (role: UserRole) => void;
   onConnectPlatform?: (platformId: string) => void;
@@ -89,16 +89,13 @@ export function OnboardingWizard({
   const handleRoleSelect = (selectedRole: UserRole) => {
     setRole(selectedRole);
     onSelectRole(selectedRole);
-    setTimeout(() => {
-        // Determine next step
-        const nextStep = selectedRole === 'freelancer' ? 'platforms' : 'bank';
-        setStep(nextStep);
-    }, 300);
+    const nextStep = selectedRole === 'freelancer' ? 'platforms' : 'bank';
+    setStep(nextStep);
   };
 
-  const handleConnectBank = () => {
-    onConnectBank();
-    setBankConnected(true);
+  const handleConnectBank = async () => {
+    const ok = await onConnectBank();
+    setBankConnected(ok);
   };
 
   const handlePlatformToggle = (platformId: string) => {

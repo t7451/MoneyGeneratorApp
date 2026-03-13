@@ -28,7 +28,7 @@ import {
   AreaChart,
 } from 'recharts';
 import './ReportsPage.css';
-import { apiFetchJson, getUserId } from '../lib/apiClient';
+import { apiFetchBlob, apiFetchJson, apiFetchText, getUserId } from '../lib/apiClient';
 
 interface DateRange {
   start: Date;
@@ -150,42 +150,34 @@ const ReportsPage: React.FC = () => {
   }, [selectedRange, userId]);
 
   const handleExport = async (format: 'csv' | 'pdf') => {
-    if (format === 'csv') {
-      // Export earningsData as CSV
-      const header = 'date,earnings,expenses,net';
-      const rows = earningsData.map(d => [d.date, d.earnings, d.expenses, d.net].join(','));
-      const csv = [header, ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `moneygen-report-${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else if (format === 'pdf') {
-      // Try to use jsPDF if available
-      try {
-        // @ts-ignore
-        const jsPDF = (window as any).jspdf?.jsPDF || (window as any).jsPDF;
-        if (!jsPDF) {
-          alert('PDF export requires jsPDF. Please include jsPDF in your project.');
-          return;
-        }
-        const doc = new jsPDF();
-        doc.text('Money Generator Report', 10, 10);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 10, 20);
-        doc.text('Earnings Data:', 10, 30);
-        let y = 40;
-        doc.text('Date      Earnings  Expenses  Net', 10, y);
-        y += 8;
-        earningsData.forEach(d => {
-          doc.text(`${d.date.padEnd(10)} $${d.earnings.toFixed(2)}   $${d.expenses.toFixed(2)}   $${d.net.toFixed(2)}`, 10, y);
-          y += 8;
-        });
-        doc.save(`moneygen-report-${new Date().toISOString().slice(0,10)}.pdf`);
-      } catch (e) {
-        alert('PDF export failed. Please ensure jsPDF is loaded.');
+    const startDate = selectedRange.start.toISOString().slice(0, 10);
+    const endDate = selectedRange.end.toISOString().slice(0, 10);
+
+    try {
+      if (format === 'csv') {
+        const csv = await apiFetchText(
+          `/api/v2/reporting/export-csv?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&type=all`
+        );
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `moneygen-report-${startDate}-to-${endDate}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const pdf = await apiFetchBlob(
+          `/api/v2/reporting/export-pdf?reportType=summary&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
+        );
+        const url = URL.createObjectURL(pdf);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `moneygen-report-${startDate}-to-${endDate}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
       }
+    } catch (err: any) {
+      setError(err?.message || 'Export failed');
     }
   };
 

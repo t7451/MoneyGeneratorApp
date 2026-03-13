@@ -4,6 +4,10 @@ import referralsRouter from './v2/referrals.js';
 import subscriptionsRouter from './v2/subscriptions.js';
 import reportingRouter from './v2/reporting.js';
 import teamRouter from './v2/team.js';
+import integrationsRouter from './v2/integrations.js';
+import mileageRouter from './v2/mileage.js';
+import activityRouter from './v2/activity.js';
+import taxRouter from './v2/tax.js';
 
 const router = express.Router();
 
@@ -12,6 +16,10 @@ router.use('/referrals', referralsRouter);
 router.use('/subscriptions', subscriptionsRouter);
 router.use('/reporting', reportingRouter);
 router.use('/team', teamRouter);
+router.use('/integrations', integrationsRouter);
+router.use('/mileage', mileageRouter);
+router.use('/activity', activityRouter);
+router.use('/tax', taxRouter);
 
 /**
  * Feature Flags V2 Routes

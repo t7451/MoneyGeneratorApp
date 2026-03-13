@@ -4,6 +4,8 @@ import { Card, CardBody, CardFooter } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
+import { useNavigate } from 'react-router-dom';
+import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './DashboardPageV2.css';
 
 interface StatItem {
@@ -26,6 +28,7 @@ interface InsightItem {
 export const DashboardPageV2: React.FC = () => {
   const { userProfile, connectBank, openCheckout } = useAppContext();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<StatItem[]>([]);
   const [insights, setInsights] = useState<InsightItem[]>([]);
 
@@ -76,10 +79,57 @@ export const DashboardPageV2: React.FC = () => {
         type: 'neutral',
         title: 'Tax Reserve Check',
         description: 'You are pacing $38 under your weekly tax reserve target. Adjust if needed.',
-        action: { label: 'View Reserves', onClick: () => showToast('Tax reserves feature coming soon', 'info') },
+        action: {
+          label: 'View Reserves',
+          onClick: async () => {
+            try {
+              const year = new Date().getFullYear();
+              await apiFetchJson(`/api/v2/reporting/tax-summary?year=${encodeURIComponent(String(year))}`);
+            } catch {
+              // ignore
+            }
+            navigate('/taxes');
+          },
+        },
       },
     ]);
   }, [userProfile, connectBank, openCheckout, showToast]);
+
+  const handleExportData = async () => {
+    try {
+      const userId = getUserId();
+      const data = await apiFetchJson<any>(`/api/v2/export/summary?userId=${encodeURIComponent(userId)}`);
+      const count = Array.isArray(data?.availableExports) ? data.availableExports.length : 0;
+      showToast(`Export options loaded (${count}).`, 'success');
+      navigate('/settings');
+    } catch {
+      showToast('Export unavailable. Please retry.', 'error');
+    }
+  };
+
+  const handleBilling = async () => {
+    try {
+      const data = await apiFetchJson<any>('/api/v2/subscriptions/billing-portal');
+      const url = data?.portalUrl;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        showToast('No billing portal available.', 'info');
+      }
+    } catch {
+      showToast('Billing portal unavailable. Please retry.', 'error');
+    }
+  };
+
+  const handleLoadActivity = async () => {
+    try {
+      const data = await apiFetchJson<any>('/api/v2/activity/recent?limit=50');
+      const count = Array.isArray(data?.items) ? data.items.length : 0;
+      showToast(`Loaded ${count} activity items.`, 'success');
+    } catch {
+      showToast('Unable to load activity. Please retry.', 'error');
+    }
+  };
 
   return (
     <div className="dashboard-v2">
@@ -147,28 +197,28 @@ export const DashboardPageV2: React.FC = () => {
       <section className="dashboard-actions">
         <h2 className="section-title">Quick Actions</h2>
         <div className="actions-grid">
-          <Card interactive onClick={() => showToast('Job Marketplace coming soon', 'info')}>
+          <Card interactive onClick={() => navigate('/jobs')}>
             <CardBody>
               <div className="action-icon-large">💼</div>
               <h3 className="action-title">Find Jobs</h3>
               <p className="action-description">Discover high-paying opportunities near you</p>
             </CardBody>
           </Card>
-          <Card interactive onClick={() => showToast('Analytics coming soon', 'info')}>
+          <Card interactive onClick={() => navigate('/reports')}>
             <CardBody>
               <div className="action-icon-large">📊</div>
               <h3 className="action-title">View Analytics</h3>
               <p className="action-description">Deep dive into your earnings & expenses</p>
             </CardBody>
           </Card>
-          <Card interactive onClick={() => showToast('Export coming soon', 'info')}>
+          <Card interactive onClick={handleExportData}>
             <CardBody>
               <div className="action-icon-large">📥</div>
               <h3 className="action-title">Export Data</h3>
               <p className="action-description">Download reports for tax prep or records</p>
             </CardBody>
           </Card>
-          <Card interactive onClick={() => showToast('Billing coming soon', 'info')}>
+          <Card interactive onClick={handleBilling}>
             <CardBody>
               <div className="action-icon-large">💳</div>
               <h3 className="action-title">Billing</h3>
@@ -211,7 +261,7 @@ export const DashboardPageV2: React.FC = () => {
             </div>
           </CardBody>
           <CardFooter align="center">
-            <Button variant="ghost" onClick={() => showToast('Activities coming soon', 'info')}>
+            <Button variant="ghost" onClick={handleLoadActivity}>
               View All Activity
             </Button>
           </CardFooter>

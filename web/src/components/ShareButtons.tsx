@@ -1,5 +1,6 @@
 import React from 'react';
 import { MessageCircle, Twitter, Mail, MessageSquare, Link } from 'lucide-react';
+import { useToast } from './Toast';
 import './ShareButtons.css';
 
 interface ShareButtonsProps {
@@ -8,6 +9,7 @@ interface ShareButtonsProps {
 }
 
 const ShareButtons: React.FC<ShareButtonsProps> = ({ code, onShare }) => {
+  const { showToast } = useToast();
   const shareUrl = `https://moneygenerator.app?ref=${code}`;
   const shareTitle = 'Test this awesome money making app!';
   const shareText = `Join me on Money Generator App! Use code ${code} to get a $2.50 bonus.`;
@@ -68,7 +70,7 @@ const ShareButtons: React.FC<ShareButtonsProps> = ({ code, onShare }) => {
       action: () => {
         onShare('direct_link');
         navigator.clipboard.writeText(shareUrl);
-        alert('Link copied to clipboard!');
+        showToast('Link copied to clipboard!', 'success');
       },
     },
   ];

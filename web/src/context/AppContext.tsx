@@ -40,7 +40,7 @@ interface AppContextType {
   completeOnboarding: () => void;
   openCheckout: () => void;
   closeCheckout: () => void;
-  connectBank: () => void;
+  connectBank: () => Promise<boolean>;
   upgradeSubscription: (planId: string, addons: string[], options?: UpgradeOptions) => Promise<void>;
   cancelSubscription: (reason?: string) => Promise<void>;
   refreshSubscription: () => Promise<void>;
@@ -118,18 +118,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
     }
     refreshSubscription().catch(() => null);
+    (async () => {
+      try {
+        const userId = getUserId();
+        const data = await apiFetchJson<{ settings?: any }>(`/api/v1/profile/settings?userId=${encodeURIComponent(userId)}`);
+        const settings = data?.settings;
+        if (settings) {
+          if (typeof settings.bankConnected === 'boolean') {
+            setUserProfile((prev) => ({ ...prev, bankConnected: settings.bankConnected }));
+          }
+          if (settings.role && !localStorage.getItem('user_role')) {
+            setUserProfile((prev) => ({ ...prev, role: settings.role as UserRole }));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    })();
     fetchProducts();
   }, []);
 
   const updateRole = useCallback((role: UserRole) => {
       setUserProfile(prev => ({ ...prev, role }));
       if (role) localStorage.setItem('user_role', role);
+      const userId = getUserId();
+      apiFetchJson('/api/v1/profile/settings', {
+        method: 'PUT',
+        body: { userId, role },
+      }).catch(() => null);
   }, []);
 
   const completeOnboarding = useCallback(() => {
     setShowOnboarding(false);
     localStorage.setItem('onboarding_complete', 'true');
     showToast('Welcome to Money Generator!', 'success');
+    const userId = getUserId();
+    apiFetchJson('/api/v1/profile/settings', {
+      method: 'PUT',
+      body: { userId, onboardingComplete: true },
+    }).catch(() => null);
   }, [showToast]);
 
   const fetchProducts = async () => {
@@ -176,12 +203,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  const connectBank = useCallback(() => {
-    showToast('Opening bank connection...', 'info');
-    setTimeout(() => {
+  const connectBank = useCallback(async () => {
+    try {
+      showToast('Opening bank connection…', 'info');
+      const userId = getUserId();
+      const token = await apiFetchJson<{ link_token: string }>('/api/v2/integrations/plaid/link-token', {
+        method: 'POST',
+        body: { userId },
+      });
+
+      await apiFetchJson<{ item_id: string }>('/api/v2/integrations/plaid/exchange', {
+        method: 'POST',
+        body: { userId, publicToken: token.link_token },
+      });
+
+      await apiFetchJson('/api/v1/profile/settings', {
+        method: 'PUT',
+        body: { userId, bankConnected: true },
+      });
+
       setUserProfile((prev) => ({ ...prev, bankConnected: true }));
       showToast('Bank account connected successfully!', 'success');
-    }, 1500);
+      return true;
+    } catch {
+      showToast('Bank connection failed. Please retry.', 'error');
+      return false;
+    }
   }, [showToast]);
 
   const upgradeSubscription = useCallback(async (planId: string, addons: string[], options: UpgradeOptions = {}) => {

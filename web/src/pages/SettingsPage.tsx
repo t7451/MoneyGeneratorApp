@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Globe, Shield, CreditCard, LogOut, Download, KeyRound, Wallet, Moon, Sun, Check } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
@@ -107,6 +107,46 @@ export const SettingsPage: React.FC = () => {
     const [exportFormat, setExportFormat] = useState<'csv' | 'json'>('csv');
     const [isExporting, setIsExporting] = useState(false);
     const [dismissedHints, setDismissedHints] = useState<string[]>([]);
+    const [settingsSaving, setSettingsSaving] = useState(false);
+
+    const userId = useMemo(() => getUserId(), []);
+
+    const saveProfileSettings = async (partial: Record<string, unknown>) => {
+      setSettingsSaving(true);
+      try {
+        const res = await apiFetchJson<{ settings?: any }>('/api/v1/profile/settings', {
+          method: 'PUT',
+          body: { userId, ...partial },
+        });
+        return res?.settings;
+      } finally {
+        setSettingsSaving(false);
+      }
+    };
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const data = await apiFetchJson<{ settings?: any }>(`/api/v1/profile/settings?userId=${encodeURIComponent(userId)}`);
+          const s = data?.settings;
+          if (!s) return;
+
+          if (typeof s.language === 'string') setLanguage(s.language);
+          if (typeof s.currency === 'string') setCurrency(s.currency);
+          if (typeof s.twoFactorEnabled === 'boolean') setTwoFactorEnabled(s.twoFactorEnabled);
+          if (s.payoutMethods && typeof s.payoutMethods === 'object') {
+            setPayoutMethods({
+              paypal: Boolean(s.payoutMethods.paypal),
+              crypto: Boolean(s.payoutMethods.crypto),
+              giftcard: Boolean(s.payoutMethods.giftcard),
+            });
+          }
+          if (typeof s.withdrawalThreshold === 'string') setWithdrawalThreshold(s.withdrawalThreshold);
+        } catch {
+          // ignore
+        }
+      })();
+    }, [userId]);
 
     const settingsTourSteps = [
       {
@@ -147,9 +187,15 @@ export const SettingsPage: React.FC = () => {
     const shouldShowTour = user.role && !user.tutorialsWatched.includes('settings-tour');
     const shouldShow2FAHint = !dismissedHints.includes('2fa') && !twoFactorEnabled;
 
-    const handleEnable2FA = () => {
+    const handleEnable2FA = async () => {
       setTwoFactorEnabled(true);
-      showToast('2FA enabled with backup codes created', 'success');
+      try {
+        await saveProfileSettings({ twoFactorEnabled: true });
+        showToast('2FA enabled with backup codes created', 'success');
+      } catch {
+        setTwoFactorEnabled(false);
+        showToast('2FA enable failed. Please retry.', 'error');
+      }
     };
 
     const handleExport = async () => {
@@ -363,7 +409,11 @@ export const SettingsPage: React.FC = () => {
             <select 
               id="setting-language" 
               value={language} 
-              onChange={(e) => setLanguage(e.target.value)} 
+              onChange={(e) => {
+                const next = e.target.value;
+                setLanguage(next);
+                saveProfileSettings({ language: next }).catch(() => null);
+              }} 
               className="setting-select"
             >
               <option value="en-US">English (US)</option>
@@ -379,7 +429,11 @@ export const SettingsPage: React.FC = () => {
             <select 
               id="setting-currency" 
               value={currency} 
-              onChange={(e) => setCurrency(e.target.value)} 
+              onChange={(e) => {
+                const next = e.target.value;
+                setCurrency(next);
+                saveProfileSettings({ currency: next }).catch(() => null);
+              }} 
               className="setting-select"
             >
               <option value="USD">USD</option>
@@ -396,7 +450,7 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
             {!twoFactorEnabled ? (
-              <button className="button primary" onClick={handleEnable2FA}>Enable 2FA</button>
+              <button className="button primary" onClick={handleEnable2FA} disabled={settingsSaving}>Enable 2FA</button>
             ) : (
               <button className="button secondary"><KeyRound size={14} /> Backup codes</button>
             )}
@@ -420,7 +474,13 @@ export const SettingsPage: React.FC = () => {
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.paypal} 
-                  onChange={() => setPayoutMethods(p => ({...p, paypal: !p.paypal}))} 
+                  onChange={() => {
+                    setPayoutMethods((p) => {
+                      const next = { ...p, paypal: !p.paypal };
+                      saveProfileSettings({ payoutMethods: next }).catch(() => null);
+                      return next;
+                    });
+                  }} 
                 /> 
                 PayPal
               </label>
@@ -428,7 +488,13 @@ export const SettingsPage: React.FC = () => {
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.crypto} 
-                  onChange={() => setPayoutMethods(p => ({...p, crypto: !p.crypto}))} 
+                  onChange={() => {
+                    setPayoutMethods((p) => {
+                      const next = { ...p, crypto: !p.crypto };
+                      saveProfileSettings({ payoutMethods: next }).catch(() => null);
+                      return next;
+                    });
+                  }} 
                 /> 
                 Crypto (BTC/ETH)
               </label>
@@ -436,7 +502,13 @@ export const SettingsPage: React.FC = () => {
                 <input 
                   type="checkbox" 
                   checked={payoutMethods.giftcard} 
-                  onChange={() => setPayoutMethods(p => ({...p, giftcard: !p.giftcard}))} 
+                  onChange={() => {
+                    setPayoutMethods((p) => {
+                      const next = { ...p, giftcard: !p.giftcard };
+                      saveProfileSettings({ payoutMethods: next }).catch(() => null);
+                      return next;
+                    });
+                  }} 
                 /> 
                 Gift Cards
               </label>
@@ -452,7 +524,10 @@ export const SettingsPage: React.FC = () => {
                   name="threshold" 
                   value="low" 
                   checked={withdrawalThreshold === 'low'} 
-                  onChange={() => setWithdrawalThreshold('low')} 
+                  onChange={() => {
+                    setWithdrawalThreshold('low');
+                    saveProfileSettings({ withdrawalThreshold: 'low' }).catch(() => null);
+                  }} 
                 /> 
                 Low ($0.50 - $2)
               </label>
@@ -462,7 +537,10 @@ export const SettingsPage: React.FC = () => {
                   name="threshold" 
                   value="medium" 
                   checked={withdrawalThreshold === 'medium'} 
-                  onChange={() => setWithdrawalThreshold('medium')} 
+                  onChange={() => {
+                    setWithdrawalThreshold('medium');
+                    saveProfileSettings({ withdrawalThreshold: 'medium' }).catch(() => null);
+                  }} 
                 /> 
                 Standard ($5 - $20)
               </label>
@@ -472,7 +550,10 @@ export const SettingsPage: React.FC = () => {
                   name="threshold" 
                   value="high" 
                   checked={withdrawalThreshold === 'high'} 
-                  onChange={() => setWithdrawalThreshold('high')} 
+                  onChange={() => {
+                    setWithdrawalThreshold('high');
+                    saveProfileSettings({ withdrawalThreshold: 'high' }).catch(() => null);
+                  }} 
                 /> 
                 High ($20+)
               </label>
