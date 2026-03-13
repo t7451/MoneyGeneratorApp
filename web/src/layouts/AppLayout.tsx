@@ -11,7 +11,8 @@ import {
   Moon,
   Share2,
   CreditCard,
-  BarChart3
+  BarChart3,
+  Map
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { OfflineIndicator } from '../components/MobileComponents';
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { path: '/jobs', label: 'Jobs', icon: Briefcase },
   { path: '/products', label: 'Products', icon: ShoppingBag },
   { path: '/reports', label: 'Reports', icon: BarChart3 },
+  { path: '/mileage', label: 'Mileage', icon: Map },
   { path: '/referrals', label: 'Referrals', icon: Share2 },
   { path: '/pricing', label: 'Pricing', icon: CreditCard },
   { path: '/team', label: 'Team', icon: Users },

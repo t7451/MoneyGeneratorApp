@@ -1,0 +1,277 @@
+.mileage-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.mileage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.mileage-header h2 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tracker-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.tracker-status {
+  padding: 1rem 0;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+/* Tracking Animation */
+.dot.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.5; transform: scale(0.9); }
+}
+
+.status-indicator.active {
+  background-color: var(--color-emerald-100);
+  color: var(--color-emerald-700);
+}
+
+.status-indicator.inactive {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.tracker-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  width: 100%;
+  margin-bottom: var(--space-6);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.tracker-controls {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.btn-start {
+  background-color: var(--color-emerald-600);
+  color: white;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-emerald-md);
+  transition: transform 0.2s;
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-emerald-lg);
+}
+
+.btn-stop {
+  background-color: var(--color-danger);
+  color: white;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+  transition: transform 0.2s;
+}
+
+.btn-stop:hover {
+  transform: translateY(-2px);
+}
+
+.trips-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.section-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trip-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.trip-item:last-child {
+  border-bottom: none;
+}
+
+.trip-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.trip-info {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.trip-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  min-width: 60px;
+}
+
+.day {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.month {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.trip-details h4 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.trip-route {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.trip-meta {
+  text-align: right;
+}
+
+.trip-distance {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trip-deduction {
+  font-size: var(--text-sm);
+  color: var(--color-emerald-600);
+  font-weight: 500;
+}
+
+.trip-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.chip-btn {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.chip-btn.business {
+  background-color: var(--color-emerald-100);
+  color: var(--color-emerald-700);
+}
+
+.chip-btn.business.active {
+  border-color: var(--color-emerald-500);
+  background-color: var(--color-emerald-200);
+}
+
+.chip-btn.personal {
+  background-color: var(--color-charcoal-100);
+  color: var(--text-secondary);
+}
+
+.chip-btn.personal.active {
+  background-color: var(--color-charcoal-200);
+  color: var(--text-primary);
+}
+
+/* Dark mode adjustments */
+body.dark .trip-item:hover {
+  background-color: var(--color-dark-bg-hover);
+}
+
+body.dark .chip-btn.personal {
+  background-color: var(--color-dark-bg-tertiary);
+  color: var(--text-tertiary);
+}

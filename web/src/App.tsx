@@ -11,6 +11,7 @@ import { ProductsPage } from './pages/ProductsPage';
 import { JobsPage } from './pages/JobsPage';
 import { TeamPage } from './pages/TeamPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { MileagePage } from './pages/MileagePage';
 import ReferralPage from './pages/ReferralPage';
 import PricingPage from './pages/PricingPage';
 import ReportsPage from './pages/ReportsPage';
@@ -54,6 +55,7 @@ const AppRoutes = () => {
           <Route path="referrals" element={<ReferralPage />} />
           <Route path="pricing" element={<PricingPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="mileage" element={<MileagePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
