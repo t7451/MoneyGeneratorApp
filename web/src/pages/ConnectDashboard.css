@@ -1,0 +1,708 @@
+/**
+ * Stripe Connect Dashboard Styles
+ * 
+ * Clean, simple styling for the Connect dashboard using the app's design system.
+ * Uses CSS custom properties from design-system.css for consistency.
+ */
+
+/* =============================================================================
+   BASE LAYOUT
+   ============================================================================= */
+
+.connect-page {
+  min-height: 100vh;
+  background: var(--color-bg-secondary, #f5f5f5);
+  padding: 2rem;
+}
+
+.connect-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--color-bg-primary, #ffffff);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connect-dashboard {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* =============================================================================
+   HEADER & ICONS
+   ============================================================================= */
+
+.connect-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.connect-header h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+  margin: 0.5rem 0;
+}
+
+.connect-header p {
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+.connect-icon {
+  color: var(--color-primary, #2563eb);
+  margin-bottom: 0.5rem;
+}
+
+.connect-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-primary, #ffffff);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connect-dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.connect-dashboard-title h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-account-id {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.connect-dashboard-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* =============================================================================
+   BADGES
+   ============================================================================= */
+
+.connect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.connect-badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.connect-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.connect-badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.connect-badge-pending {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* =============================================================================
+   ALERTS
+   ============================================================================= */
+
+.connect-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+}
+
+.connect-alert button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  opacity: 0.6;
+}
+
+.connect-alert button:hover {
+  opacity: 1;
+}
+
+.connect-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.connect-alert-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* =============================================================================
+   ONBOARDING BANNER
+   ============================================================================= */
+
+.connect-onboarding-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.connect-onboarding-banner h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.connect-onboarding-banner p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9375rem;
+}
+
+.connect-onboarding-banner .connect-btn-primary {
+  background: white;
+  color: #1d4ed8;
+}
+
+.connect-onboarding-banner .connect-btn-primary:hover {
+  background: #f0f0f0;
+}
+
+/* =============================================================================
+   TABS
+   ============================================================================= */
+
+.connect-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--color-bg-primary, #ffffff);
+  padding: 0.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connect-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.connect-tab:hover {
+  background: var(--color-bg-secondary, #f5f5f5);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-tab.active {
+  background: var(--color-primary, #2563eb);
+  color: white;
+}
+
+/* =============================================================================
+   TAB CONTENT
+   ============================================================================= */
+
+.connect-tab-content {
+  background: var(--color-bg-primary, #ffffff);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connect-section {
+  margin-bottom: 2rem;
+}
+
+.connect-section:last-child {
+  margin-bottom: 0;
+}
+
+.connect-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* =============================================================================
+   STATS & OVERVIEW
+   ============================================================================= */
+
+.connect-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.connect-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-radius: 10px;
+  color: var(--color-primary, #2563eb);
+}
+
+.connect-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.connect-stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-stat-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.connect-quick-actions h3 {
+  margin-bottom: 1rem;
+}
+
+.connect-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.connect-action-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: var(--color-text-primary, #1a1a1a);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.connect-action-card:hover {
+  border-color: var(--color-primary, #2563eb);
+  background: white;
+}
+
+.connect-action-card svg:first-child {
+  color: var(--color-primary, #2563eb);
+}
+
+.connect-action-card svg:last-child {
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+/* =============================================================================
+   FORMS
+   ============================================================================= */
+
+.connect-form,
+.connect-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.connect-form-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+}
+
+.connect-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.connect-field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-field input,
+.connect-field textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.connect-field input:focus,
+.connect-field textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.connect-field-price {
+  max-width: 150px;
+}
+
+.connect-price-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.connect-price-input:focus-within {
+  border-color: var(--color-primary, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.connect-price-symbol {
+  padding: 0.75rem;
+  background: var(--color-bg-secondary, #f5f5f5);
+  color: var(--color-text-secondary, #666);
+  font-weight: 500;
+}
+
+.connect-price-input input {
+  border: none;
+  padding: 0.75rem;
+}
+
+.connect-price-input input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.connect-field-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #666);
+  margin-top: 0.5rem;
+}
+
+/* =============================================================================
+   BUTTONS
+   ============================================================================= */
+
+.connect-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.connect-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.connect-btn-primary {
+  background: var(--color-primary, #2563eb);
+  color: white;
+}
+
+.connect-btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-dark, #1d4ed8);
+}
+
+.connect-btn-secondary {
+  background: var(--color-bg-secondary, #f5f5f5);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-btn-secondary:hover:not(:disabled) {
+  background: #e5e5e5;
+}
+
+.connect-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.connect-btn-icon:hover {
+  background: var(--color-bg-secondary, #f5f5f5);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-spinner {
+  animation: connect-spin 1s linear infinite;
+}
+
+@keyframes connect-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   PRODUCTS
+   ============================================================================= */
+
+.connect-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.connect-empty svg {
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}
+
+.connect-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.connect-product-card {
+  padding: 1.25rem;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-radius: 10px;
+}
+
+.connect-product-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-product-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 0.75rem 0;
+}
+
+.connect-product-price {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+}
+
+/* =============================================================================
+   SUBSCRIPTION
+   ============================================================================= */
+
+.connect-subscription-card {
+  padding: 1.5rem;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-radius: 10px;
+}
+
+.connect-subscription-status {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.connect-subscription-period {
+  color: var(--color-text-secondary, #666);
+  margin-bottom: 1rem;
+}
+
+.connect-subscription-promo {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 10px;
+  border: 1px solid #bae6fd;
+}
+
+.connect-subscription-promo h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.connect-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.connect-feature-list li {
+  padding: 0.375rem 0;
+  color: var(--color-text-secondary, #666);
+}
+
+.connect-subscription-note {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #666);
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+}
+
+/* =============================================================================
+   FOOTER NOTE
+   ============================================================================= */
+
+.connect-footer-note {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #666);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+/* =============================================================================
+   DARK MODE SUPPORT
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .connect-page {
+    background: var(--color-bg-secondary-dark, #1a1a1a);
+  }
+  
+  .connect-container,
+  .connect-dashboard-header,
+  .connect-tabs,
+  .connect-tab-content {
+    background: var(--color-bg-primary-dark, #262626);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .connect-header h1,
+  .connect-dashboard-title h1,
+  .connect-section h3,
+  .connect-product-card h4,
+  .connect-stat-value {
+    color: var(--color-text-primary-dark, #f5f5f5);
+  }
+  
+  .connect-field input,
+  .connect-field textarea {
+    background: var(--color-bg-secondary-dark, #1a1a1a);
+    border-color: var(--color-border-dark, #404040);
+    color: var(--color-text-primary-dark, #f5f5f5);
+  }
+  
+  .connect-stat-card,
+  .connect-action-card,
+  .connect-product-card,
+  .connect-subscription-card {
+    background: var(--color-bg-secondary-dark, #1a1a1a);
+  }
+  
+  .connect-action-card:hover {
+    background: var(--color-bg-primary-dark, #262626);
+    border-color: var(--color-primary, #2563eb);
+  }
+  
+  .connect-tab {
+    color: var(--color-text-secondary-dark, #a0a0a0);
+  }
+  
+  .connect-tab:hover {
+    background: var(--color-bg-secondary-dark, #1a1a1a);
+    color: var(--color-text-primary-dark, #f5f5f5);
+  }
+  
+  .connect-subscription-promo {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e293b 100%);
+    border-color: #3b82f6;
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .connect-page {
+    padding: 1rem;
+  }
+  
+  .connect-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .connect-onboarding-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .connect-onboarding-content {
+    margin-bottom: 1rem;
+  }
+  
+  .connect-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .connect-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .connect-field-price {
+    max-width: none;
+  }
+}

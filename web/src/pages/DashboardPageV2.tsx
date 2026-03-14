@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, CheckCircle, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { Card, CardBody, CardFooter } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppContext } from '../context/AppContext';
@@ -25,39 +25,111 @@ interface InsightItem {
   action?: { label: string; onClick: () => void };
 }
 
+interface AnalyticsSummary {
+  totalEarnings: number;
+  totalExpenses: number;
+  netIncome: number;
+  hoursWorked: number;
+  hourlyRate: number;
+  trend: {
+    direction: 'up' | 'down';
+    percent: number;
+  };
+}
+
 export const DashboardPageV2: React.FC = () => {
   const { userProfile, connectBank, openCheckout } = useAppContext();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [stats, setStats] = useState<StatItem[]>([]);
   const [insights, setInsights] = useState<InsightItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Fetch analytics data from backend
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsRefreshing(true);
+    
+    try {
+      const userId = getUserId();
+      
+      // Fetch analytics summary from API
+      const analyticsData = await apiFetchJson<{
+        summary: AnalyticsSummary;
+      }>(`/api/v2/analytics/summary?userId=${encodeURIComponent(userId)}&period=30d`);
+
+      const summary = analyticsData?.summary;
+      
+      if (summary) {
+        setStats([
+          {
+            label: 'Total Earnings',
+            value: `$${summary.totalEarnings.toLocaleString()}`,
+            trend: { 
+              direction: summary.trend?.direction || 'up', 
+              percent: summary.trend?.percent || 0 
+            },
+            icon: <TrendingUp size={20} />,
+          },
+          {
+            label: 'Net Income',
+            value: `$${summary.netIncome.toLocaleString()}`,
+            trend: { direction: 'up', percent: 8 },
+          },
+          {
+            label: 'Hourly Rate',
+            value: `$${summary.hourlyRate.toFixed(2)}`,
+            trend: { direction: 'up', percent: 5 },
+          },
+          {
+            label: 'Hours Worked',
+            value: summary.hoursWorked.toFixed(1),
+            trend: { direction: 'down', percent: -2 },
+          },
+        ]);
+      }
+      
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.warn('Failed to fetch analytics, using defaults:', error);
+      // Fall back to user profile data
+      setStats([
+        {
+          label: 'Total Earnings',
+          value: `$${userProfile.earnings.toLocaleString()}`,
+          trend: { direction: 'up', percent: userProfile.weeklyChange },
+          icon: <TrendingUp size={20} />,
+        },
+        {
+          label: 'This Week',
+          value: `$${(userProfile.earnings / 4).toLocaleString()}`,
+          trend: { direction: 'up', percent: 8 },
+        },
+        {
+          label: 'Hourly Rate',
+          value: '$17.50',
+          trend: { direction: 'up', percent: 5 },
+        },
+        {
+          label: 'Hours Worked',
+          value: '142.5',
+          trend: { direction: 'down', percent: -2 },
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [userProfile]);
+
+  // Fetch data on mount
   useEffect(() => {
-    // Load dashboard data
-    setStats([
-      {
-        label: 'Total Earnings',
-        value: `$${userProfile.earnings.toLocaleString()}`,
-        trend: { direction: 'up', percent: userProfile.weeklyChange },
-        icon: <TrendingUp size={20} />,
-      },
-      {
-        label: 'This Week',
-        value: `$${(userProfile.earnings / 4).toLocaleString()}`,
-        trend: { direction: 'up', percent: 8 },
-      },
-      {
-        label: 'Hourly Rate',
-        value: '$17.50',
-        trend: { direction: 'up', percent: 5 },
-      },
-      {
-        label: 'Hours Worked',
-        value: '142.5',
-        trend: { direction: 'down', percent: -2 },
-      },
-    ]);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
+  // Set up insights based on user profile
+  useEffect(() => {
     setInsights([
       {
         type: userProfile.bankConnected ? 'positive' : 'warning',
@@ -93,7 +165,21 @@ export const DashboardPageV2: React.FC = () => {
         },
       },
     ]);
-  }, [userProfile, connectBank, openCheckout, showToast]);
+  }, [userProfile, connectBank, openCheckout, navigate]);
+
+  // Set up auto-refresh every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDashboardData(false); // Silent refresh
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [fetchDashboardData]);
+
+  const handleRefresh = () => {
+    fetchDashboardData(true);
+    showToast('Dashboard refreshed', 'success');
+  };
 
   const handleExportData = async () => {
     try {
@@ -131,6 +217,15 @@ export const DashboardPageV2: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="dashboard-v2 dashboard-loading">
+        <Loader2 className="loading-spinner" size={48} />
+        <p>Loading your dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-v2">
       {/* Hero Section */}
@@ -138,6 +233,26 @@ export const DashboardPageV2: React.FC = () => {
         <div className="hero-content">
           <h1 className="hero-title">Welcome back! 👋</h1>
           <p className="hero-subtitle">Here's your financial snapshot for today</p>
+          {lastUpdated && (
+            <p className="hero-updated">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
+        <div className="hero-actions">
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <Loader2 size={16} className="spinning" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
       </section>
 

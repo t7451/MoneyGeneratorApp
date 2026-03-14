@@ -19,8 +19,9 @@ services:
       RATE_LIMIT_WEBHOOK_MAX: 1000
       # Feature flags
       FEATURE_V2_ENABLED: "true"
-      # Database (if needed)
-      DATABASE_URL: "postgresql://user:password@db:5432/moneygenerator"
+      # Database
+      DATABASE_URL: "postgresql://moneygen:moneygen_secret@db:5432/moneygenerator"
+      JWT_SECRET: "change-this-to-a-secure-random-string-in-production"
       # Payment providers
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_}
       PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
@@ -32,7 +33,7 @@ services:
       REDIS_URL: "redis://cache:6379"
     depends_on:
       - cache
-      # - db  # Uncomment when database is implemented
+      - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 30s
@@ -61,26 +62,26 @@ services:
     networks:
       - moneygenerator
 
-  # PostgreSQL database (optional, for future use)
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: moneygenerator-db
-  #   environment:
-  #     POSTGRES_USER: user
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: moneygenerator
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U user"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: unless-stopped
-  #   networks:
-  #     - moneygenerator
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    container_name: moneygenerator-db
+    environment:
+      POSTGRES_USER: moneygen
+      POSTGRES_PASSWORD: moneygen_secret
+      POSTGRES_DB: moneygenerator
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moneygen -d moneygenerator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - moneygenerator
 
   # Web app (optional for local development)
   web:
@@ -104,7 +105,7 @@ services:
 
 volumes:
   cache-data:
-  # db-data:
+  db-data:
 
 networks:
   moneygenerator:

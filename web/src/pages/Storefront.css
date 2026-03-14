@@ -1,0 +1,456 @@
+/**
+ * Storefront Styles
+ * 
+ * Clean, simple styling for the customer-facing storefront.
+ * Designed to be visually appealing and trustworthy for purchases.
+ */
+
+/* =============================================================================
+   BASE LAYOUT
+   ============================================================================= */
+
+.storefront {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+/* =============================================================================
+   HEADER
+   ============================================================================= */
+
+.storefront-header {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  padding: 2rem;
+}
+
+.storefront-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.storefront-icon {
+  opacity: 0.9;
+}
+
+.storefront-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.storefront-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin: 0.25rem 0 0 0;
+}
+
+/* =============================================================================
+   MAIN CONTENT
+   ============================================================================= */
+
+.storefront-main {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* =============================================================================
+   DEVELOPER NOTE
+   ============================================================================= */
+
+.storefront-dev-note {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  color: #92400e;
+}
+
+.storefront-dev-note strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* =============================================================================
+   ALERTS
+   ============================================================================= */
+
+.storefront-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.storefront-alert svg:first-child {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.storefront-alert div {
+  flex: 1;
+}
+
+.storefront-alert strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.storefront-alert p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.storefront-alert button {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0;
+  line-height: 1;
+}
+
+.storefront-alert button:hover {
+  opacity: 1;
+}
+
+.storefront-alert-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.storefront-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =============================================================================
+   LOADING & EMPTY STATES
+   ============================================================================= */
+
+.storefront-loading,
+.storefront-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+}
+
+.storefront-loading p,
+.storefront-empty h2 {
+  margin: 1rem 0 0.5rem 0;
+}
+
+.storefront-empty p {
+  margin: 0;
+}
+
+.storefront-empty svg {
+  opacity: 0.3;
+}
+
+.storefront-spinner {
+  animation: storefront-spin 1s linear infinite;
+}
+
+@keyframes storefront-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   PRODUCTS
+   ============================================================================= */
+
+.storefront-products h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #1e293b;
+}
+
+.storefront-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.storefront-product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.storefront-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.storefront-product-image {
+  aspect-ratio: 4 / 3;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+.storefront-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.storefront-product-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+}
+
+.storefront-product-details {
+  padding: 1.25rem;
+}
+
+.storefront-product-details h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+}
+
+.storefront-product-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.storefront-product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.storefront-product-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.storefront-buy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.storefront-buy-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.storefront-buy-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   SUCCESS PAGE
+   ============================================================================= */
+
+.storefront-success-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.storefront-success-icon {
+  color: #22c55e;
+  margin-bottom: 1.5rem;
+}
+
+.storefront-success-page h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+}
+
+.storefront-success-page p {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.storefront-success-detail {
+  margin-top: 0.5rem !important;
+  font-size: 0.9375rem !important;
+}
+
+.storefront-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+
+.storefront-btn:hover {
+  background: #2563eb;
+}
+
+/* =============================================================================
+   FOOTER
+   ============================================================================= */
+
+.storefront-footer {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.storefront-footer p {
+  margin: 0.25rem 0;
+}
+
+.storefront-footer a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.storefront-footer a:hover {
+  text-decoration: underline;
+}
+
+.storefront-footer-note {
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}
+
+/* =============================================================================
+   RESPONSIVE
+   ============================================================================= */
+
+@media (max-width: 640px) {
+  .storefront-header {
+    padding: 1.5rem;
+  }
+  
+  .storefront-main {
+    padding: 1.5rem;
+  }
+  
+  .storefront-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .storefront-product-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .storefront-product-price {
+    text-align: center;
+  }
+  
+  .storefront-buy-btn {
+    justify-content: center;
+  }
+}
+
+/* =============================================================================
+   DARK MODE
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .storefront {
+    background: #0f172a;
+  }
+  
+  .storefront-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  }
+  
+  .storefront-dev-note {
+    background: #422006;
+    border-color: #854d0e;
+    color: #fcd34d;
+  }
+  
+  .storefront-products h2 {
+    color: #f1f5f9;
+  }
+  
+  .storefront-product-card {
+    background: #1e293b;
+  }
+  
+  .storefront-product-image {
+    background: #334155;
+  }
+  
+  .storefront-product-details h3 {
+    color: #f1f5f9;
+  }
+  
+  .storefront-product-description {
+    color: #94a3b8;
+  }
+  
+  .storefront-product-price {
+    color: #60a5fa;
+  }
+  
+  .storefront-loading,
+  .storefront-empty {
+    color: #94a3b8;
+  }
+  
+  .storefront-success-page h1 {
+    color: #f1f5f9;
+  }
+  
+  .storefront-footer {
+    background: #1e293b;
+    border-color: #334155;
+    color: #94a3b8;
+  }
+}

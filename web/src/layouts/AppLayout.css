@@ -502,3 +502,323 @@ body.dark .layout-main::-webkit-scrollbar-thumb:hover {
   background: var(--color-charcoal-500);
 }
 
+/* ============= MORE MENU (MOBILE) ============= */
+
+.more-menu-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.more-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.more-menu-dropdown {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+  padding: var(--space-2);
+  z-index: 100;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+body.dark .more-menu-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--duration-base);
+}
+
+.more-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.more-menu-item.active {
+  background: var(--color-emerald-100);
+  color: var(--color-emerald-600);
+}
+
+body.dark .more-menu-item.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-emerald-400);
+}
+
+/* ============= NOTIFICATIONS DROPDOWN ============= */
+
+.notifications-wrapper {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: var(--color-red-500);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  min-width: 320px;
+  max-width: 90vw;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body.dark .notifications-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notifications-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--color-emerald-600);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+.notifications-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--duration-base);
+}
+
+.notification-item:hover {
+  background: var(--bg-hover);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item.unread {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+body.dark .notification-item.unread {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-blue-500);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-content strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.notification-content p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.notification-time {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.notifications-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.notifications-footer a {
+  color: var(--color-emerald-600);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.notifications-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ============= COLLAPSIBLE SIDEBAR ============= */
+
+.sidebar.collapsed {
+  width: 72px;
+  padding: var(--space-4);
+}
+
+.sidebar-brand-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: var(--space-3);
+}
+
+.sidebar.collapsed .sidebar-item span {
+  display: none;
+}
+
+.collapse-toggle {
+  opacity: 0.7;
+}
+
+.collapse-toggle:hover {
+  opacity: 1;
+}
+
+/* Sidebar transition */
+.sidebar {
+  transition: width 0.2s ease-out;
+}
+
+.sidebar-item {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ============= IMPROVED BOTTOM NAV (MOBILE) ============= */
+
+@media (max-width: 767px) {
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: var(--space-2) var(--space-3);
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+    gap: 0;
+    overflow: visible; /* Allow more-menu-dropdown to show */
+  }
+
+  .bottom-nav .nav-item {
+    flex: 1;
+    max-width: 80px;
+    min-width: 0;
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .bottom-nav .nav-item span {
+    font-size: 0.65rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Improve active state visibility */
+  .bottom-nav .nav-item.active {
+    background: var(--color-emerald-100);
+    border-radius: var(--radius-lg);
+    transform: scale(1.02);
+  }
+
+  body.dark .bottom-nav .nav-item.active {
+    background: rgba(34, 197, 94, 0.15);
+  }
+}
+
+/* ============= ICON BUTTON ACTIVE STATE ============= */
+
+.icon-btn.active {
+  background: var(--bg-hover);
+  color: var(--color-emerald-600);
+}
+
+body.dark .icon-btn.active {
+  color: var(--color-emerald-400);
+}

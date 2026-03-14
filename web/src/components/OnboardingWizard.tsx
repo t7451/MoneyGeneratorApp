@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { UserRole } from '../context/AppContext';
 import { Briefcase, Building, User } from 'lucide-react';
+import { useToast } from './Toast';
 import './OnboardingWizard.css';
 
 type OnboardingStep = 'welcome' | 'role' | 'platforms' | 'bank' | 'goals' | 'plan' | 'complete';
@@ -10,8 +11,8 @@ interface OnboardingWizardProps {
   onConnectBank: () => Promise<boolean>;
   onSelectPlan: (planId: string) => void;
   onSelectRole: (role: UserRole) => void;
-  onConnectPlatform?: (platformId: string) => void;
-  onSetGoal?: (goal: { type: string; target: number }) => void;
+  onConnectPlatform?: (platformId: string) => Promise<boolean> | boolean;
+  onSetGoal?: (goal: { type: string; target: number }) => Promise<boolean> | boolean;
 }
 
 const PLATFORMS = [
@@ -44,6 +45,7 @@ export function OnboardingWizard({
   onConnectPlatform,
   onSetGoal,
 }: OnboardingWizardProps) {
+  const { showToast } = useToast();
   const [step, setStep] = useState<OnboardingStep>('welcome');
   const [role, setRole] = useState<UserRole>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -98,14 +100,25 @@ export function OnboardingWizard({
     setBankConnected(ok);
   };
 
-  const handlePlatformToggle = (platformId: string) => {
-    setConnectedPlatforms(prev => {
-      if (prev.includes(platformId)) {
-        return prev.filter(p => p !== platformId);
+  const handlePlatformToggle = async (platformId: string) => {
+    if (connectedPlatforms.includes(platformId)) {
+      setConnectedPlatforms(prev => prev.filter(p => p !== platformId));
+      return;
+    }
+
+    const platformName = PLATFORMS.find((p) => p.id === platformId)?.name ?? 'platform';
+
+    try {
+      const result = await onConnectPlatform?.(platformId);
+      const ok = result !== false;
+      if (!ok) {
+        showToast(`Could not connect ${platformName}. Please retry.`, 'error');
+        return;
       }
-      onConnectPlatform?.(platformId);
-      return [...prev, platformId];
-    });
+      setConnectedPlatforms((prev) => [...prev, platformId]);
+    } catch {
+      showToast(`Could not connect ${platformName}. Please retry.`, 'error');
+    }
   };
 
   const handlePlanSelect = (planId: string) => {
@@ -113,9 +126,20 @@ export function OnboardingWizard({
     onSelectPlan(planId);
   }
 
-  const handleGoalSave = () => {
-    onSetGoal?.({ type: 'weekly_earnings', target: weeklyGoal });
-    handleNext();
+  const handleGoalSave = async () => {
+    try {
+      const r1 = await onSetGoal?.({ type: 'weekly_earnings', target: weeklyGoal });
+      const r2 = await onSetGoal?.({ type: 'tax_reserve_pct', target: taxReserve });
+      const ok1 = r1 !== false;
+      const ok2 = r2 !== false;
+      if (ok1 && ok2) {
+        handleNext();
+        return;
+      }
+      showToast('Could not save goals. Please retry.', 'error');
+    } catch {
+      showToast('Could not save goals. Please retry.', 'error');
+    }
   };
 
   const handleFinish = () => {
@@ -381,98 +405,6 @@ export function OnboardingWizard({
 
         </div>
       </div>
-      <style>{`
-        .role-cards {
-            display: grid;
-            gap: 1rem;
-            width: 100%;
-        }
-        .role-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .role-card:hover {
-            border-color: #cbd5e1;
-            background-color: #f8fafc;
-        }
-        .role-card.selected {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-        }
-        .role-icon {
-            color: #2563eb;
-            margin-bottom: 0.25rem;
-        }
-        .role-card h3 {
-            margin: 0;
-            font-size: 1rem;
-            color: #1e293b;
-        }
-        .role-card p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        .plans-grid {
-             display: grid;
-             grid-template-columns: 1fr 1fr;
-             gap: 1rem;
-             width: 100%;
-             margin-bottom: 1rem;
-        }
-        .plan-card {
-             border: 2px solid #e2e8f0;
-             border-radius: 0.75rem;
-             padding: 1.5rem;
-             cursor: pointer;
-             text-align: center;
-             transition: all 0.2s;
-             position: relative;
-        }
-        .plan-card.selected {
-             border-color: #2563eb;
-             background-color: #eff6ff;
-        }
-        .plan-card .price {
-             font-size: 1.5rem;
-             font-weight: 700;
-             color: #1e293b;
-             margin: 0.5rem 0;
-        }
-        .plan-card .price span {
-             font-size: 0.85rem;
-             font-weight: 400;
-             color: #64748b;
-        }
-        .plan-card ul {
-             list-style: none;
-             padding: 0;
-             font-size: 0.85rem;
-             color: #475569;
-             margin: 0.5rem 0;
-        }
-        .plan-card .check {
-             position: absolute;
-             top: 0.5rem;
-             right: 0.5rem;
-             background: #2563eb;
-             color: white;
-             border-radius: 50%;
-             width: 20px;
-             height: 20px;
-             font-size: 12px;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-        }
-      `}</style>
     </div>
   );
 }

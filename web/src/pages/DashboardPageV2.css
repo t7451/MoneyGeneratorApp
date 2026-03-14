@@ -334,4 +334,70 @@ body.dark .section-title {
   .stat-card-value {
     font-size: var(--font-size-xl);
   }
+
+  .dashboard-hero {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
 }
+
+/* Loading State */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--spacing-lg);
+  color: var(--color-neutral-500);
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  color: var(--color-primary);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Hero Actions */
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.hero-actions button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.hero-updated {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-400);
+  margin-top: var(--spacing-xs);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* Enhanced Stats Animation */
+.stats-grid .card {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.stats-grid .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+

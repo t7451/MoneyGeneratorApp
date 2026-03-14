@@ -41,6 +41,8 @@ interface AppContextType {
   openCheckout: () => void;
   closeCheckout: () => void;
   connectBank: () => Promise<boolean>;
+  connectPlatform: (platformId: string) => Promise<boolean>;
+  setGoal: (goal: { type: string; target: number }) => Promise<boolean>;
   upgradeSubscription: (planId: string, addons: string[], options?: UpgradeOptions) => Promise<void>;
   cancelSubscription: (reason?: string) => Promise<void>;
   refreshSubscription: () => Promise<void>;
@@ -231,6 +233,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [showToast]);
 
+  const connectPlatform = useCallback(async (platformId: string) => {
+    try {
+      const userId = getUserId();
+      await apiFetchJson('/api/v1/platforms/connect', {
+        method: 'POST',
+        body: { userId, platform: platformId },
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const setGoal = useCallback(async (goal: { type: string; target: number }) => {
+    try {
+      const userId = getUserId();
+
+      if (goal.type === 'tax_reserve_pct') {
+        await apiFetchJson('/api/v1/profile/settings', {
+          method: 'PUT',
+          body: { userId, taxReservePct: goal.target },
+        });
+        return true;
+      }
+
+      await apiFetchJson('/api/v1/profile/goals', {
+        method: 'POST',
+        body: { userId, type: goal.type, target: goal.target },
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const upgradeSubscription = useCallback(async (planId: string, addons: string[], options: UpgradeOptions = {}) => {
     const {
       billingCycle = 'monthly',
@@ -300,6 +337,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openCheckout,
         closeCheckout,
         connectBank,
+        connectPlatform,
+        setGoal,
         upgradeSubscription,
         cancelSubscription,
         refreshSubscription,

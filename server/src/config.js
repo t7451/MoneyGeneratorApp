@@ -12,6 +12,27 @@ const ConfigSchema = z.object({
   WEBHOOK_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
   WEBHOOK_REPLAY_WINDOW_MS: z.coerce.number().int().positive().default(5 * 60_000),
   CORS_ORIGIN: z.string().optional(),
+  // Database configuration
+  DATABASE_URL: z.string().optional(),
+  DB_HOST: z.string().default('localhost'),
+  DB_PORT: z.coerce.number().int().positive().default(5432),
+  DB_NAME: z.string().default('moneygenerator'),
+  DB_USER: z.string().default('postgres'),
+  DB_PASSWORD: z.string().default(''),
+  DB_SSL: z.enum(['true', 'false', 'require']).default('false'),
+  DB_POOL_MIN: z.coerce.number().int().min(0).default(2),
+  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  // JWT configuration  
+  JWT_SECRET: z.string().min(32).optional(),
+  JWT_EXPIRES_IN: z.string().default('7d'),
+  // Stripe configuration
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_PRO_MONTHLY: z.string().default('price_pro_monthly'),
+  STRIPE_PRICE_PRO_ANNUAL: z.string().default('price_pro_annual'),
+  STRIPE_PRICE_ENTERPRISE_MONTHLY: z.string().default('price_enterprise_monthly'),
+  STRIPE_PRICE_ENTERPRISE_ANNUAL: z.string().default('price_enterprise_annual'),
 });
 
 const parsed = ConfigSchema.safeParse(process.env);
@@ -33,6 +54,10 @@ export const config = {
     userToken: parsed.data.AUTH_USER_TOKEN,
     adminToken: parsed.data.AUTH_ADMIN_TOKEN,
   },
+  jwt: {
+    secret: parsed.data.JWT_SECRET,
+    expiresIn: parsed.data.JWT_EXPIRES_IN,
+  },
   rateLimiting: {
     windowMs: parsed.data.RATE_LIMIT_WINDOW_MS,
     max: parsed.data.RATE_LIMIT_MAX,
@@ -42,4 +67,28 @@ export const config = {
     webhookReplayWindowMs: parsed.data.WEBHOOK_REPLAY_WINDOW_MS,
   },
   corsOrigin: parsed.data.CORS_ORIGIN,
+  database: {
+    url: parsed.data.DATABASE_URL,
+    host: parsed.data.DB_HOST,
+    port: parsed.data.DB_PORT,
+    name: parsed.data.DB_NAME,
+    user: parsed.data.DB_USER,
+    password: parsed.data.DB_PASSWORD,
+    ssl: parsed.data.DB_SSL === 'true' || parsed.data.DB_SSL === 'require',
+    pool: {
+      min: parsed.data.DB_POOL_MIN,
+      max: parsed.data.DB_POOL_MAX,
+    },
+  },
+  stripe: {
+    secretKey: parsed.data.STRIPE_SECRET_KEY,
+    publishableKey: parsed.data.STRIPE_PUBLISHABLE_KEY,
+    webhookSecret: parsed.data.STRIPE_WEBHOOK_SECRET,
+    prices: {
+      proMonthly: parsed.data.STRIPE_PRICE_PRO_MONTHLY,
+      proAnnual: parsed.data.STRIPE_PRICE_PRO_ANNUAL,
+      enterpriseMonthly: parsed.data.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+      enterpriseAnnual: parsed.data.STRIPE_PRICE_ENTERPRISE_ANNUAL,
+    },
+  },
 };

@@ -2,7 +2,7 @@
 let isShuttingDown = false;
 const connections = new Set();
 
-export function setupGracefulShutdown(server) {
+export function setupGracefulShutdown(server, onCleanup = null) {
   // Track connections
   server.on('connection', (conn) => {
     connections.add(conn);
@@ -41,6 +41,15 @@ export function setupGracefulShutdown(server) {
       // Destroy remaining connections
       for (const conn of connections) {
         conn.destroy();
+      }
+
+      // Run cleanup callback (e.g., close database)
+      if (onCleanup) {
+        try {
+          await onCleanup();
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
       }
 
       console.log('All connections closed. Exiting...');

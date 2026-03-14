@@ -10,6 +10,14 @@ function getApiBaseUrl(): string {
   return raw.replace(/\/$/, '');
 }
 
+export function getAuthToken(): string | null {
+  try {
+    return localStorage.getItem('auth_token');
+  } catch {
+    return null;
+  }
+}
+
 export function getUserId(): string {
   try {
     return localStorage.getItem('userId') || 'demo-user';
@@ -25,6 +33,12 @@ export async function apiFetchJson<T>(path: string, options: ApiFetchOptions = {
   const headers = new Headers(options.headers);
   if (!headers.has('x-user-id')) {
     headers.set('x-user-id', getUserId());
+  }
+  
+  // Add auth token if available
+  const token = getAuthToken();
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   let body: BodyInit | undefined;
