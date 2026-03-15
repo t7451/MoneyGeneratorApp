@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { usePlaidLink, PlaidLinkOptions, PlaidLinkOnSuccess } from 'react-plaid-link';
+import { getUserId } from '../lib/apiClient';
 import './PlaidLink.css';
 
 interface PlaidLinkButtonProps {
@@ -13,15 +14,23 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const effectiveUserId = userId?.trim() || getUserId() || '';
 
   const fetchLinkToken = useCallback(async () => {
+    if (!effectiveUserId) {
+      const message = 'Sign in to connect a bank account.';
+      setError(message);
+      onError?.(message);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${apiUrl}/api/plaid/link-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userId || 'demo_user' }),
+        body: JSON.stringify({ userId: effectiveUserId }),
       });
 
       if (!response.ok) {
@@ -37,7 +46,7 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, userId, onError]);
+  }, [apiUrl, effectiveUserId, onError]);
 
   useEffect(() => {
     fetchLinkToken();

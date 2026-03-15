@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Briefcase, Search, Bell, MapPin, Star, DollarSign, TrendingUp, Wallet } from 'lucide-react';
 import { JobCard } from '../components/JobCard';
-import { JobMap } from '../components/JobMap';
 import type { Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
 import { ErrorState } from '../components/ErrorState';
 import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './JobsPage.css';
+
+const JobMap = lazy(async () => ({
+  default: (await import('../components/JobMap')).JobMap,
+}));
 
 type V2RecommendedJob = {
   id: string;
@@ -375,7 +378,16 @@ export const JobsPage: React.FC = () => {
       
       {viewMode === 'map' ? (
         <div className="map-view">
-          <JobMap jobs={filteredJobs} center={mapCenter} />
+          <Suspense
+            fallback={
+              <div className="map-loading-state" role="status" aria-live="polite">
+                <div className="map-loading-spinner" aria-hidden="true" />
+                <p>Loading map view...</p>
+              </div>
+            }
+          >
+            <JobMap jobs={filteredJobs} center={mapCenter} />
+          </Suspense>
         </div>
       ) : filteredJobs.length > 0 ? (
         <div className="job-list" data-tour="job-cards">

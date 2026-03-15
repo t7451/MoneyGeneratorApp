@@ -106,11 +106,6 @@ const ADDONS: Addon[] = [
   },
 ];
 
-const DEMO_SAVED_METHODS: SavedMethod[] = [
-  { id: 'pm_card_4242', label: 'Visa •••• 4242', type: 'card', expiry: '11/28' },
-  { id: 'pm_apple_pay', label: 'Apple Pay (Keith)', type: 'wallet' },
-];
-
 interface CheckoutProps {
   currentPlan?: string;
   onSelectPlan: (planId: string, cycle: BillingCycle, addons: string[], payment: PaymentDetails) => void;
@@ -123,11 +118,12 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [step, setStep] = useState<'plan' | 'addons' | 'confirm'>('plan');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
-  const [savedMethods, setSavedMethods] = useState<SavedMethod[]>(DEMO_SAVED_METHODS);
-  const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>(DEMO_SAVED_METHODS[0]?.id || '');
+  const [savedMethods, setSavedMethods] = useState<SavedMethod[]>([]);
+  const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>('');
   const [autoRetry, setAutoRetry] = useState(true);
   const [rememberMethod, setRememberMethod] = useState(true);
   const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
+  const [paymentMethodsError, setPaymentMethodsError] = useState<string | null>(null);
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
@@ -163,6 +159,10 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
         if (apiMethods.length > 0) {
           setSavedMethods(apiMethods);
           setSelectedSavedMethod(methodsResponse.defaultMethodId || apiMethods[0].id);
+          setPaymentMethodsError(null);
+        } else {
+          setSavedMethods([]);
+          setSelectedSavedMethod('');
         }
 
         if (preferencesResponse.billingPreferences?.autoRetry !== undefined) {
@@ -179,8 +179,10 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
         }
       } catch {
         if (!cancelled) {
-          setSavedMethods(DEMO_SAVED_METHODS);
-          setSelectedSavedMethod(DEMO_SAVED_METHODS[0]?.id || '');
+          setSavedMethods([]);
+          setSelectedSavedMethod('');
+          setPaymentMethod('card');
+          setPaymentMethodsError('Saved payment methods are unavailable right now.');
         }
       } finally {
         if (!cancelled) {
@@ -425,11 +427,20 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
                   <button
                     type="button"
                     className={`payment-chip ${paymentMethod === 'saved' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('saved')}
+                    onClick={() => {
+                      if (savedMethods.length > 0) {
+                        setPaymentMethod('saved');
+                      }
+                    }}
+                    disabled={!loadingPaymentMethods && savedMethods.length === 0}
                   >
                     ⭐ Saved
                   </button>
                 </div>
+
+                {paymentMethodsError && (
+                  <div className="payment-note payment-note-error">{paymentMethodsError}</div>
+                )}
 
                 {paymentMethod === 'saved' && (
                   <div className="saved-methods">

@@ -49,7 +49,7 @@ export const TaxPage: React.FC = () => {
           setQuarters(quartersRes.quarters);
         }
       } catch {
-        // fall back to existing demo values
+        // Keep the existing local summary visible when fresh reporting data is unavailable.
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

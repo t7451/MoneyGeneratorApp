@@ -47,15 +47,16 @@ interface StatCardProps {
   icon: string;
   label: string;
   value: string;
+  className?: string;
   trend?: {
     value: number;
     direction: 'up' | 'down';
   };
 }
 
-export function StatCard({ icon, label, value, trend }: StatCardProps) {
+export function StatCard({ icon, label, value, className, trend }: StatCardProps) {
   return (
-    <div className="stat-card">
+    <div className={`stat-card ${className || ''}`.trim()}>
       <div className="stat-icon">{icon}</div>
       <div className="stat-content">
         <span className="stat-label">{label}</span>
@@ -119,29 +120,46 @@ export function Dashboard({
 
   const allComplete = progressSteps.every((s) => s.completed);
 
-  const aiInsights = [
+  const completedCount = progressSteps.filter((step) => step.completed).length;
+  const readinessScore = Math.round((completedCount / progressSteps.length) * 100);
+
+  const nextSteps = [
+    !bankConnected
+      ? {
+          title: 'Connect your bank',
+          detail: 'Link an account to bring transactions and cash-flow reporting into the dashboard.',
+          cta: 'Connect bank',
+        }
+      : {
+          title: 'Bank connection active',
+          detail: 'Your linked account is ready for transaction sync and reporting updates.',
+          cta: 'View analytics',
+        },
+    !hasSubscription
+      ? {
+          title: 'Unlock advanced reporting',
+          detail: 'Upgrade to enable more detailed reporting, forecasting, and automation tools.',
+          cta: 'Upgrade plan',
+        }
+      : {
+          title: 'Subscription is active',
+          detail: 'Your plan is ready for premium analytics and operator-assisted workflows.',
+          cta: 'View analytics',
+        },
     {
-      title: 'Best time to work',
-      detail: 'Monday 5-9pm shows +24% surge near Downtown.',
-      cta: 'View surge map',
-    },
-    {
-      title: 'Expense to trim',
-      detail: 'Subscription “Fuel Saver Plus” unused 21 days. Save $12/mo.',
-      cta: 'Review and cancel',
-    },
-    {
-      title: 'Tax reserve check',
-      detail: 'You are pacing $38 under weekly tax target. Move $38 today.',
-      cta: 'Adjust reserve',
+      title: 'Weekly momentum',
+      detail:
+        weeklyChange >= 0
+          ? `Earnings are up ${Math.abs(weeklyChange)}% versus last week.`
+          : `Earnings are down ${Math.abs(weeklyChange)}% versus last week. Review trends and recent activity.` ,
+      cta: 'View analytics',
     },
   ];
 
-  const healthScore = 82;
   const healthSignals = [
-    { label: 'Cash flow', value: '+$420 this week', status: 'positive' },
-    { label: 'Savings runway', value: '6.2 months', status: 'neutral' },
-    { label: 'Goal progress', value: '68% to weekly target', status: 'positive' },
+    { label: 'Profile', value: 'Complete', status: 'positive' },
+    { label: 'Bank data', value: bankConnected ? 'Connected' : 'Needs setup', status: bankConnected ? 'positive' : 'warning' },
+    { label: 'Plan access', value: hasSubscription ? 'Premium active' : 'Basic access', status: hasSubscription ? 'positive' : 'neutral' },
   ];
 
   return (
@@ -161,20 +179,30 @@ export function Dashboard({
           icon="💰"
           label="This Month"
           value={`$${earnings.toLocaleString()}`}
+          className="earnings-card"
           trend={{ value: weeklyChange, direction: weeklyChange >= 0 ? 'up' : 'down' }}
         />
-        <StatCard icon="📊" label="Active Gigs" value="3" />
-        <StatCard icon="🎯" label="Goal Progress" value="68%" />
+        <StatCard
+          icon="🏦"
+          label="Bank Status"
+          value={bankConnected ? 'Connected' : 'Needs setup'}
+          className="bank-section"
+        />
+        <StatCard
+          icon="⚡"
+          label="Plan"
+          value={hasSubscription ? 'Premium' : 'Basic'}
+        />
       </div>
 
       <div className="health-grid">
         <div className="health-card">
           <div className="health-score">
-            <span className="score-label">Financial Health</span>
-            <span className="score-value">{healthScore}</span>
+            <span className="score-label">Account Readiness</span>
+            <span className="score-value">{readinessScore}</span>
           </div>
           <div className="score-meter">
-            <progress className="score-meter" value={healthScore} max={100} />
+            <progress className="score-meter" value={readinessScore} max={100} />
           </div>
           <div className="signal-list">
             {healthSignals.map((signal) => (
@@ -186,16 +214,16 @@ export function Dashboard({
           </div>
         </div>
 
-        <div className="insights-card">
+        <div className="insights-card insights-section">
           <div className="insights-header">
             <div>
-              <h4>AI Insights</h4>
-              <p>Personalized tips based on your shifts, spend, and goals.</p>
+              <h4>Recommended Next Steps</h4>
+              <p>Actions based on your current setup and recent earnings trend.</p>
             </div>
             <button className="btn-secondary" onClick={onViewAnalytics}>View report</button>
           </div>
           <div className="insights-grid">
-            {aiInsights.map((insight) => (
+            {nextSteps.map((insight) => (
               <div key={insight.title} className="insight-card">
                 <h5>{insight.title}</h5>
                 <p>{insight.detail}</p>
@@ -233,7 +261,7 @@ export function Dashboard({
           <QuickAction
             icon="📈"
             label="View Analytics"
-            description="See your earning trends"
+            description="Review live earnings and activity trends"
             onClick={onViewAnalytics}
           />
         </div>

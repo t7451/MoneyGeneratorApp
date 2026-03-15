@@ -63,25 +63,6 @@
 }
 
 /* =============================================================================
-   DEVELOPER NOTE
-   ============================================================================= */
-
-.storefront-dev-note {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  font-size: 0.875rem;
-  color: #92400e;
-}
-
-.storefront-dev-note strong {
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-/* =============================================================================
    ALERTS
    ============================================================================= */
 
@@ -407,12 +388,6 @@
   
   .storefront-header {
     background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-  }
-  
-  .storefront-dev-note {
-    background: #422006;
-    border-color: #854d0e;
-    color: #fcd34d;
   }
   
   .storefront-products h2 {

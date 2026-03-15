@@ -118,8 +118,9 @@ interface CreditsHubProps {
 type TabType = 'earn' | 'redeem' | 'history' | 'achievements';
 type EarnSection = 'all' | 'surveys' | 'games' | 'offers' | 'tasks' | 'videos' | 'social' | 'cashback';
 
-export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHubProps) {
-  const effectiveUserId = userId || getUserId();
+export function CreditsHub({ userId, onBalanceChange }: CreditsHubProps) {
+  const effectiveUserId = userId?.trim() || getUserId() || '';
+  const hasUserContext = effectiveUserId.length > 0;
   const [activeTab, setActiveTab] = useState<TabType>('earn');
   const [earnSection, setEarnSection] = useState<EarnSection>('all');
   const [balance, setBalance] = useState<CreditBalance | null>(null);
@@ -155,6 +156,11 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
 
   // Load dashboard data
   const loadDashboard = useCallback(async () => {
+    if (!hasUserContext) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const [dashboard, surveysData, gamesData, offersData, tasksData, redemptions, achievementsData, retailersData, videoData, referralData] = await Promise.all([
         api(`/credits/dashboard?userId=${effectiveUserId}`),
@@ -187,17 +193,22 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
     } finally {
       setLoading(false);
     }
-  }, [api, effectiveUserId, onBalanceChange]);
+  }, [api, effectiveUserId, hasUserContext, onBalanceChange]);
 
   // Load transactions
   const loadTransactions = useCallback(async () => {
+    if (!hasUserContext) {
+      setTransactions([]);
+      return;
+    }
+
     try {
       const data = await api(`/credits/transactions?userId=${effectiveUserId}&limit=50`);
       setTransactions(data.transactions || []);
     } catch (error) {
       console.error('Failed to load transactions:', error);
     }
-  }, [api, effectiveUserId]);
+  }, [api, effectiveUserId, hasUserContext]);
 
   useEffect(() => {
     loadDashboard();
@@ -384,6 +395,16 @@ export function CreditsHub({ userId = 'demo-user', onBalanceChange }: CreditsHub
         <div className="credits-loading">
           <div className="loading-spinner" />
           <span>Loading credits...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasUserContext) {
+    return (
+      <div className="credits-hub">
+        <div className="credits-loading">
+          <span>Sign in to access credits and rewards.</span>
         </div>
       </div>
     );

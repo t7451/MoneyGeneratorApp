@@ -256,6 +256,36 @@
   text-align: right;
 }
 
+.map-loading-state {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.map-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--color-emerald-600);
+  animation: jobs-map-spin 0.8s linear infinite;
+}
+
+@keyframes jobs-map-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .job-list {
   padding: 0 var(--space-4);
   display: flex;

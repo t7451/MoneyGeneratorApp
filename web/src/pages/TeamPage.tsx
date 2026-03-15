@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Users, Plus, Shield, Wallet, BarChart3, Crown } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { ErrorState } from '../components/ErrorState';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './TeamPage.css';
 
@@ -14,29 +15,36 @@ export const TeamPage: React.FC = () => {
   const [showAuditLog, setShowAuditLog] = useState(false);
   const [selectedRole, setSelectedRole] = useState('Viewer');
   const [pendingInvites, setPendingInvites] = useState<string[]>([]);
-  const [teamPlan, setTeamPlan] = useState('Enterprise');
-  const [teamBudget, setTeamBudget] = useState(4250);
-  const [teamBudgetUsed, setTeamBudgetUsed] = useState(0.48); // 48%
-  const [auditLog, setAuditLog] = useState([
-    { id: 1, action: 'Invited Sam', date: '2026-03-10' },
-    { id: 2, action: 'Changed Alex role to Manager', date: '2026-03-09' },
-    { id: 3, action: 'Enabled shared wallet', date: '2026-03-08' },
-  ]);
+  const [teamPlan, setTeamPlan] = useState('');
+  const [teamBudget, setTeamBudget] = useState(0);
+  const [teamBudgetUsed, setTeamBudgetUsed] = useState(0);
+  const [auditLog, setAuditLog] = useState<Array<{ id: string | number; action: string; date: string }>>([]);
+  const [teamError, setTeamError] = useState<string | null>(null);
+  const [teamLoaded, setTeamLoaded] = useState(false);
 
   const refreshTeam = async () => {
     try {
       const userId = getUserId();
       const data = await apiFetchJson<any>(`/api/v2/team?userId=${encodeURIComponent(userId)}`);
 
-      setTeamPlan(data.plan || 'Enterprise');
+      setTeamPlan(data.plan || '');
       setMembers(Array.isArray(data.members) ? data.members : []);
       setPendingInvites(Array.isArray(data.pendingInvites) ? data.pendingInvites : []);
       const sharedWallet = data.sharedWallet || {};
       setSharedWalletEnabled(Boolean(sharedWallet.enabled));
       if (typeof sharedWallet.balance === 'number') setTeamBudget(sharedWallet.balance);
       if (typeof sharedWallet.budgetUsed === 'number') setTeamBudgetUsed(sharedWallet.budgetUsed);
-    } catch {
-      showToast('Unable to load team data. Using local defaults.', 'error');
+      setTeamError(null);
+    } catch (error: any) {
+      setMembers([]);
+      setPendingInvites([]);
+      setTeamPlan('');
+      setTeamBudget(0);
+      setTeamBudgetUsed(0);
+      setTeamError(error?.message || 'Unable to load team data.');
+      showToast('Unable to load team data.', 'error');
+    } finally {
+      setTeamLoaded(true);
     }
   };
 
@@ -47,7 +55,7 @@ export const TeamPage: React.FC = () => {
       const entries = Array.isArray(data.entries) ? data.entries : [];
       setAuditLog(entries.map((e: any, idx: number) => ({ id: e.id || idx, action: e.action, date: (e.date || '').slice(0, 10) })));
     } catch {
-      // Keep existing local audit log if API fails
+      setAuditLog([]);
     }
   };
 
@@ -63,11 +71,11 @@ export const TeamPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAuditLog]);
 
-  const tasks = useMemo(() => ([
-    { id: 't1', title: 'Upload receipts', owner: 'Sam', due: 'Today', status: 'In Progress' },
-    { id: 't2', title: 'Verify payouts', owner: 'Keith', due: 'Tomorrow', status: 'Pending' },
-    { id: 't3', title: 'Tag expenses', owner: 'Alex', due: 'Friday', status: 'Pending' },
-  ]), []);
+  const teamInsights = useMemo(() => ([
+    { id: 'members', label: 'Active members', value: String(members.length) },
+    { id: 'invites', label: 'Pending invites', value: String(pendingInvites.length) },
+    { id: 'wallet', label: 'Shared wallet', value: `$${teamBudget.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
+  ]), [members.length, pendingInvites.length, teamBudget]);
 
   const handleInvite = () => {
     if (!newMemberEmail) return;
@@ -108,6 +116,19 @@ export const TeamPage: React.FC = () => {
     })();
   };
 
+  if (teamLoaded && teamError && members.length === 0 && !teamPlan) {
+    return (
+      <div className="team-page">
+        <ErrorState
+          type="server"
+          title="Team workspace unavailable"
+          message={teamError}
+          onRetry={refreshTeam}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="team-page">
       {/* Team Plan Management */}
@@ -116,7 +137,7 @@ export const TeamPage: React.FC = () => {
           <h3>Team Plan & Management</h3>
         </div>
         <div className="team-plan-row">
-          <span>Current Plan: <strong>{teamPlan}</strong></span>
+          <span>Current Plan: <strong>{teamPlan || 'Not configured'}</strong></span>
           <button className="btn-secondary team-plan-manage">Manage Plan</button>
         </div>
         <div className="team-budget-row">
@@ -159,45 +180,49 @@ export const TeamPage: React.FC = () => {
         <div className="team-card">
           <div className="card-header"><Users size={18} /> Members</div>
           <div className="member-list">
-            {members.map((member) => (
-              <div key={member.id} className="member-row">
-                <div>
-                  <div className="member-name">{member.name} {member.role === 'Owner' && <Crown size={14} />}</div>
-                  <div className="member-email">{member.email}</div>
-                  <div className="member-perms">{member.permissions.join(', ')}</div>
+            {members.length === 0 ? (
+              <div className="team-empty-state">No team members yet.</div>
+            ) : (
+              members.map((member) => (
+                <div key={member.id} className="member-row">
+                  <div>
+                    <div className="member-name">{member.name} {member.role === 'Owner' && <Crown size={14} />}</div>
+                    <div className="member-email">{member.email}</div>
+                    <div className="member-perms">{member.permissions.join(', ')}</div>
+                  </div>
+                  <span className="badge">{member.role}</span>
+                  <select
+                    value={member.role}
+                    aria-label={`Role for ${member.name}`}
+                    onChange={e => {
+                      const nextRole = e.target.value;
+                      (async () => {
+                        try {
+                          const userId = getUserId();
+                          await apiFetchJson(`/api/v2/team/members/${encodeURIComponent(member.id)}/role`, {
+                            method: 'PATCH',
+                            body: { userId, role: nextRole },
+                          });
+                          setMembers(prev => prev.map(m => m.id === member.id ? { ...m, role: nextRole } : m));
+                          showToast(`Updated ${member.name} to ${nextRole}`, 'success');
+                          if (showAuditLog) await refreshAudit();
+                        } catch {
+                          showToast('Role update failed. Please retry.', 'error');
+                          await refreshTeam();
+                        }
+                      })();
+                    }}
+                    className="role-select"
+                    disabled={member.role === 'Owner'}
+                  >
+                    <option value="Owner">Owner</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Contributor">Contributor</option>
+                    <option value="Viewer">Viewer</option>
+                  </select>
                 </div>
-                <span className="badge">{member.role}</span>
-                <select
-                  value={member.role}
-                  aria-label={`Role for ${member.name}`}
-                  onChange={e => {
-                    const nextRole = e.target.value;
-                    (async () => {
-                      try {
-                        const userId = getUserId();
-                        await apiFetchJson(`/api/v2/team/members/${encodeURIComponent(member.id)}/role`, {
-                          method: 'PATCH',
-                          body: { userId, role: nextRole },
-                        });
-                        setMembers(prev => prev.map(m => m.id === member.id ? { ...m, role: nextRole } : m));
-                        showToast(`Updated ${member.name} to ${nextRole}`, 'success');
-                        if (showAuditLog) await refreshAudit();
-                      } catch {
-                        showToast('Role update failed. Please retry.', 'error');
-                        await refreshTeam();
-                      }
-                    })();
-                  }}
-                  className="role-select"
-                  disabled={member.role === 'Owner'}
-                >
-                  <option value="Owner">Owner</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Contributor">Contributor</option>
-                  <option value="Viewer">Viewer</option>
-                </select>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -229,36 +254,27 @@ export const TeamPage: React.FC = () => {
           {showAuditLog && (
             <div className="audit-log">
               <h5>Audit Log</h5>
-              <ul>
-                {auditLog.map((entry) => (
-                  <li key={entry.id}>{entry.date}: {entry.action}</li>
-                ))}
-              </ul>
+              {auditLog.length === 0 ? (
+                <p className="team-empty-inline">No audit entries available.</p>
+              ) : (
+                <ul>
+                  {auditLog.map((entry) => (
+                    <li key={entry.id}>{entry.date}: {entry.action}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>
 
         <div className="team-card">
           <div className="card-header"><BarChart3 size={18} /> Team Insights</div>
-          <div className="insight-row">
-            <span>Shared earnings</span>
-            <strong>$9,420</strong>
-          </div>
-          <div className="insight-row">
-            <span>Tasks on track</span>
-            <strong>5/6</strong>
-          </div>
-          <div className="task-list">
-            {tasks.map((task) => (
-              <div key={task.id} className="task-row">
-                <div>
-                  <div className="task-title">{task.title}</div>
-                  <div className="task-meta">{task.owner} • {task.due}</div>
-                </div>
-                <span className="badge muted">{task.status}</span>
-              </div>
-            ))}
-          </div>
+          {teamInsights.map((item) => (
+            <div key={item.id} className="insight-row">
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+            </div>
+          ))}
         </div>
       </div>
     </div>

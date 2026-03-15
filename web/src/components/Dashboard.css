@@ -218,6 +218,7 @@
 
 .signal-row.positive strong { color: #16a34a; }
 .signal-row.neutral strong { color: #0ea5e9; }
+.signal-row.warning strong { color: #d97706; }
 
 .insights-header {
   display: flex;

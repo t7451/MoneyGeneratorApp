@@ -146,7 +146,7 @@ export const ConnectDashboard: React.FC = () => {
   
   /**
    * Load the connected account's onboarding status.
-   * This always fetches fresh data from Stripe (per demo requirements).
+    * This always fetches fresh data from Stripe.
    */
   async function loadAccountStatus() {
     if (!accountId) return;

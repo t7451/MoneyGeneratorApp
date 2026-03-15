@@ -5,16 +5,6 @@
  * customers to purchase them via Stripe Checkout.
  * 
  * URL: /storefront/:accountId
- * 
- * IMPORTANT: In production, you should NOT use the Stripe account ID in the URL.
- * Instead, use a merchant-friendly slug or your own internal ID that maps to
- * the Stripe account ID on the backend. The account ID is used here for
- * demonstration purposes only.
- * 
- * TODO for production:
- * - Replace :accountId with a custom slug (e.g., /store/acme-coffee)
- * - Create a mapping table: slug -> stripe_account_id
- * - Add merchant branding (logo, colors, etc.)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -173,11 +163,6 @@ export const Storefront: React.FC = () => {
           <Store size={28} className="storefront-icon" />
           <div>
             <h1>Store</h1>
-            {/* 
-              TODO: In production, display the merchant's business name here
-              instead of the account ID. Fetch this from your database or
-              from the Stripe account's display_name.
-            */}
             <p className="storefront-subtitle">
               Powered by Money Generator
             </p>
@@ -209,13 +194,6 @@ export const Storefront: React.FC = () => {
             <button onClick={() => setError(null)}>×</button>
           </div>
         )}
-        
-        {/* Note about account ID in URL */}
-        <div className="storefront-dev-note">
-          <strong>Developer Note:</strong> This storefront uses the Stripe account ID ({accountId}) 
-          in the URL for demonstration. In production, use a merchant-friendly slug 
-          (e.g., /store/your-business-name) and map it to the account ID on the backend.
-        </div>
         
         {/* Loading State */}
         {isLoading && (
