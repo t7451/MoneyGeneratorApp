@@ -1,0 +1,156 @@
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  gap: 0.75rem;
+}
+
+.error-state--inline {
+  padding: 1rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.error-state--inline .error-state__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.error-state--inline .error-state__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.error-state--inline .error-state__title {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.error-state--inline .error-state__message {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+}
+
+/* Size variants */
+.error-state--sm {
+  padding: 1.5rem 1rem;
+  gap: 0.5rem;
+}
+
+.error-state--sm .error-state__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.error-state--sm .error-state__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.error-state--sm .error-state__title {
+  font-size: 1rem;
+}
+
+.error-state--sm .error-state__message {
+  font-size: 0.85rem;
+}
+
+.error-state--lg {
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.error-state--lg .error-state__icon {
+  width: 64px;
+  height: 64px;
+}
+
+.error-state--lg .error-state__icon svg {
+  width: 64px;
+  height: 64px;
+}
+
+.error-state--lg .error-state__title {
+  font-size: 1.5rem;
+}
+
+.error-state--lg .error-state__message {
+  font-size: 1.1rem;
+  max-width: 500px;
+}
+
+/* Icon */
+.error-state__icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-red-500, #ef4444);
+}
+
+.error-state__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Title */
+.error-state__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Message */
+.error-state__message {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Retry button */
+.error-state__retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  margin-top: 0.5rem;
+  background: var(--color-emerald-500, #10b981);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-state__retry-btn:hover:not(:disabled) {
+  background: var(--color-emerald-600, #059669);
+  transform: translateY(-1px);
+}
+
+.error-state__retry-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-state__retry-btn .spin {
+  animation: error-spin 1s linear infinite;
+}
+
+@keyframes error-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .error-state__icon {
+    color: var(--color-red-400, #f87171);
+  }
+}

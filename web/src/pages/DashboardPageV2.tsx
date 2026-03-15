@@ -6,6 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useNavigate } from 'react-router-dom';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
+import { SkeletonMetricCard, SkeletonCard, Skeleton } from '../components';
 import './DashboardPageV2.css';
 
 interface StatItem {
@@ -219,9 +220,35 @@ export const DashboardPageV2: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="dashboard-v2 dashboard-loading">
-        <Loader2 className="loading-spinner" size={48} />
-        <p>Loading your dashboard...</p>
+      <div className="dashboard-v2">
+        {/* Hero Skeleton */}
+        <section className="dashboard-hero">
+          <div className="hero-content">
+            <Skeleton width="60%" height="2rem" />
+            <Skeleton width="80%" height="1rem" className="mt-2" />
+          </div>
+        </section>
+        
+        {/* Stats Skeleton */}
+        <section className="dashboard-stats">
+          <div className="stats-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonMetricCard key={i} />
+            ))}
+          </div>
+        </section>
+
+        {/* Content Skeleton */}
+        <section className="dashboard-content">
+          <div className="dashboard-main">
+            <SkeletonCard descriptionLines={3} />
+            <SkeletonCard descriptionLines={3} />
+          </div>
+          <aside className="dashboard-sidebar">
+            <SkeletonCard descriptionLines={2} showAvatar={false} />
+            <SkeletonCard descriptionLines={2} showAvatar={false} />
+          </aside>
+        </section>
       </div>
     );
   }

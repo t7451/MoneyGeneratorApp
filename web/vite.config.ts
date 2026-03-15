@@ -42,6 +42,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,
+      },
+      '/auth': {
+        target: process.env.VITE_API_URL || 'http://localhost:4000',
+        changeOrigin: true,
+        secure: false,
       }
     }
   },

@@ -18,6 +18,7 @@ import { TaxPage } from './pages/TaxPage';
 import ReferralPage from './pages/ReferralPage';
 import PricingPage from './pages/PricingPage';
 import ReportsPage from './pages/ReportsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ConnectDashboard } from './pages/ConnectDashboard';
@@ -92,6 +93,7 @@ const AppRoutes = () => {
           <Route path="reports" element={<ReportsPage />} />
           <Route path="mileage" element={<MileagePage />} />
           <Route path="taxes" element={<TaxPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           
           {/* Stripe Connect routes */}
           <Route path="connect/dashboard" element={<ConnectDashboard />} />

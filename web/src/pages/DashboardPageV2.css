@@ -7,6 +7,9 @@
   width: 100%;
 }
 
+/* Utility classes */
+.mt-2 { margin-top: 0.5rem; }
+
 /* Hero Section */
 .dashboard-hero {
   padding: var(--spacing-xl) 0;

@@ -33,6 +33,18 @@
   color: var(--text-primary);
 }
 
+.last-updated {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -97,6 +109,40 @@
   background: var(--color-emerald-600);
 }
 
+.action-btn.refreshing {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-btn .spin {
+  animation: spin 1s linear infinite;
+}
+
+.auto-refresh-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.auto-refresh-toggle:hover {
+  background: var(--bg-hover);
+}
+
+.auto-refresh-toggle input[type="checkbox"] {
+  accent-color: var(--color-emerald-500);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .export-dropdown {
   position: relative;
 }
@@ -154,6 +200,21 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Skeleton loading state */
+.reports-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.reports-skeleton .metrics-grid {
+  margin-bottom: 0;
+}
+
+.reports-skeleton .charts-grid {
+  margin-bottom: 0;
 }
 
 /* Metrics Grid */

@@ -10,6 +10,7 @@ import {
   Activity,
   Clock,
   Target,
+  Loader2,
 } from 'lucide-react';
 import {
   Line,
@@ -29,6 +30,7 @@ import {
 } from 'recharts';
 import './ReportsPage.css';
 import { apiFetchBlob, apiFetchJson, apiFetchText, getUserId } from '../lib/apiClient';
+import { ErrorState, SkeletonMetricCard, SkeletonChart } from '../components';
 
 interface DateRange {
   start: Date;
@@ -67,14 +69,20 @@ const DATE_RANGES: DateRange[] = [
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
 const ReportsPage: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState<DateRange>(DATE_RANGES[1]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [earningsData, setEarningsData] = useState<EarningsData[]>([]);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const userId = getUserId();
 
+  const autoRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounce fetchReportData to avoid rapid re-renders
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -87,6 +95,77 @@ const ReportsPage: React.FC = () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRange]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (autoRefresh) {
+      autoRefreshIntervalRef.current = setInterval(() => {
+        handleRefresh();
+      }, AUTO_REFRESH_INTERVAL);
+    }
+    return () => {
+      if (autoRefreshIntervalRef.current) {
+        clearInterval(autoRefreshIntervalRef.current);
+        autoRefreshIntervalRef.current = null;
+      }
+    };
+  }, [autoRefresh]);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    setError(null);
+    try {
+      const startDate = selectedRange.start.toISOString().slice(0, 10);
+      const endDate = selectedRange.end.toISOString().slice(0, 10);
+
+      const [dashboard, incomeTrends, expenseTrends, incomeBreakdown] = await Promise.all([
+        apiFetchJson<any>('/api/v2/reporting/dashboard'),
+        apiFetchJson<any>(
+          `/api/v2/reporting/trends?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&period=daily&type=income`
+        ),
+        apiFetchJson<any>(
+          `/api/v2/reporting/trends?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&period=daily&type=expense`
+        ),
+        apiFetchJson<any>(
+          `/api/v2/reporting/breakdown?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&type=income`
+        ),
+      ]);
+
+      const incomeByDate = new Map<string, number>();
+      (incomeTrends?.data || []).forEach((d: any) => {
+        const key = String(d.date || '').slice(0, 10);
+        if (key) incomeByDate.set(key, Number(d.amount) || 0);
+      });
+      const expenseByDate = new Map<string, number>();
+      (expenseTrends?.data || []).forEach((d: any) => {
+        const key = String(d.date || '').slice(0, 10);
+        if (key) expenseByDate.set(key, Number(d.amount) || 0);
+      });
+
+      const allDates = new Set<string>([...incomeByDate.keys(), ...expenseByDate.keys()]);
+      const mergedSeries = [...allDates]
+        .sort((a, b) => a.localeCompare(b))
+        .map((date) => {
+          const earnings = incomeByDate.get(date) || 0;
+          const expenses = expenseByDate.get(date) || 0;
+          return { date, earnings, expenses, net: earnings - expenses };
+        });
+      setEarningsData(mergedSeries);
+
+      const breakdown = (incomeBreakdown?.data || []) as Array<any>;
+      const platforms = breakdown.map((row: any, i: number) => ({
+        name: row.category || `Category ${i + 1}`,
+        value: Number(row.percentage) || 0,
+        color: COLORS[i % COLORS.length],
+      }));
+      setPlatformData(platforms);
+      setLastUpdated(new Date());
+    } catch (err: any) {
+      setError(err.message || 'Failed to refresh analytics');
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [selectedRange]);
 
   const fetchReportData = useCallback(async () => {
@@ -137,6 +216,7 @@ const ReportsPage: React.FC = () => {
         color: COLORS[i % COLORS.length],
       }));
       setPlatformData(platforms);
+      setLastUpdated(new Date());
 
       // Use dashboard metrics as a sanity check; if it returns no success, keep going with chart data
       if (dashboard?.success === false) {
@@ -259,6 +339,12 @@ const ReportsPage: React.FC = () => {
         <div className="header-title">
           <BarChart3 size={28} />
           <h1>Reports & Analytics</h1>
+          {lastUpdated && (
+            <span className="last-updated">
+              <Clock size={12} />
+              Updated {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
         </div>
         <div className="header-actions">
           <div className="date-selector">
@@ -276,9 +362,25 @@ const ReportsPage: React.FC = () => {
               ))}
             </select>
           </div>
-          <button className="action-btn" onClick={() => fetchReportData()}>
-            <RefreshCw size={16} />
-            Refresh
+          <label className="auto-refresh-toggle">
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+            />
+            <span>Auto-refresh</span>
+          </label>
+          <button 
+            className={`action-btn ${isRefreshing ? 'refreshing' : ''}`} 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <Loader2 size={16} className="spin" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </button>
           <div className="export-dropdown">
             <button className="action-btn primary">
@@ -292,14 +394,37 @@ const ReportsPage: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Loading State */}
+      {/* Error State */}
       {error && (
-        <div className="error-state">{error}</div>
+        <ErrorState
+          type={error.includes('connect') || error.includes('network') ? 'network' : 'server'}
+          message={error}
+          onRetry={handleRefresh}
+          isRetrying={isRefreshing}
+          size="sm"
+        />
       )}
+      {/* Loading State with Skeletons */}
       {loading ? (
-        <div className="loading-state">
-          <RefreshCw className="spin" size={32} />
-          <p>Loading report data...</p>
+        <div className="reports-skeleton">
+          {/* Metrics skeleton */}
+          <div className="metrics-grid">
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonMetricCard key={i} />
+            ))}
+          </div>
+          {/* Charts skeleton */}
+          <div className="charts-grid">
+            <div className="chart-card full-width">
+              <SkeletonChart height={300} />
+            </div>
+            <div className="chart-card">
+              <SkeletonChart height={250} showLegend={false} />
+            </div>
+            <div className="chart-card">
+              <SkeletonChart height={250} showLegend={false} />
+            </div>
+          </div>
         </div>
       ) : (
         <>
