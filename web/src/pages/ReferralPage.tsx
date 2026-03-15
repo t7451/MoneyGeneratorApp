@@ -62,7 +62,7 @@ const ReferralPage: React.FC = () => {
     };
   };
 
-  const fetchReferralData = async () => {
+  const _fetchReferralData = async () => {
     try {
       setLoadError(null);
       const data = await apiFetchJson<any>('/api/v2/referrals/me');
@@ -76,7 +76,7 @@ const ReferralPage: React.FC = () => {
     }
   };
 
-  const fetchLeaderboard = async () => {
+  const _fetchLeaderboard = async () => {
     try {
       const data = await apiFetchJson<{ success: boolean; data?: any[] }>('/api/v2/referrals/leaderboard?limit=10');
       setLeaderboard(Array.isArray(data?.data) ? data.data : []);

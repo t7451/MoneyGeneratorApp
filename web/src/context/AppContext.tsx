@@ -161,7 +161,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(() => null);
   }, [showToast]);
 
-  const fetchProducts = async () => {
+  const _fetchProducts = async () => {
     try {
       const data = await apiFetchJson<{ success: boolean; plans?: Array<{ id: string; name: string; description?: string; price?: { monthly?: number | null; annual?: number | null } }> }>(
         '/api/v2/subscriptions/plans'

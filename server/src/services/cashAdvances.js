@@ -26,7 +26,7 @@ export const CashAdvanceService = {
       .filter(a => a.userId === userId && a.status === 'pending');
 
     // Calculate available limit
-    const totalPending = pendingAdvances.reduce((sum, a) => sum + a.amount, 0);
+    const _totalPending = pendingAdvances.reduce((sum, a) => sum + a.amount, 0);
     const dailyUsed = Array.from(Models.cashAdvances.values())
       .filter(a => {
         if (a.userId !== userId) return false;

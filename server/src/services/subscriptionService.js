@@ -538,8 +538,7 @@ async function handlePaymentSucceeded(invoice) {
 
 async function handlePaymentFailed(invoice) {
   const subscriptionId = invoice.subscription;
-  const customerId = invoice.customer;
-  
+  // invoice.customer available if needed for notification emails
   logger.warn(`Payment failed for subscription ${subscriptionId}, invoice ${invoice.id}`);
   
   // The subscription status will be updated via customer.subscription.updated webhook

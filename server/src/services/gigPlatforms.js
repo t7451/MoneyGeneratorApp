@@ -61,7 +61,7 @@ export const GigPlatformService = {
   // Fetch jobs from connected platforms (aggregated feed)
   fetchAggregatedJobs: ({ userId, category, limit = 20, offset = 0 }) => {
     // In production, this would call each connected platform's API
-    const connections = GigPlatformService.getConnectedPlatforms(userId);
+    const _connections = GigPlatformService.getConnectedPlatforms(userId);
     const platformCategories = {
       local: GigPlatforms.LOCAL_MISSIONS,
       digital: GigPlatforms.DIGITAL_SERVICES,

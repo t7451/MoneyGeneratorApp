@@ -211,7 +211,7 @@ const Reporting = {
     const endDate = new Date(`${year}-12-31`);
 
     const summary = await this.getSummary(userId, startDate, endDate);
-    const categories = await this.getCategoryBreakdown(userId, startDate, endDate);
+    const _categories = await this.getCategoryBreakdown(userId, startDate, endDate);
     const incomeCats = await this.getCategoryBreakdown(userId, startDate, endDate, 'income');
     const expenseCats = await this.getCategoryBreakdown(userId, startDate, endDate, 'expense');
 
