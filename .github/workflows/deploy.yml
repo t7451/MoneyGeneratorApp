@@ -27,6 +27,10 @@ jobs:
         working-directory: ./web
         run: npm ci
 
+      - name: Enforce bundle budgets
+        working-directory: ./web
+        run: npm run build:budget
+
       - name: Build web app
         working-directory: ./web
         run: npm run build

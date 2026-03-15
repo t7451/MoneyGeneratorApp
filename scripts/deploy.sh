@@ -111,6 +111,13 @@ build_web_app() {
     }
     log_success "Dependencies installed"
 
+    log_info "Enforcing bundle budgets..."
+    npm run build:budget || {
+        log_error "Bundle budget check failed"
+        exit 1
+    }
+    log_success "Bundle budgets passed"
+
     log_info "Running build..."
     npm run build || {
         log_error "Build failed"

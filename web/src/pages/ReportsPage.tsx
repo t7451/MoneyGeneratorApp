@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   BarChart3,
   TrendingUp,
@@ -11,41 +11,14 @@ import {
   Clock,
   Target,
   Loader2,
-  Save,
   Trash2,
   Plus,
-  Check,
 } from 'lucide-react';
-import {
-  Line,
-  LineChart,
-  BarChart,
-  Bar,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-  Legend,
-} from 'recharts';
 import './ReportsPage.css';
 import { apiFetchBlob, apiFetchJson, apiFetchText, getUserId } from '../lib/apiClient';
 import { ErrorState, SkeletonMetricCard, SkeletonChart } from '../components';
 
-// Saved chart configuration interface
-interface SavedChartConfig {
-  id: string;
-  name: string;
-  chartType: string;
-  metrics: { field: string; color: string; label: string }[];
-  stacked: boolean;
-  createdAt: string;
-}
+const ReportsCharts = lazy(() => import('../components/ReportsCharts'));
 
 // Scheduled report interface
 interface ScheduledReport {
@@ -79,14 +52,14 @@ interface DateRange {
   label: string;
 }
 
-interface EarningsData {
+interface ReportsChartEarningsPoint {
   date: string;
   earnings: number;
   expenses: number;
   net: number;
 }
 
-interface PlatformData {
+interface ReportsChartPlatformPoint {
   name: string;
   value: number;
   color: string;
@@ -118,8 +91,8 @@ const ReportsPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [earningsData, setEarningsData] = useState<EarningsData[]>([]);
-  const [platformData, setPlatformData] = useState<PlatformData[]>([]);
+  const [earningsData, setEarningsData] = useState<ReportsChartEarningsPoint[]>([]);
+  const [platformData, setPlatformData] = useState<ReportsChartPlatformPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const userId = getUserId();
 
@@ -302,22 +275,6 @@ const ReportsPage: React.FC = () => {
     }
   };
 
-  const renderCustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip">
-          <p className="tooltip-label">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className={`tooltip-entry tooltip-entry-${entry.name?.toLowerCase()}`}>
-              {entry.name}: ${entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   // Memoize metrics for performance
   const metrics = useMemo<MetricCard[]>(() => {
     if (!earningsData.length) return [];
@@ -356,94 +313,6 @@ const ReportsPage: React.FC = () => {
       },
     ];
   }, [earningsData]);
-
-  // --- Custom Chart Builder UI ---
-  const chartTypes = [
-    { label: 'Line', value: 'line' },
-    { label: 'Bar', value: 'bar' },
-    { label: 'Area', value: 'area' },
-    { label: 'Pie', value: 'pie' },
-  ];
-  const chartFields = [
-    { label: 'Earnings', value: 'earnings', color: '#3b82f6' },
-    { label: 'Expenses', value: 'expenses', color: '#ef4444' },
-    { label: 'Net Profit', value: 'net', color: '#10b981' },
-  ];
-
-  const [customChartType, setCustomChartType] = useState('line');
-  
-  // Enhanced chart builder state
-  const [selectedMetrics, setSelectedMetrics] = useState<{ field: string; color: string; label: string }[]>([
-    { field: 'earnings', color: '#3b82f6', label: 'Earnings' }
-  ]);
-  const [isStacked, setIsStacked] = useState(false);
-  const [savedCharts, setSavedCharts] = useState<SavedChartConfig[]>(() => {
-    try {
-      const saved = localStorage.getItem('savedChartConfigs');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [chartName, setChartName] = useState('');
-  const [showSaveForm, setShowSaveForm] = useState(false);
-
-  // Toggle a metric in selection
-  const toggleMetric = (field: string) => {
-    const existing = selectedMetrics.find(m => m.field === field);
-    if (existing) {
-      if (selectedMetrics.length > 1) {
-        setSelectedMetrics(selectedMetrics.filter(m => m.field !== field));
-      }
-    } else {
-      const fieldDef = chartFields.find(f => f.value === field);
-      if (fieldDef) {
-        setSelectedMetrics([...selectedMetrics, { field, color: fieldDef.color, label: fieldDef.label }]);
-      }
-    }
-  };
-
-  // Update metric color
-  const updateMetricColor = (field: string, color: string) => {
-    setSelectedMetrics(selectedMetrics.map(m => 
-      m.field === field ? { ...m, color } : m
-    ));
-  };
-
-  // Save current chart configuration
-  const saveChartConfig = () => {
-    if (!chartName.trim()) return;
-    const config: SavedChartConfig = {
-      id: `chart_${Date.now()}`,
-      name: chartName.trim(),
-      chartType: customChartType,
-      metrics: selectedMetrics,
-      stacked: isStacked,
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...savedCharts, config];
-    setSavedCharts(updated);
-    localStorage.setItem('savedChartConfigs', JSON.stringify(updated));
-    setChartName('');
-    setShowSaveForm(false);
-  };
-
-  // Load a saved chart configuration
-  const loadChartConfig = (config: SavedChartConfig) => {
-    setCustomChartType(config.chartType);
-    setSelectedMetrics(config.metrics);
-    setIsStacked(config.stacked);
-  };
-
-  // Delete a saved chart configuration
-  const deleteChartConfig = (id: string) => {
-    const updated = savedCharts.filter(c => c.id !== id);
-    setSavedCharts(updated);
-    localStorage.setItem('savedChartConfigs', JSON.stringify(updated));
-  };
-
-  // Color options for metric customization
-  const colorOptions = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 
   // ==================== SCHEDULED REPORTS ====================
   const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>([]);
@@ -647,125 +516,21 @@ const ReportsPage: React.FC = () => {
               </div>
             ))}
           </div>
-          {/* Charts Section */}
-          <div className="charts-grid">
-            {/* Earnings Over Time */}
-            <div className="chart-card full-width">
-              <div className="chart-header">
-                <h3>Earnings Over Time</h3>
-                <div className="chart-legend">
-                  <span className="legend-item earnings">
-                    <span className="dot"></span> Earnings
-                  </span>
-                  <span className="legend-item expenses">
-                    <span className="dot"></span> Expenses
-                  </span>
-                  <span className="legend-item net">
-                    <span className="dot"></span> Net Profit
-                  </span>
-                </div>
+          <Suspense fallback={
+            <div className="charts-grid">
+              <div className="chart-card full-width">
+                <SkeletonChart height={300} />
               </div>
-              <div className="chart-body">
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={earningsData}>
-                    <defs>
-                      <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v: number) => `$${v}`} />
-                    <Tooltip content={renderCustomTooltip} />
-                    <Area
-                      type="monotone"
-                      dataKey="earnings"
-                      stroke="#3b82f6"
-                      fillOpacity={1}
-                      fill="url(#colorEarnings)"
-                      strokeWidth={2}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="net"
-                      stroke="#10b981"
-                      fillOpacity={1}
-                      fill="url(#colorNet)"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="expenses"
-                      stroke="#ef4444"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className="chart-card">
+                <SkeletonChart height={250} showLegend={false} />
+              </div>
+              <div className="chart-card">
+                <SkeletonChart height={250} showLegend={false} />
               </div>
             </div>
-            {/* Platform Breakdown */}
-            <div className="chart-card">
-              <div className="chart-header">
-                <h3>Platform Breakdown</h3>
-              </div>
-              <div className="chart-body pie-chart">
-                <ResponsiveContainer width="100%" height={250}>
-                  <RechartsPieChart>
-                    <Pie
-                      data={platformData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {platformData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-                <div className="pie-legend">
-                  {platformData.map((platform, index) => (
-                    <div key={index} className="pie-legend-item">
-                      <span className={`dot dot-${platform.name.toLowerCase()}`}></span>
-                      <span className="name">{platform.name}</span>
-                      <span className="value">{platform.value}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Weekly Comparison */}
-            <div className="chart-card">
-              <div className="chart-header">
-                <h3>Weekly Comparison</h3>
-              </div>
-              <div className="chart-body">
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart
-                    data={earningsData.slice(-7)}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
-                    <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip content={renderCustomTooltip} />
-                    <Bar dataKey="earnings" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
+          }>
+            <ReportsCharts earningsData={earningsData} platformData={platformData} />
+          </Suspense>
           {/* Insights Section */}
           <div className="insights-section">
             <h3>
@@ -803,227 +568,6 @@ const ReportsPage: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* Custom Chart Builder Section - Enhanced */}
-          <div className="custom-chart-section">
-            <div className="custom-chart-header">
-              <h3>Custom Chart Builder</h3>
-              <div className="chart-header-actions">
-                {savedCharts.length > 0 && (
-                  <div className="saved-charts-dropdown">
-                    <button className="action-btn" aria-label="Load saved chart">
-                      Load Saved
-                    </button>
-                    <div className="dropdown-menu">
-                      {savedCharts.map(config => (
-                        <div key={config.id} className="saved-chart-item">
-                          <button onClick={() => loadChartConfig(config)} aria-label={`Load ${config.name}`}>
-                            {config.name}
-                          </button>
-                          <button 
-                            className="delete-btn"
-                            onClick={(e) => { e.stopPropagation(); deleteChartConfig(config.id); }}
-                            aria-label={`Delete ${config.name}`}
-                            title="Delete chart"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {showSaveForm ? (
-                  <div className="save-chart-form">
-                    <input
-                      type="text"
-                      placeholder="Chart name..."
-                      value={chartName}
-                      onChange={(e) => setChartName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && saveChartConfig()}
-                    />
-                    <button className="action-btn primary" onClick={saveChartConfig}>
-                      <Check size={14} />
-                    </button>
-                    <button className="action-btn" onClick={() => setShowSaveForm(false)}>
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button className="action-btn" onClick={() => setShowSaveForm(true)}>
-                    <Save size={14} />
-                    Save Chart
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="custom-chart-controls">
-              <div className="control-group">
-                <label htmlFor="chart-type-select">Chart Type:</label>
-                <select 
-                  id="chart-type-select"
-                  value={customChartType} 
-                  onChange={e => setCustomChartType(e.target.value)}
-                  aria-label="Select chart type"
-                >
-                  {chartTypes.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-              </div>
-              
-              <div className="control-group">
-                <label>Metrics:</label>
-                <div className="metric-toggles" role="group" aria-label="Select metrics to display">
-                  {chartFields.map(field => {
-                    const isSelected = selectedMetrics.some(m => m.field === field.value);
-                    const metric = selectedMetrics.find(m => m.field === field.value);
-                    return (
-                      <div key={field.value} className={`metric-toggle ${isSelected ? 'active' : ''}`}>
-                        <button 
-                          onClick={() => toggleMetric(field.value)}
-                          aria-label={`Toggle ${field.label} metric`}
-                          aria-pressed={isSelected}
-                        >
-                          <span className="color-dot" style={{ background: metric?.color || field.color }} />
-                          {field.label}
-                        </button>
-                        {isSelected && (
-                          <div className="color-picker-mini" role="group" aria-label={`Color options for ${field.label}`}>
-                            {colorOptions.map(color => (
-                              <button
-                                key={color}
-                                className={`color-option ${metric?.color === color ? 'selected' : ''}`}
-                                style={{ background: color }}
-                                onClick={() => updateMetricColor(field.value, color)}
-                                aria-label={`Set ${field.label} color to ${color}`}
-                                title={color}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              {(customChartType === 'bar' || customChartType === 'area') && selectedMetrics.length > 1 && (
-                <div className="control-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isStacked}
-                      onChange={(e) => setIsStacked(e.target.checked)}
-                    />
-                    Stacked
-                  </label>
-                </div>
-              )}
-            </div>
-            
-            <div className="custom-chart-preview">
-              {customChartType === 'line' && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={earningsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={v => `$${v}`} />
-                    <Tooltip content={renderCustomTooltip} />
-                    <Legend />
-                    {selectedMetrics.map(metric => (
-                      <Line 
-                        key={metric.field}
-                        type="monotone" 
-                        dataKey={metric.field} 
-                        name={metric.label}
-                        stroke={metric.color} 
-                        strokeWidth={2}
-                        dot={{ fill: metric.color, strokeWidth: 2 }}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-              {customChartType === 'bar' && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={earningsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={v => `$${v}`} />
-                    <Tooltip content={renderCustomTooltip} />
-                    <Legend />
-                    {selectedMetrics.map(metric => (
-                      <Bar 
-                        key={metric.field}
-                        dataKey={metric.field}
-                        name={metric.label}
-                        fill={metric.color}
-                        radius={isStacked ? undefined : [4, 4, 0, 0]}
-                        stackId={isStacked ? 'stack' : undefined}
-                      />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-              {customChartType === 'area' && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={earningsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={v => `$${v}`} />
-                    <Tooltip content={renderCustomTooltip} />
-                    <Legend />
-                    {selectedMetrics.map(metric => (
-                      <Area 
-                        key={metric.field}
-                        type="monotone" 
-                        dataKey={metric.field}
-                        name={metric.label}
-                        stroke={metric.color}
-                        fillOpacity={0.3}
-                        fill={metric.color}
-                        strokeWidth={2}
-                        stackId={isStacked ? 'stack' : undefined}
-                      />
-                    ))}
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-              {customChartType === 'pie' && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPieChart>
-                    <Pie
-                      data={selectedMetrics.length === 1 
-                        ? earningsData.map(d => ({ name: d.date, value: d[selectedMetrics[0].field as keyof typeof d] }))
-                        : selectedMetrics.map(m => ({ 
-                            name: m.label, 
-                            value: earningsData.reduce((sum, d) => sum + (Number(d[m.field as keyof typeof d]) || 0), 0),
-                            color: m.color
-                          }))
-                      }
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {selectedMetrics.length === 1 
-                        ? earningsData.map((_, index) => (
-                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                          ))
-                        : selectedMetrics.map((m, index) => (
-                            <Cell key={index} fill={m.color} />
-                          ))
-                      }
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-
           {/* Scheduled Reports Section */}
           <div className="scheduled-reports-section">
             <div className="scheduled-reports-header">

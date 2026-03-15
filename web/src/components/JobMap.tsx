@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
-import maplibregl, { Map, GeoJSONSource } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import { Job } from '../data/mockJobs';
 import './JobMap.css';
+
+type MapLibreMap = import('maplibre-gl').Map;
+type MapLibreGeoJSONSource = import('maplibre-gl').GeoJSONSource;
 
 interface JobMapProps {
   jobs: Job[];
@@ -31,136 +32,154 @@ function buildGeoJson(jobs: Job[]): GeoJSON.FeatureCollection {
 }
 
 export function JobMap({ jobs, center = [-122.4194, 37.7749] }: JobMapProps) {
-  const mapRef = useRef<Map | null>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: 'https://demotiles.maplibre.org/style.json',
-      center,
-      zoom: 11,
-      attributionControl: false,
+    let disposed = false;
+    let activeMap: MapLibreMap | null = null;
+
+    const initializeMap = async () => {
+      const maplibreModule = await import('maplibre-gl');
+      if (disposed || !containerRef.current) {
+        return;
+      }
+
+      const maplibregl = maplibreModule.default;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current,
+        style: 'https://demotiles.maplibre.org/style.json',
+        center,
+        zoom: 11,
+        attributionControl: false,
+      });
+
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      map.on('load', () => {
+        // Add data source
+        map.addSource('jobs', {
+          type: 'geojson',
+          data: buildGeoJson(jobs),
+          cluster: true,
+          clusterRadius: 50,
+          clusterMaxZoom: 14,
+        });
+
+        // Clusters Layer
+        map.addLayer({
+          id: 'clusters',
+          type: 'circle',
+          source: 'jobs',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': [
+              'step',
+              ['get', 'point_count'],
+              '#51bbd6',
+              20,
+              '#f1f075',
+              50,
+              '#f28cb1'
+            ],
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20,
+              20,
+              30,
+              50,
+              40
+            ]
+          }
+        });
+
+        // Cluster Count Text
+        map.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'jobs',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          }
+        });
+
+        // Unclustered Points (Single Jobs)
+        map.addLayer({
+          id: 'unclustered-point',
+          type: 'circle',
+          source: 'jobs',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+            'circle-color': '#10b981',
+            'circle-radius': 8,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#fff'
+          }
+        });
+
+        // Handle click on cluster to zoom in
+        map.on('click', 'clusters', async (e) => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+          const clusterId = features[0].properties['cluster_id'];
+          
+          try {
+            const zoom = await (map.getSource('jobs') as MapLibreGeoJSONSource).getClusterExpansionZoom(clusterId);
+            map.easeTo({
+              center: (features[0].geometry as any).coordinates,
+              zoom: zoom
+            });
+          } catch (err) {
+            console.error('Error getting cluster zoom:', err);
+          }
+        });
+
+        // Handle click on individual job marker
+        map.on('click', 'unclustered-point', (e) => {
+          const coordinates = (e.features![0].geometry as any).coordinates.slice();
+          const { title, company, pay } = e.features![0].properties;
+
+          // Ensure popup appears over the copy being pointed to
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+
+          new maplibregl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(
+              `<div class="map-popup-content">
+                <div class="map-popup-title">${title}</div>
+                <div class="map-popup-company">${company}</div>
+                <div class="map-popup-wage">${pay}</div>
+              </div>`
+            )
+            .addTo(map);
+        });
+
+        // Change cursor on hover
+        map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
+        map.on('mouseenter', 'unclustered-point', () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'unclustered-point', () => { map.getCanvas().style.cursor = ''; });
+      });
+
+      mapRef.current = map;
+      activeMap = map;
+    };
+
+    initializeMap().catch((err) => {
+      console.error('Failed to initialize job map:', err);
     });
-
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
-
-    map.on('load', () => {
-      // Add data source
-      map.addSource('jobs', {
-        type: 'geojson',
-        data: buildGeoJson(jobs),
-        cluster: true,
-        clusterRadius: 50,
-        clusterMaxZoom: 14,
-      });
-
-      // Clusters Layer
-      map.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'jobs',
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#51bbd6',
-            20,
-            '#f1f075',
-            50,
-            '#f28cb1'
-          ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20,
-            20,
-            30,
-            50,
-            40
-          ]
-        }
-      });
-
-      // Cluster Count Text
-      map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'jobs',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
-        }
-      });
-
-      // Unclustered Points (Single Jobs)
-      map.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        source: 'jobs',
-        filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-color': '#10b981',
-          'circle-radius': 8,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#fff'
-        }
-      });
-
-      // Handle click on cluster to zoom in
-      map.on('click', 'clusters', async (e) => {
-        const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-        const clusterId = features[0].properties['cluster_id'];
-        
-        try {
-          const zoom = await (map.getSource('jobs') as GeoJSONSource).getClusterExpansionZoom(clusterId);
-          map.easeTo({
-            center: (features[0].geometry as any).coordinates,
-            zoom: zoom
-          });
-        } catch (err) {
-          console.error('Error getting cluster zoom:', err);
-        }
-      });
-
-      // Handle click on individual job marker
-      map.on('click', 'unclustered-point', (e) => {
-        const coordinates = (e.features![0].geometry as any).coordinates.slice();
-        const { title, company, pay } = e.features![0].properties;
-
-        // Ensure popup appears over the copy being pointed to
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        new maplibregl.Popup()
-          .setLngLat(coordinates)
-          .setHTML(
-            `<div class="map-popup-content">
-              <div class="map-popup-title">${title}</div>
-              <div class="map-popup-company">${company}</div>
-              <div class="map-popup-wage">${pay}</div>
-            </div>`
-          )
-          .addTo(map);
-      });
-
-      // Change cursor on hover
-      map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
-      map.on('mouseenter', 'unclustered-point', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'unclustered-point', () => { map.getCanvas().style.cursor = ''; });
-    });
-
-    mapRef.current = map;
 
     return () => {
-      map.remove();
+      disposed = true;
+      activeMap?.remove();
       mapRef.current = null;
     };
   }, []); // Initialize strictly once
@@ -172,13 +191,13 @@ export function JobMap({ jobs, center = [-122.4194, 37.7749] }: JobMapProps) {
     
     // Check if style is loaded before updating source
     if (map.isStyleLoaded()) {
-      const source = map.getSource('jobs') as GeoJSONSource;
+      const source = map.getSource('jobs') as MapLibreGeoJSONSource;
       if (source) {
         source.setData(buildGeoJson(jobs));
       }
     } else {
       map.once('load', () => {
-        const source = map.getSource('jobs') as GeoJSONSource;
+        const source = map.getSource('jobs') as MapLibreGeoJSONSource;
         if (source) {
           source.setData(buildGeoJson(jobs));
         }

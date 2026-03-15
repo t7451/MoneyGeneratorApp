@@ -9,6 +9,7 @@
 ## 📋 Pre-Deployment Checklist
 
 ### Local Verification
+- [ ] `npm run build:budget` succeeds without errors
 - [ ] `npm run build` succeeds without errors
 - [ ] `npm run preview` works at http://localhost:3000
 - [ ] API endpoints respond correctly
@@ -50,7 +51,7 @@
 ```
 Basic settings:
 - Base directory: web
-- Build command: npm ci --include=dev && npm run build
+- Build command: npm ci --include=dev && npm run build:budget && npm run build
 - Publish directory: dist
 - Node version: 20
 ```
@@ -84,6 +85,7 @@ git push origin main
 
 ### Build Success
 - [ ] Netlify build succeeds (check Deploys tab)
+- [ ] Bundle budget gate passes before deploy build
 - [ ] No build warnings
 - [ ] Build time is reasonable (~45 seconds)
 - [ ] All dependencies installed correctly

@@ -1,3 +1,177 @@
+.maplibregl-map {
+  font: 12px/20px Helvetica Neue, Arial, Helvetica, sans-serif;
+  overflow: hidden;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.maplibregl-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive,
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass {
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive:active,
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass:active {
+  cursor: grabbing;
+}
+
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.maplibregl-ctrl-top-left {
+  top: 0;
+  left: 0;
+}
+
+.maplibregl-ctrl-top-right {
+  top: 0;
+  right: 0;
+}
+
+.maplibregl-ctrl {
+  clear: both;
+  pointer-events: auto;
+  transform: translate(0);
+}
+
+.maplibregl-ctrl-top-right .maplibregl-ctrl {
+  float: right;
+  margin: 10px 10px 0 0;
+}
+
+.maplibregl-ctrl-group {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 10%);
+}
+
+.maplibregl-ctrl-group button {
+  display: block;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid #ddd;
+}
+
+.maplibregl-ctrl button .maplibregl-ctrl-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-position: 50%;
+  background-repeat: no-repeat;
+}
+
+.maplibregl-ctrl button:not(:disabled):hover {
+  background-color: rgb(0 0 0 / 5%);
+}
+
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%23333' viewBox='0 0 29 29'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13z'/%3E%3C/svg%3E");
+}
+
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%23333' viewBox='0 0 29 29'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5'/%3E%3C/svg%3E");
+}
+
+.maplibregl-ctrl button.maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%23333' viewBox='0 0 29 29'%3E%3Cpath d='m10.5 14 4-8 4 8z'/%3E%3Cpath fill='%23ccc' d='m10.5 16 4 8 4-8z'/%3E%3C/svg%3E");
+}
+
+.maplibregl-popup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.maplibregl-popup-anchor-top,
+.maplibregl-popup-anchor-top-left,
+.maplibregl-popup-anchor-top-right {
+  flex-direction: column;
+}
+
+.maplibregl-popup-anchor-bottom,
+.maplibregl-popup-anchor-bottom-left,
+.maplibregl-popup-anchor-bottom-right {
+  flex-direction: column-reverse;
+}
+
+.maplibregl-popup-anchor-left {
+  flex-direction: row;
+}
+
+.maplibregl-popup-anchor-right {
+  flex-direction: row-reverse;
+}
+
+.maplibregl-popup-tip {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  z-index: 1;
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  align-self: center;
+  border-top: none;
+  border-bottom-color: #fff;
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  align-self: center;
+  border-bottom: none;
+  border-top-color: #fff;
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  align-self: center;
+  border-left: none;
+  border-right-color: #fff;
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  align-self: center;
+  border-right: none;
+  border-left-color: #fff;
+}
+
+.maplibregl-popup-close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0 3px 0 0;
+  cursor: pointer;
+}
+
+.maplibregl-popup-close-button:hover {
+  background-color: rgb(0 0 0 / 5%);
+}
+
 .job-map-container {
   width: 100%;
   height: 600px;
@@ -8,6 +182,9 @@
 }
 
 .maplibregl-popup-content {
+  position: relative;
+  pointer-events: auto;
+  background: #fff;
   border-radius: var(--radius-md);
   padding: var(--space-3);
   box-shadow: var(--shadow-lg);

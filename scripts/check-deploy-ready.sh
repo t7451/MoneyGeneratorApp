@@ -47,6 +47,7 @@ echo ""
 echo "── BUILD CHECK ──"
 check "Node >=18"     'node -e "process.exit(parseInt(process.version.slice(1)) >= 18 ? 0 : 1)"'
 check "server deps"   'cd server && npm ci --production --silent 2>/dev/null || npm install --production --silent'
+check "bundle budget gate" 'cd web && npm run build:budget 2>/dev/null'
 check "web build"     'cd web && npm run build 2>/dev/null'
 
 echo ""

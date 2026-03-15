@@ -33,8 +33,10 @@ const bundleRules: BundleRule[] = [
       fileName.endsWith('.js') &&
       !fileName.includes('vendor-react') &&
       !fileName.includes('vendor-icons') &&
-      !fileName.includes('vendor-charts') &&
-      !fileName.includes('JobMap-'),
+      !fileName.includes('ReportsCharts-') &&
+      !fileName.includes('ReportsChartBuilder-') &&
+      !fileName.includes('JobMap-') &&
+      !fileName.includes('maplibre-gl-'),
   },
   {
     name: 'vendor-react',
@@ -47,14 +49,20 @@ const bundleRules: BundleRule[] = [
     matches: (fileName) => fileName.includes('vendor-icons') && fileName.endsWith('.js'),
   },
   {
-    name: 'vendor-charts',
+    name: 'reports-charts-js',
     maxSize: kilobytes(450),
-    matches: (fileName) => fileName.includes('vendor-charts') && fileName.endsWith('.js'),
+    matches: (fileName) =>
+      (fileName.includes('ReportsCharts-') || fileName.includes('ReportsChartBuilder-')) && fileName.endsWith('.js'),
   },
   {
     name: 'job-map-js',
     maxSize: kilobytes(850),
     matches: (fileName) => fileName.includes('JobMap-') && fileName.endsWith('.js'),
+  },
+  {
+    name: 'maplibre-js',
+    maxSize: kilobytes(850),
+    matches: (fileName) => fileName.includes('maplibre-gl-') && fileName.endsWith('.js'),
   },
   {
     name: 'entry-css',
@@ -262,7 +270,6 @@ export default defineConfig(({ mode }) => {
           // Vendor chunk
           manualChunks: {
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-charts': ['recharts'],
             'vendor-icons': ['lucide-react'],
             // 'vendor-utils': ['axios', 'zod'], // Removed as they are not used in web
           },
