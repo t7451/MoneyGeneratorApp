@@ -32,6 +32,24 @@ export function requestLogger(req, _res, next) {
   req.correlationId = correlationId;
   req.requestTimestamp = Date.now();
   req.log = createLogger(correlationId);
+  _res.setHeader('x-correlation-id', correlationId);
+
+  req.log.info('request_started', {
+    method: req.method,
+    path: req.originalUrl || req.url,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+  });
+
+  _res.on('finish', () => {
+    req.log.info('request_completed', {
+      method: req.method,
+      path: req.originalUrl || req.url,
+      statusCode: _res.statusCode,
+      durationMs: Date.now() - req.requestTimestamp,
+      userId: req.user?.id,
+    });
+  });
   next();
 }
 

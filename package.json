@@ -10,6 +10,7 @@
     "lint": "cd web && npm run lint",
     "provision": "node scripts/provision.mjs --fix",
     "provision:check": "node scripts/provision.mjs",
+    "smoke:prod": "node scripts/smoke-check.mjs",
     "test": "npm run test:server",
     "test:server": "npm test --prefix server",
     "deploy": "scripts/deploy.sh production",

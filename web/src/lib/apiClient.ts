@@ -4,6 +4,8 @@ type ApiFetchOptions = Omit<RequestInit, 'body'> & {
 
 export type ApiError = Error & { status?: number; details?: unknown };
 
+const AUTH_EXPIRED_EVENT = 'moneygen:auth-expired';
+
 function getApiBaseUrl(): string {
   const raw = import.meta.env.VITE_API_URL;
   if (!raw) return '';
@@ -20,10 +22,35 @@ export function getAuthToken(): string | null {
 
 export function getUserId(): string {
   try {
-    return localStorage.getItem('userId') || 'demo-user';
+    const explicitUserId = localStorage.getItem('userId');
+    if (explicitUserId) return explicitUserId;
+
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser) as { id?: string };
+      return parsed.id || '';
+    }
+
+    return '';
   } catch {
-    return 'demo-user';
+    return '';
   }
+}
+
+function notifyAuthExpired(reason = 'expired'): void {
+  try {
+    sessionStorage.setItem('auth_redirect_reason', reason);
+    window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT, { detail: { reason } }));
+  } catch {
+    // ignore storage/event failures
+  }
+}
+
+function shouldTriggerAuthExpiry(status: number, details: unknown): boolean {
+  if (status !== 401) return false;
+  if (!details || typeof details !== 'object') return true;
+  const code = 'code' in details ? String((details as { code?: unknown }).code || '') : '';
+  return ['NO_TOKEN', 'INVALID_TOKEN', 'AUTH_ERROR'].includes(code) || code.length === 0;
 }
 
 export async function apiFetchJson<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
@@ -65,6 +92,9 @@ export async function apiFetchJson<T>(path: string, options: ApiFetchOptions = {
         err.details = undefined;
       }
     }
+    if (shouldTriggerAuthExpiry(res.status, err.details)) {
+      notifyAuthExpired('session_expired');
+    }
     throw err;
   }
 
@@ -100,6 +130,9 @@ export async function apiFetchText(path: string, options: ApiFetchOptions = {}):
     } catch {
       err.details = undefined;
     }
+    if (shouldTriggerAuthExpiry(res.status, err.details)) {
+      notifyAuthExpired('session_expired');
+    }
     throw err;
   }
 
@@ -134,6 +167,9 @@ export async function apiFetchBlob(path: string, options: ApiFetchOptions = {}):
       err.details = await res.text();
     } catch {
       err.details = undefined;
+    }
+    if (shouldTriggerAuthExpiry(res.status, err.details)) {
+      notifyAuthExpired('session_expired');
     }
     throw err;
   }

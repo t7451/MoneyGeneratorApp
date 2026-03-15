@@ -6,8 +6,25 @@
 import express from 'express';
 import SubscriptionService from '../../services/subscriptionService.js';
 import { logger } from '../../logger.js';
+import { AuthService } from '../../services/authService.js';
 
 const router = express.Router();
+
+async function requireOperator(req, res, next) {
+  if (req.user?.role === 'admin' || req.user?.role === 'operator') {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const user = token ? await AuthService.verifyAndGetUser(token) : null;
+  if (user && (user.role === 'admin' || user.role === 'operator')) {
+    req.user = user;
+    return next();
+  }
+
+  return res.status(403).json({ success: false, error: 'Operator access required' });
+}
 
 /**
  * GET /api/v2/subscriptions
@@ -60,7 +77,15 @@ router.get('/plans', (req, res) => {
 router.post('/upgrade', async (req, res) => {
   try {
     const userId = req.user?.id || req.headers['x-user-id'];
-    const { plan, billingCycle = 'monthly' } = req.body;
+    const {
+      plan,
+      billingCycle = 'monthly',
+      paymentMethod = 'card',
+      savedMethodId,
+      autoRetry = true,
+      rememberMethod = true,
+      card,
+    } = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -84,7 +109,13 @@ router.post('/upgrade', async (req, res) => {
       });
     }
 
-    const result = await SubscriptionService.upgradePlan(userId, plan, billingCycle);
+    const result = await SubscriptionService.upgradePlan(userId, plan, billingCycle, null, {
+      paymentMethod,
+      savedMethodId,
+      autoRetry,
+      rememberMethod,
+      card,
+    });
     res.json(result);
   } catch (error) {
     logger.error('Error in POST /upgrade:', error);
@@ -200,6 +231,140 @@ router.post('/payment-method', async (req, res) => {
 });
 
 /**
+ * GET /api/v2/subscriptions/payment-methods
+ * Get saved payment methods and default selection
+ */
+router.get('/payment-methods', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    const result = await SubscriptionService.getPaymentMethods(userId);
+    res.json(result);
+  } catch (error) {
+    logger.error('Error in GET /payment-methods:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to fetch payment methods' });
+  }
+});
+
+/**
+ * POST /api/v2/subscriptions/payment-methods
+ * Save a payment method
+ */
+router.post('/payment-methods', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+    const { type, last4, brand, expiresAt, label, providerRef, setDefault = true } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    if (!type || !label) {
+      return res.status(400).json({ success: false, error: 'type and label are required' });
+    }
+
+    const result = await SubscriptionService.savePaymentMethod(userId, {
+      type,
+      last4,
+      brand,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      label,
+      providerRef,
+      setDefault,
+    });
+    res.status(201).json(result);
+  } catch (error) {
+    logger.error('Error in POST /payment-methods:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to save payment method' });
+  }
+});
+
+/**
+ * DELETE /api/v2/subscriptions/payment-methods/:methodId
+ */
+router.delete('/payment-methods/:methodId', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    const result = await SubscriptionService.deletePaymentMethod(userId, req.params.methodId);
+    res.json(result);
+  } catch (error) {
+    logger.error('Error in DELETE /payment-methods/:methodId:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to delete payment method' });
+  }
+});
+
+/**
+ * POST /api/v2/subscriptions/payment-methods/:methodId/default
+ */
+router.post('/payment-methods/:methodId/default', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    const result = await SubscriptionService.setDefaultPaymentMethod(userId, req.params.methodId);
+    res.json(result);
+  } catch (error) {
+    logger.error('Error in POST /payment-methods/:methodId/default:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to set default payment method' });
+  }
+});
+
+/**
+ * GET /api/v2/subscriptions/billing-preferences
+ */
+router.get('/billing-preferences', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    const result = await SubscriptionService.getBillingPreferences(userId);
+    res.json(result);
+  } catch (error) {
+    logger.error('Error in GET /billing-preferences:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to fetch billing preferences' });
+  }
+});
+
+/**
+ * PUT /api/v2/subscriptions/billing-preferences
+ */
+router.put('/billing-preferences', async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers['x-user-id'];
+    const { autoRetry, preferredMethod, retryDelayHours } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'User authentication required' });
+    }
+
+    const result = await SubscriptionService.updateBillingPreferences(userId, {
+      autoRetry,
+      preferredMethod,
+      retryDelayHours,
+    });
+    res.json(result);
+  } catch (error) {
+    logger.error('Error in PUT /billing-preferences:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to update billing preferences' });
+  }
+});
+
+/**
  * GET /api/v2/subscriptions/billing-portal
  * Get Stripe billing portal URL
  */
@@ -269,13 +434,8 @@ router.get('/has-feature', async (req, res) => {
  * GET /api/v2/subscriptions/stats
  * Get subscription statistics (admin only)
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats', requireOperator, async (req, res) => {
   try {
-    // TODO: Add admin authorization check
-    // if (!req.user?.isAdmin) {
-    //   return res.status(403).json({ success: false, error: 'Admin access required' });
-    // }
-
     const result = await SubscriptionService.getSubscriptionStats();
     res.json(result);
   } catch (error) {

@@ -9,6 +9,13 @@ export const Models = {
   plaidTransactions: new Map(),
   webhookEvents: new Map(),
   outboundWebhookQueue: [],
+  savedJobs: new Map(),
+  jobAlerts: new Map(),
+  incidents: [],
+  operatorAnnotations: [],
+  replayOutcomes: [],
+  backgroundJobs: new Map(),
+  assetObjects: new Map(),
   metricsEvents: new Map(),
   userMetricsDaily: new Map(),
   settings: {

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Checkout.css';
+import { apiFetchJson } from '../lib/apiClient';
 
 type BillingCycle = 'monthly' | 'annual';
 type PaymentMethod = 'card' | 'paypal' | 'crypto' | 'saved';
@@ -15,6 +16,15 @@ type PaymentDetails = {
     expiry: string;
     cvc: string;
   };
+};
+
+type SavedMethod = {
+  id: string;
+  label: string;
+  type: string;
+  expiry?: string;
+  brand?: string;
+  last4?: string;
 };
 
 interface Plan {
@@ -96,7 +106,7 @@ const ADDONS: Addon[] = [
   },
 ];
 
-const SAVED_METHODS = [
+const DEMO_SAVED_METHODS: SavedMethod[] = [
   { id: 'pm_card_4242', label: 'Visa •••• 4242', type: 'card', expiry: '11/28' },
   { id: 'pm_apple_pay', label: 'Apple Pay (Keith)', type: 'wallet' },
 ];
@@ -113,15 +123,78 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [step, setStep] = useState<'plan' | 'addons' | 'confirm'>('plan');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
-  const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>(SAVED_METHODS[0]?.id || '');
+  const [savedMethods, setSavedMethods] = useState<SavedMethod[]>(DEMO_SAVED_METHODS);
+  const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>(DEMO_SAVED_METHODS[0]?.id || '');
   const [autoRetry, setAutoRetry] = useState(true);
   const [rememberMethod, setRememberMethod] = useState(true);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
 
   const annualSavings = Math.round(((14.99 * 12 - 119.88) / (14.99 * 12)) * 100);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPaymentSetup = async () => {
+      setLoadingPaymentMethods(true);
+      try {
+        const [methodsResponse, preferencesResponse] = await Promise.all([
+          apiFetchJson<{
+            methods?: Array<{ id: string; label: string; type: string; expiresAt?: string | null; brand?: string; last4?: string }>;
+            defaultMethodId?: string | null;
+          }>('/api/v2/subscriptions/payment-methods'),
+          apiFetchJson<{ billingPreferences?: { autoRetry?: boolean; preferredMethod?: string } }>('/api/v2/subscriptions/billing-preferences'),
+        ]);
+
+        if (cancelled) return;
+
+        const apiMethods = (methodsResponse.methods || []).map((method) => ({
+          id: method.id,
+          label: method.label,
+          type: method.type,
+          expiry: method.expiresAt ? new Date(method.expiresAt).toLocaleDateString(undefined, { month: '2-digit', year: '2-digit' }).replace('/', '/') : undefined,
+          brand: method.brand,
+          last4: method.last4,
+        }));
+
+        if (apiMethods.length > 0) {
+          setSavedMethods(apiMethods);
+          setSelectedSavedMethod(methodsResponse.defaultMethodId || apiMethods[0].id);
+        }
+
+        if (preferencesResponse.billingPreferences?.autoRetry !== undefined) {
+          setAutoRetry(Boolean(preferencesResponse.billingPreferences.autoRetry));
+        }
+
+        if (preferencesResponse.billingPreferences?.preferredMethod) {
+          const preferredMethod = preferencesResponse.billingPreferences.preferredMethod as PaymentMethod;
+          if (preferredMethod === 'saved' && apiMethods.length === 0) {
+            setPaymentMethod('card');
+          } else {
+            setPaymentMethod(preferredMethod);
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setSavedMethods(DEMO_SAVED_METHODS);
+          setSelectedSavedMethod(DEMO_SAVED_METHODS[0]?.id || '');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingPaymentMethods(false);
+        }
+      }
+    };
+
+    loadPaymentSetup();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const getPrice = (plan: Plan) => {
     return billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice / 12;
@@ -360,7 +433,7 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
 
                 {paymentMethod === 'saved' && (
                   <div className="saved-methods">
-                    {SAVED_METHODS.map((method) => (
+                    {savedMethods.map((method) => (
                       <label key={method.id} className={`saved-method ${selectedSavedMethod === method.id ? 'selected' : ''}`}>
                         <input
                           type="radio"
@@ -374,8 +447,11 @@ export function Checkout({ currentPlan, onSelectPlan, onClose }: CheckoutProps) 
                         </div>
                       </label>
                     ))}
-                    {SAVED_METHODS.length === 0 && (
+                    {!loadingPaymentMethods && savedMethods.length === 0 && (
                       <div className="empty-saved">No saved methods yet</div>
+                    )}
+                    {loadingPaymentMethods && (
+                      <div className="empty-saved">Loading saved methods...</div>
                     )}
                   </div>
                 )}

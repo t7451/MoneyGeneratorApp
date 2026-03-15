@@ -33,6 +33,11 @@ const ConfigSchema = z.object({
   STRIPE_PRICE_PRO_ANNUAL: z.string().default('price_pro_annual'),
   STRIPE_PRICE_ENTERPRISE_MONTHLY: z.string().default('price_enterprise_monthly'),
   STRIPE_PRICE_ENTERPRISE_ANNUAL: z.string().default('price_enterprise_annual'),
+  OBJECT_STORAGE_PROVIDER: z.enum(['local', 's3', 'r2', 'gcs']).default('local'),
+  OBJECT_STORAGE_BUCKET: z.string().default('moneygenerator-assets'),
+  OBJECT_STORAGE_PUBLIC_BASE_URL: z.string().optional(),
+  OBJECT_STORAGE_SIGNING_SECRET: z.string().default('local-object-storage-signing-secret'),
+  ASSET_TEMP_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
 });
 
 const parsed = ConfigSchema.safeParse(process.env);
@@ -90,5 +95,12 @@ export const config = {
       enterpriseMonthly: parsed.data.STRIPE_PRICE_ENTERPRISE_MONTHLY,
       enterpriseAnnual: parsed.data.STRIPE_PRICE_ENTERPRISE_ANNUAL,
     },
+  },
+  objectStorage: {
+    provider: parsed.data.OBJECT_STORAGE_PROVIDER,
+    bucket: parsed.data.OBJECT_STORAGE_BUCKET,
+    publicBaseUrl: parsed.data.OBJECT_STORAGE_PUBLIC_BASE_URL,
+    signingSecret: parsed.data.OBJECT_STORAGE_SIGNING_SECRET,
+    tempRetentionHours: parsed.data.ASSET_TEMP_RETENTION_HOURS,
   },
 };

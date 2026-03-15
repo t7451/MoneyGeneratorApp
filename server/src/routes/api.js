@@ -17,8 +17,25 @@ import { CreditsService } from '../services/credits.js';
 import { validate } from '../validation.js';
 import { cacheMiddleware } from '../cache.js';
 import { MetricsService } from '../metrics.js';
+import { AuthService } from '../services/authService.js';
 
 const router = express.Router();
+
+async function requireOperator(req, res, next) {
+  if (req.user?.role === 'admin' || req.user?.role === 'operator' || req.user?.role === 'support') {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const user = token ? await AuthService.verifyAndGetUser(token) : null;
+  if (user && ['admin', 'operator', 'support'].includes(user.role)) {
+    req.user = user;
+    return next();
+  }
+
+  return res.status(403).json({ error: 'Operator access required' });
+}
 
 // Validation schemas
 const schemas = {
@@ -615,14 +632,14 @@ router.get('/fraud/profile', (req, res) => {
 });
 
 // Get fraud alerts (admin)
-router.get('/fraud/alerts', (req, res) => {
+router.get('/fraud/alerts', requireOperator, (req, res) => {
   const { status, severity, userId, limit } = req.query;
   const alerts = FraudDetectionService.getAlerts({ status, severity, userId, limit: parseInt(limit) || 50 });
   res.json(alerts);
 });
 
 // Resolve fraud alert
-router.post('/fraud/alerts/:alertId/resolve', (req, res) => {
+router.post('/fraud/alerts/:alertId/resolve', requireOperator, (req, res) => {
   const { alertId } = req.params;
   const { resolvedBy, resolution } = req.body;
   try {
@@ -634,13 +651,13 @@ router.post('/fraud/alerts/:alertId/resolve', (req, res) => {
 });
 
 // Block entity
-router.post('/fraud/block', (req, res) => {
+router.post('/fraud/block', requireOperator, (req, res) => {
   const block = FraudDetectionService.blockEntity(req.body);
   res.json(block);
 });
 
 // Unblock entity
-router.post('/fraud/unblock', (req, res) => {
+router.post('/fraud/unblock', requireOperator, (req, res) => {
   try {
     const result = FraudDetectionService.unblockEntity(req.body);
     res.json(result);
@@ -975,14 +992,14 @@ router.get('/compliance/summary', (req, res) => {
 });
 
 // Admin: Get pending KYC reviews
-router.get('/compliance/kyc/pending', (req, res) => {
+router.get('/compliance/kyc/pending', requireOperator, (req, res) => {
   const { limit } = req.query;
   const pending = ComplianceService.getPendingReviews({ limit: parseInt(limit) || 50 });
   res.json(pending);
 });
 
 // Admin: Review KYC
-router.post('/compliance/kyc/review', (req, res) => {
+router.post('/compliance/kyc/review', requireOperator, (req, res) => {
   const { sessionId, decision, reviewerId, notes } = req.body;
   try {
     const result = ComplianceService.reviewKyc({ sessionId, decision, reviewerId, notes });
@@ -1124,7 +1141,7 @@ router.put('/marketplace/whitelabel/:partnerId', (req, res) => {
 });
 
 // Admin: Approve developer
-router.post('/marketplace/developers/:developerId/approve', (req, res) => {
+router.post('/marketplace/developers/:developerId/approve', requireOperator, (req, res) => {
   const { developerId } = req.params;
   const { reviewerId } = req.body;
   try {
@@ -1136,7 +1153,7 @@ router.post('/marketplace/developers/:developerId/approve', (req, res) => {
 });
 
 // Admin: Publish plugin
-router.post('/marketplace/plugins/:pluginId/publish', (req, res) => {
+router.post('/marketplace/plugins/:pluginId/publish', requireOperator, (req, res) => {
   const { pluginId } = req.params;
   const { reviewerId } = req.body;
   try {

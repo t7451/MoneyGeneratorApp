@@ -7,8 +7,34 @@ import { Router } from 'express';
 import { config } from '../config.js';
 import { StripeService, verifyWebhookSignature } from '../services/stripeService.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { Models } from '../models.js';
+import OpsService from '../services/opsService.js';
 
 const router = Router();
+
+function recordStripeWebhookEvent(event, correlationId) {
+  const existing = Models.webhookEvents.get(event.id);
+  if (existing) {
+    return { duplicate: true, event: existing };
+  }
+
+  const record = {
+    id: event.id,
+    provider: 'stripe',
+    type: event.type,
+    correlationId,
+    payload: {
+      id: event.id,
+      type: event.type,
+      created: event.created,
+      livemode: event.livemode,
+    },
+    status: 'received',
+    createdAt: new Date().toISOString(),
+  };
+  Models.webhookEvents.set(event.id, record);
+  return { duplicate: false, event: record };
+}
 
 /**
  * Get current subscription status
@@ -216,6 +242,7 @@ router.post('/billing-portal', authenticateToken, async (req, res) => {
  */
 router.post('/webhook', async (req, res) => {
   const signature = req.headers['stripe-signature'];
+  const correlationId = req.headers['x-correlation-id'] || `stripe_${Date.now()}`;
 
   if (!signature) {
     return res.status(400).json({ error: 'Missing stripe-signature header' });
@@ -227,14 +254,48 @@ router.post('/webhook', async (req, res) => {
     event = verifyWebhookSignature(req.body, signature);
   } catch (error) {
     console.error('Webhook signature verification failed:', error.message);
+    OpsService.createIncident({
+      source: 'stripe.webhook',
+      severity: 'warning',
+      title: 'Stripe webhook signature verification failed',
+      details: { error: error.message, correlationId },
+    });
     return res.status(400).json({ error: `Webhook Error: ${error.message}` });
+  }
+
+  const recorded = recordStripeWebhookEvent(event, correlationId);
+  if (recorded.duplicate) {
+    OpsService.recordReplayOutcome({
+      targetId: event.id,
+      outcome: 'duplicate_ignored',
+      operator: 'system',
+      details: { type: event.type, correlationId },
+    });
+    return res.json({ received: true, duplicate: true });
   }
 
   try {
     await StripeService.handleWebhookEvent(event);
+    const stored = Models.webhookEvents.get(event.id);
+    if (stored) {
+      stored.status = 'processed';
+      stored.processedAt = new Date().toISOString();
+    }
     res.json({ received: true });
   } catch (error) {
     console.error('Error handling webhook event:', error);
+    const stored = Models.webhookEvents.get(event.id);
+    if (stored) {
+      stored.status = 'failed';
+      stored.failureReason = error.message;
+      stored.failedAt = new Date().toISOString();
+    }
+    OpsService.createIncident({
+      source: 'stripe.webhook',
+      severity: 'critical',
+      title: `Stripe webhook processing failed: ${event.type}`,
+      details: { eventId: event.id, correlationId, error: error.message },
+    });
     // Return 200 to acknowledge receipt (Stripe will retry otherwise)
     res.json({ received: true, error: error.message });
   }

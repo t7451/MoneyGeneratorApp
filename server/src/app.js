@@ -43,7 +43,7 @@ app.use(cors({
   origin: config.corsOrigin || '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-paypal-signature', 'x-paypal-transmission-time', 'x-plaid-signature', 'x-plaid-timestamp'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id', 'x-paypal-signature', 'x-paypal-transmission-time', 'x-plaid-signature', 'x-plaid-timestamp'],
 }));
 
 const publicLimiter = rateLimit({
@@ -64,6 +64,19 @@ const plaidWebhookLimiter = rateLimit(webhookLimiterConfig);
 
 app.use(bodyParser.json({ verify: rawBodySaver }));
 app.use(requestLogger);
+
+app.use(async (req, _res, next) => {
+  try {
+    const user = await authenticate(req);
+    if (user) {
+      req.user = user;
+    }
+  } catch {
+    // Optional auth hydration should never block the request pipeline.
+  }
+  next();
+});
+
 app.use(['/webhooks', '/integrations/plaid'], publicLimiter);
 
 async function requireUser(req, res, next) {

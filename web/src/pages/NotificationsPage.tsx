@@ -3,6 +3,7 @@ import { Bell, Check, CheckCheck, Trash2, RefreshCw, Loader2, Settings, AlertCir
 import { Card, CardBody } from '../components/Card';
 import { Button } from '../components/Button';
 import { useToast } from '../components/Toast';
+import { ErrorState } from '../components/ErrorState';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './NotificationsPage.css';
 
@@ -36,19 +37,6 @@ const NOTIFICATION_ICONS: Record<string, React.ReactNode> = {
   system: <Info size={20} />,
 };
 
-const NOTIFICATION_COLORS: Record<string, string> = {
-  surge_alert: 'var(--color-warning)',
-  earnings_update: 'var(--color-success)',
-  shift_reminder: 'var(--color-info)',
-  cash_advance_eligible: 'var(--color-emerald-500)',
-  payment_received: 'var(--color-success)',
-  tax_reminder: 'var(--color-warning)',
-  new_job_match: 'var(--color-info)',
-  goal_progress: 'var(--color-purple-500)',
-  promotion: 'var(--color-pink-500)',
-  system: 'var(--color-neutral-500)',
-};
-
 const NotificationsPage: React.FC = () => {
   const { showToast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -56,12 +44,19 @@ const NotificationsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const fetchNotifications = useCallback(async (showLoading = true) => {
     if (showLoading) setIsRefreshing(true);
     
     try {
       const userId = getUserId();
+      if (!userId) {
+        setNotifications([]);
+        setUnreadCount(0);
+        setLoadError('Sign in to view notifications.');
+        return;
+      }
       const unreadOnly = filter === 'unread';
       const data = await apiFetchJson<NotificationsResponse>(
         `/api/v1/notifications?userId=${encodeURIComponent(userId)}&unreadOnly=${unreadOnly}&limit=50`
@@ -69,57 +64,12 @@ const NotificationsPage: React.FC = () => {
       
       setNotifications(data?.notifications || []);
       setUnreadCount(data?.unreadCount || 0);
+      setLoadError(null);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
-      // Use mock data for demo
-      setNotifications([
-        {
-          id: 'n1',
-          type: 'surge_alert',
-          title: 'Surge Alert!',
-          body: 'DoorDash is offering 1.5x pay in your area for the next 2 hours.',
-          read: false,
-          createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          priority: 'high',
-        },
-        {
-          id: 'n2',
-          type: 'payment_received',
-          title: 'Payment Received',
-          body: 'You received $127.50 from Uber Eats. Funds are now available.',
-          read: false,
-          createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          priority: 'normal',
-        },
-        {
-          id: 'n3',
-          type: 'tax_reminder',
-          title: 'Q1 Tax Reminder',
-          body: 'Estimated quarterly taxes are due in 7 days. You\'ve set aside $1,245.',
-          read: false,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          priority: 'high',
-        },
-        {
-          id: 'n4',
-          type: 'new_job_match',
-          title: 'New Job Match',
-          body: 'We found 3 new gig opportunities matching your preferences.',
-          read: true,
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          priority: 'normal',
-        },
-        {
-          id: 'n5',
-          type: 'goal_progress',
-          title: 'Weekly Goal Progress',
-          body: 'You\'re 78% towards your $500 weekly earnings goal. Keep going!',
-          read: true,
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          priority: 'low',
-        },
-      ]);
-      setUnreadCount(3);
+      setNotifications([]);
+      setUnreadCount(0);
+      setLoadError('Live notifications could not be loaded.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -170,8 +120,8 @@ const NotificationsPage: React.FC = () => {
 
   const handleDismiss = async (notificationId: string) => {
     try {
-      await apiFetchJson(`/api/v1/notifications/${notificationId}`, {
-        method: 'DELETE',
+      await apiFetchJson(`/api/v1/notifications/${notificationId}/dismiss`, {
+        method: 'POST',
       });
     } catch {
       // Continue with local removal
@@ -213,6 +163,20 @@ const NotificationsPage: React.FC = () => {
       <div className="notifications-page loading">
         <Loader2 className="loading-spinner" size={48} />
         <p>Loading notifications...</p>
+      </div>
+    );
+  }
+
+  if (loadError && notifications.length === 0) {
+    return (
+      <div className="notifications-page">
+        <ErrorState
+          type="server"
+          title="Notifications unavailable"
+          message={loadError}
+          onRetry={() => fetchNotifications(true)}
+          isRetrying={isRefreshing}
+        />
       </div>
     );
   }
@@ -294,8 +258,7 @@ const NotificationsPage: React.FC = () => {
               <CardBody>
                 <div className="notification-content">
                   <div 
-                    className="notification-icon"
-                    style={{ backgroundColor: NOTIFICATION_COLORS[notification.type] + '20', color: NOTIFICATION_COLORS[notification.type] }}
+                    className={`notification-icon notification-icon--${notification.type}`}
                   >
                     {NOTIFICATION_ICONS[notification.type] || <Bell size={20} />}
                   </div>

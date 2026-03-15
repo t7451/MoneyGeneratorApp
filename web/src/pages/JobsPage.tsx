@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Briefcase, Search, Bell, MapPin, Star, DollarSign, TrendingUp, Wallet } from 'lucide-react';
 import { JobCard } from '../components/JobCard';
 import { JobMap } from '../components/JobMap';
-import { MOCK_JOBS, Job } from '../data/mockJobs';
+import type { Job } from '../data/mockJobs';
 import { useToast } from '../components/Toast';
+import { ErrorState } from '../components/ErrorState';
 import { GuidedTour, useTourNavigation, useOnboarding } from '../utils/onboardingSystem';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './JobsPage.css';
@@ -76,7 +77,8 @@ export const JobsPage: React.FC = () => {
   const [jobStatus, setJobStatus] = useState<Record<string, 'saved' | 'applied'>>({});
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
-  const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { showToast } = useToast();
   const { markTutorialWatched, user } = useOnboarding();
 
@@ -124,6 +126,12 @@ export const JobsPage: React.FC = () => {
 
     const load = async () => {
       try {
+        if (!userId) {
+          setJobs([]);
+          setLoadError('Sign in to view job recommendations.');
+          return;
+        }
+
         const [recommended, saved, alerts] = await Promise.all([
           apiFetchJson<{ recommendations: V2RecommendedJob[] }>(`/api/v2/jobs/recommended?userId=${encodeURIComponent(userId)}`),
           apiFetchJson<{ savedJobs: Array<{ id: string }> }>(`/api/v2/jobs/saved?userId=${encodeURIComponent(userId)}`),
@@ -131,7 +139,8 @@ export const JobsPage: React.FC = () => {
         ]);
 
         const mapped = (recommended.recommendations || []).map(mapV2JobToJob);
-        if (mapped.length > 0) setJobs(mapped);
+  setJobs(mapped);
+  setLoadError(null);
 
         const savedIds = new Set((saved.savedJobs || []).map((j) => j.id));
         setJobStatus((prev) => {
@@ -144,18 +153,8 @@ export const JobsPage: React.FC = () => {
 
         setAlertsEnabled((alerts.alerts || []).some((a) => a.isActive));
       } catch (e) {
-        // Fallback to local storage + mock jobs
-        const saved = localStorage.getItem('jobs_status');
-        const alerts = localStorage.getItem('jobs_alerts_enabled');
-        if (saved) {
-          try {
-            setJobStatus(JSON.parse(saved));
-          } catch {
-            // ignore parse errors
-          }
-        }
-        if (alerts) setAlertsEnabled(alerts === 'true');
-        setJobs(MOCK_JOBS);
+        setJobs([]);
+        setLoadError('Live job data could not be loaded.');
       }
     };
 
@@ -336,6 +335,15 @@ export const JobsPage: React.FC = () => {
           <TrendingUp size={16} /> Maximize Earnings
         </button>
       </div>
+
+      {loadError && jobs.length === 0 && (
+        <ErrorState
+          type="server"
+          title="Jobs unavailable"
+          message={loadError}
+          onRetry={() => window.location.reload()}
+        />
+      )}
 
       {showComparison && (
         <div className="comparison-tool">

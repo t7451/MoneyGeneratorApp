@@ -13,6 +13,67 @@ if (!Models.gigConnections) Models.gigConnections = new Map();
 if (!Models.gigJobs) Models.gigJobs = new Map();
 if (!Models.gigEarnings) Models.gigEarnings = new Map();
 if (!Models.gigShifts) Models.gigShifts = new Map();
+if (!Models.savedJobs) Models.savedJobs = new Map();
+if (!Models.jobAlerts) Models.jobAlerts = new Map();
+
+const SEED_JOBS = [
+  {
+    id: 'job_001',
+    title: 'Package Delivery - Downtown Route',
+    platform: 'Amazon Flex',
+    category: 'delivery',
+    pay: { amount: 85, estimate: 'per 2 hours' },
+    distance: 2.3,
+    rating: 4.8,
+    latitude: 37.779,
+    longitude: -122.419,
+    matches: [
+      { type: 'skill', label: 'Delivery experience' },
+      { type: 'schedule', label: 'Morning availability' },
+    ],
+  },
+  {
+    id: 'job_002',
+    title: 'Rideshare Driver Needed',
+    platform: 'Uber',
+    category: 'rideshare',
+    pay: { amount: '$18-$25', estimate: 'per trip' },
+    distance: 1.1,
+    rating: 4.7,
+    latitude: 37.804,
+    longitude: -122.271,
+    matches: [
+      { type: 'earning', label: 'Surge pricing expected' },
+      { type: 'schedule', label: 'Evening hours' },
+    ],
+  },
+  {
+    id: 'job_003',
+    title: 'Furniture Assembly Tasks',
+    platform: 'TaskRabbit',
+    category: 'tasks',
+    pay: { amount: '120', estimate: 'per 2 hours' },
+    distance: 5.2,
+    rating: 4.9,
+    latitude: 37.784,
+    longitude: -122.401,
+    matches: [
+      { type: 'skill', label: 'DIY skills' },
+      { type: 'earning', label: 'Premium hourly rate' },
+    ],
+  },
+];
+
+function ensureSeedJobs() {
+  if (Models.gigJobs.size > 0) return;
+  for (const job of SEED_JOBS) {
+    Models.gigJobs.set(job.id, {
+      ...job,
+      postedAt: new Date().toISOString(),
+      isActive: true,
+    });
+  }
+}
 
 export const GigPlatformService = {
   // Connect a user to a gig platform
@@ -60,6 +121,7 @@ export const GigPlatformService = {
 
   // Fetch jobs from connected platforms (aggregated feed)
   fetchAggregatedJobs: ({ userId, category, limit = 20, offset = 0 }) => {
+    ensureSeedJobs();
     // In production, this would call each connected platform's API
     const _connections = GigPlatformService.getConnectedPlatforms(userId);
     const platformCategories = {
@@ -83,6 +145,85 @@ export const GigPlatformService = {
       total: jobs.length,
       hasMore: jobs.length === limit,
     };
+  },
+
+  getRecommendedJobs: ({ userId, limit = 20 }) => {
+    const result = GigPlatformService.fetchAggregatedJobs({ userId, limit });
+    return result.jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      platform: job.platform,
+      category: job.category,
+      pay: job.pay,
+      distance: job.distance,
+      rating: job.rating,
+      matches: job.matches || [],
+    }));
+  },
+
+  saveJob: ({ userId, jobId, saved = true }) => {
+    ensureSeedJobs();
+    const key = `${userId}:${jobId}`;
+    if (!saved) {
+      Models.savedJobs.delete(key);
+      return { jobId, saved: false, savedAt: null };
+    }
+
+    const job = Models.gigJobs.get(jobId);
+    if (!job) {
+      throw new Error('job_not_found');
+    }
+
+    const record = {
+      id: key,
+      userId,
+      jobId,
+      savedAt: new Date().toISOString(),
+    };
+    Models.savedJobs.set(key, record);
+    return { jobId, saved: true, savedAt: record.savedAt };
+  },
+
+  getSavedJobs: ({ userId }) => {
+    ensureSeedJobs();
+    const savedJobs = Array.from(Models.savedJobs.values())
+      .filter((entry) => entry.userId === userId)
+      .map((entry) => {
+        const job = Models.gigJobs.get(entry.jobId);
+        return {
+          id: entry.jobId,
+          title: job?.title || 'Saved job',
+          platform: job?.platform || 'Unknown',
+          savedAt: entry.savedAt,
+        };
+      });
+
+    return {
+      savedJobs,
+      totalSaved: savedJobs.length,
+    };
+  },
+
+  upsertJobAlert: ({ userId, name, filters, channels = ['in-app'] }) => {
+    const alertId = `alert_${Date.now()}`;
+    const alert = {
+      id: alertId,
+      userId,
+      name,
+      filters,
+      channels,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      recentMatches: 0,
+    };
+    Models.jobAlerts.set(alertId, alert);
+    return alert;
+  },
+
+  getJobAlerts: ({ userId }) => {
+    return Array.from(Models.jobAlerts.values())
+      .filter((alert) => alert.userId === userId)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
   // Record earnings from a gig

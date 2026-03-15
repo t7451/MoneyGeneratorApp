@@ -88,6 +88,87 @@ async function createStripeSubscription(userId, plan, billingCycle, customerEmai
   return stripeSubscription;
 }
 
+function inferCardBrand(cardNumber = '') {
+  const sanitized = String(cardNumber).replace(/\s+/g, '');
+  if (sanitized.startsWith('4')) return 'visa';
+  if (/^5[1-5]/.test(sanitized)) return 'mastercard';
+  if (/^3[47]/.test(sanitized)) return 'amex';
+  if (/^6/.test(sanitized)) return 'discover';
+  return 'card';
+}
+
+function parseExpiry(expiry = '') {
+  const match = String(expiry).match(/^(\d{1,2})\/(\d{2,4})$/);
+  if (!match) return null;
+  const month = Number(match[1]);
+  const year = Number(match[2].length === 2 ? `20${match[2]}` : match[2]);
+  if (!month || month < 1 || month > 12 || !year) return null;
+  return new Date(year, month, 0);
+}
+
+async function syncPaymentPreferences(userId, paymentOptions = {}) {
+  const {
+    paymentMethod = 'card',
+    savedMethodId,
+    autoRetry = true,
+    rememberMethod = true,
+    card,
+  } = paymentOptions;
+
+  await Subscription.updateBillingPreferences(userId, {
+    autoRetry,
+    preferredMethod: paymentMethod,
+  });
+
+  if (paymentMethod === 'saved' && savedMethodId) {
+    await Subscription.setDefaultPaymentMethod(userId, savedMethodId);
+    return;
+  }
+
+  if (!rememberMethod) {
+    return;
+  }
+
+  if (paymentMethod === 'card' && card?.number) {
+    const last4 = String(card.number).replace(/\D+/g, '').slice(-4);
+    await Subscription.updatePaymentMethod(userId, {
+      type: 'card',
+      last4,
+      brand: inferCardBrand(card.number),
+      expiresAt: parseExpiry(card.expiry),
+      label: `${inferCardBrand(card.number).toUpperCase()} •••• ${last4}`,
+      save: true,
+      setDefault: true,
+    });
+    return;
+  }
+
+  if (paymentMethod === 'paypal') {
+    await Subscription.updatePaymentMethod(userId, {
+      type: 'paypal',
+      last4: 'PPAL',
+      brand: 'paypal',
+      label: 'PayPal',
+      providerRef: `paypal_${userId}`,
+      save: true,
+      setDefault: true,
+    });
+    return;
+  }
+
+  if (paymentMethod === 'crypto') {
+    await Subscription.updatePaymentMethod(userId, {
+      type: 'crypto',
+      last4: 'WALLET',
+      brand: 'crypto',
+      label: 'Crypto Wallet',
+      providerRef: `crypto_${userId}`,
+      save: true,
+      setDefault: true,
+    });
+  }
+}
+
 /**
  * Get Stripe price ID for a plan/cycle combination
  */
@@ -126,7 +207,7 @@ const SubscriptionService = {
   /**
    * Upgrade subscription plan
    */
-  async upgradePlan(userId, newPlan, billingCycle = 'monthly', customerEmail = null) {
+  async upgradePlan(userId, newPlan, billingCycle = 'monthly', customerEmail = null, paymentOptions = {}) {
     try {
       const validPlans = ['basic', 'pro', 'enterprise'];
       if (!validPlans.includes(newPlan)) {
@@ -157,6 +238,8 @@ const SubscriptionService = {
           // Continue with local upgrade even if Stripe fails
         }
       }
+
+      await syncPaymentPreferences(userId, paymentOptions);
 
       return {
         success: true,
@@ -445,6 +528,99 @@ const SubscriptionService = {
       throw error;
     }
   }
+  ,
+
+  async getPaymentMethods(userId) {
+    try {
+      const result = await Subscription.getPaymentMethods(userId);
+      const billingPreferences = await Subscription.updateBillingPreferences(userId, {});
+      return {
+        success: true,
+        ...result,
+        billingPreferences,
+      };
+    } catch (error) {
+      logger.error('Error getting payment methods:', error);
+      throw error;
+    }
+  },
+
+  async savePaymentMethod(userId, paymentDetails) {
+    try {
+      const subscription = await Subscription.updatePaymentMethod(userId, {
+        ...paymentDetails,
+        save: true,
+        setDefault: paymentDetails.setDefault !== false,
+      });
+      return {
+        success: true,
+        paymentMethod: subscription.paymentMethod,
+        savedPaymentMethods: subscription.savedPaymentMethods || [],
+        defaultMethodId: subscription.preferredPaymentMethodId || null,
+      };
+    } catch (error) {
+      logger.error('Error saving payment method:', error);
+      throw error;
+    }
+  },
+
+  async deletePaymentMethod(userId, methodId) {
+    try {
+      const subscription = await Subscription.removePaymentMethod(userId, methodId);
+      return {
+        success: true,
+        savedPaymentMethods: subscription.savedPaymentMethods || [],
+        defaultMethodId: subscription.preferredPaymentMethodId || null,
+      };
+    } catch (error) {
+      logger.error('Error deleting payment method:', error);
+      throw error;
+    }
+  },
+
+  async setDefaultPaymentMethod(userId, methodId) {
+    try {
+      const subscription = await Subscription.setDefaultPaymentMethod(userId, methodId);
+      return {
+        success: true,
+        paymentMethod: subscription.paymentMethod,
+        defaultMethodId: subscription.preferredPaymentMethodId || null,
+      };
+    } catch (error) {
+      logger.error('Error setting default payment method:', error);
+      throw error;
+    }
+  },
+
+  async getBillingPreferences(userId) {
+    try {
+      const subscription = await Subscription.findByUserId(userId);
+      return {
+        success: true,
+        billingPreferences: subscription.billingPreferences || {
+          autoRetry: true,
+          preferredMethod: 'card',
+          retryDelayHours: 24,
+        },
+      };
+    } catch (error) {
+      logger.error('Error getting billing preferences:', error);
+      throw error;
+    }
+  },
+
+  async updateBillingPreferences(userId, preferences) {
+    try {
+      const billingPreferences = await Subscription.updateBillingPreferences(userId, preferences);
+      return {
+        success: true,
+        billingPreferences,
+      };
+    } catch (error) {
+      logger.error('Error updating billing preferences:', error);
+      throw error;
+    }
+  }
 };
 
 /**
@@ -468,7 +644,15 @@ function formatSubscriptionResponse(subscription) {
     features: subscription.features,
     isActive: subscription.status === 'active',
     trialActive: subscription.trialActive,
-    trialEndsAt: subscription.trialEndsAt
+    trialEndsAt: subscription.trialEndsAt,
+    paymentMethod: subscription.paymentMethod || null,
+    savedPaymentMethods: subscription.savedPaymentMethods || [],
+    defaultPaymentMethodId: subscription.preferredPaymentMethodId || null,
+    billingPreferences: subscription.billingPreferences || {
+      autoRetry: true,
+      preferredMethod: 'card',
+      retryDelayHours: 24,
+    }
   };
 }
 
@@ -540,14 +724,13 @@ async function handlePaymentFailed(invoice) {
   const subscriptionId = invoice.subscription;
   // invoice.customer available if needed for notification emails
   logger.warn(`Payment failed for subscription ${subscriptionId}, invoice ${invoice.id}`);
-  
-  // The subscription status will be updated via customer.subscription.updated webhook
-  // Here we can trigger additional actions like:
-  // - Send payment failed email notification
-  // - Update UI state to show payment required banner
-  
-  // Find user by customer ID and mark for notification
-  // await NotificationService.sendPaymentFailedEmail(customerId);
+
+  const userId = invoice.metadata?.userId || invoice.customer;
+  const subscription = userId ? await Subscription.findByUserId(userId) : null;
+
+  if (subscription?.billingPreferences?.autoRetry) {
+    logger.info(`Auto-retry enabled for failed invoice ${invoice.id}`);
+  }
 }
 
 export default SubscriptionService;

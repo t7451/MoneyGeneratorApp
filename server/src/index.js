@@ -6,6 +6,7 @@ import { initDatabase, closeDatabase } from './database.js';
 
 // Register migrations
 import './migrations/index.js';
+import './migrations/011_ops_tables.js';
 
 const PORT = Number(process.env.PORT || process.env.BACKEND_PORT || 4000);
 

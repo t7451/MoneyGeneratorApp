@@ -58,11 +58,11 @@
   - Scheduled reports with email delivery
 
 ## Phase 5: Advanced Features (Planned)
-- [ ] **Item 1: Multi-Payment Method Support**
+- [~] **Item 1: Multi-Payment Method Support**
   - Stripe integration (complete)
-  - Crypto payments
-  - Saved payment methods
-  - Auto-retry failed payments
+  - Crypto payment option in checkout
+  - Saved payment methods API + checkout integration
+  - Auto-retry billing preferences
 - [ ] **Item 2: Advanced Job Board Features**
   - Smart filters
   - Job alerts

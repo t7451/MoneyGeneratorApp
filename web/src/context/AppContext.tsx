@@ -50,30 +50,6 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const DEMO_PRODUCTS: Product[] = [
-  {
-    id: 'plan_pro',
-    type: 'plan',
-    name: 'Pro Plan',
-    price: '$14.99/mo',
-    description: 'Advanced analytics, instant payouts, and smart automations to maximize your earnings.',
-  },
-  {
-    id: 'addon_shift_insights',
-    type: 'addon',
-    name: 'Shift Insights',
-    price: '$4.99/mo',
-    description: 'Deep per-shift profitability analysis and mileage rollups for gig work.',
-  },
-  {
-    id: 'onetime_boost',
-    type: 'one_time',
-    name: 'Priority Boost',
-    price: '$19.99',
-    description: 'Get priority placement for 14 days to attract more high-paying opportunities.',
-  },
-];
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
     role: null,
@@ -82,7 +58,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     earnings: 2847,
     weeklyChange: 12,
   });
-  const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [apiConnected, setApiConnected] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -181,9 +157,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         });
 
-        // Preserve any non-plan demo products for now (add-ons / one-time).
-        const nonPlans = DEMO_PRODUCTS.filter((p) => p.type !== 'plan');
-        setProducts([...plansAsProducts, ...nonPlans]);
+        const catalogData = await apiFetchJson<{ products?: Array<{ id: string; type: string; name: string; price: string; description: string }> }>('/catalog');
+        const catalogProducts = (catalogData.products || []).filter((p) => p.type !== 'plan');
+        setProducts([...plansAsProducts, ...catalogProducts]);
         setApiConnected(true);
         return;
       }
@@ -192,6 +168,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setApiConnected(false);
+    setProducts([]);
   };
 
   const refreshSubscription = useCallback(async () => {

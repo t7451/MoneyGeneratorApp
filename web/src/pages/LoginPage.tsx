@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
@@ -16,6 +16,14 @@ export const LoginPage: React.FC = () => {
   
   // Get redirect path from location state
   const from = (location.state as { from?: string })?.from || '/';
+
+  useEffect(() => {
+    const redirectReason = sessionStorage.getItem('auth_redirect_reason');
+    if (redirectReason === 'session_expired') {
+      setError('Your session expired. Please sign in again.');
+      sessionStorage.removeItem('auth_redirect_reason');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

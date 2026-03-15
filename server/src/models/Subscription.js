@@ -3,6 +3,10 @@
  * Manages user subscriptions, plans, and billing
  */
 
+function createPaymentMethodId() {
+  return `pm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 const subscriptionSchema = {
   userId: String,
   plan: {
@@ -44,10 +48,21 @@ const subscriptionSchema = {
 
   // Payment method
   paymentMethod: {
+    id: String,
     type: String,             // card, bank_account, etc.
     last4: String,            // Last 4 digits
     brand: String,            // visa, mastercard, amex
-    expiresAt: Date
+    expiresAt: Date,
+    label: String,
+    providerRef: String
+  },
+
+  savedPaymentMethods: [],
+  preferredPaymentMethodId: String,
+  billingPreferences: {
+    autoRetry: Boolean,
+    preferredMethod: String,
+    retryDelayHours: Number
   },
 
   // Features unlocked by plan
@@ -169,6 +184,14 @@ const Subscription = {
       nextPaymentDue: billingCycle === 'monthly' ? nextMonth : nextYear,
       features: { ...planConfig.features },
       trialActive: false,
+      paymentMethod: subscription?.paymentMethod || null,
+      savedPaymentMethods: subscription?.savedPaymentMethods || [],
+      preferredPaymentMethodId: subscription?.preferredPaymentMethodId || null,
+      billingPreferences: subscription?.billingPreferences || {
+        autoRetry: true,
+        preferredMethod: 'card',
+        retryDelayHours: 24
+      },
       metadata: {}
     };
 
@@ -224,15 +247,78 @@ const Subscription = {
   async updatePaymentMethod(userId, paymentDetails) {
     const subscription = await this.findByUserId(userId);
     if (subscription) {
-      subscription.paymentMethod = {
+      const normalizedMethod = {
+        id: paymentDetails.id || createPaymentMethodId(),
         type: paymentDetails.type || 'card',
         last4: paymentDetails.last4,
         brand: paymentDetails.brand,
-        expiresAt: paymentDetails.expiresAt
+        expiresAt: paymentDetails.expiresAt,
+        label: paymentDetails.label || `${paymentDetails.brand || paymentDetails.type} •••• ${paymentDetails.last4 || '----'}`,
+        providerRef: paymentDetails.providerRef || null
       };
+      subscription.paymentMethod = normalizedMethod;
       subscription.lastPaymentAt = new Date();
+
+      if (!Array.isArray(subscription.savedPaymentMethods)) {
+        subscription.savedPaymentMethods = [];
+      }
+
+      if (paymentDetails.save !== false) {
+        const existingIndex = subscription.savedPaymentMethods.findIndex((method) => method.id === normalizedMethod.id);
+        if (existingIndex >= 0) {
+          subscription.savedPaymentMethods[existingIndex] = normalizedMethod;
+        } else {
+          subscription.savedPaymentMethods.push(normalizedMethod);
+        }
+      }
+
+      if (paymentDetails.setDefault !== false) {
+        subscription.preferredPaymentMethodId = normalizedMethod.id;
+      }
     }
     return subscription;
+  },
+
+  async getPaymentMethods(userId) {
+    const subscription = await this.findByUserId(userId);
+    return {
+      methods: subscription.savedPaymentMethods || [],
+      defaultMethodId: subscription.preferredPaymentMethodId || null,
+      currentMethod: subscription.paymentMethod || null,
+    };
+  },
+
+  async removePaymentMethod(userId, methodId) {
+    const subscription = await this.findByUserId(userId);
+    subscription.savedPaymentMethods = (subscription.savedPaymentMethods || []).filter((method) => method.id !== methodId);
+    if (subscription.preferredPaymentMethodId === methodId) {
+      subscription.preferredPaymentMethodId = subscription.savedPaymentMethods[0]?.id || null;
+    }
+    if (subscription.paymentMethod?.id === methodId) {
+      subscription.paymentMethod = subscription.savedPaymentMethods[0] || null;
+    }
+    return subscription;
+  },
+
+  async setDefaultPaymentMethod(userId, methodId) {
+    const subscription = await this.findByUserId(userId);
+    const method = (subscription.savedPaymentMethods || []).find((entry) => entry.id === methodId);
+    if (!method) {
+      throw new Error('Payment method not found');
+    }
+    subscription.preferredPaymentMethodId = methodId;
+    subscription.paymentMethod = method;
+    return subscription;
+  },
+
+  async updateBillingPreferences(userId, preferences = {}) {
+    const subscription = await this.findByUserId(userId);
+    subscription.billingPreferences = {
+      autoRetry: preferences.autoRetry ?? subscription.billingPreferences?.autoRetry ?? true,
+      preferredMethod: preferences.preferredMethod ?? subscription.billingPreferences?.preferredMethod ?? 'card',
+      retryDelayHours: preferences.retryDelayHours ?? subscription.billingPreferences?.retryDelayHours ?? 24,
+    };
+    return subscription.billingPreferences;
   },
 
   // Get all subscriptions by plan

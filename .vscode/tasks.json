@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "validate-web-build",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/d",
+				"/c",
+				"cd /d c:\\Users\\keith\\MoneyGeneratorApp\\web && call npm.cmd run build"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "validate-server-tests",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/d",
+				"/c",
+				"cd /d c:\\Users\\keith\\MoneyGeneratorApp\\server && set CI=1 && call npm.cmd test -- --runInBand --watchAll=false"
+			],
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

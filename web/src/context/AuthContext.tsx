@@ -41,6 +41,8 @@ interface AuthContextType extends AuthState {
 // Storage keys
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
+const USER_ID_KEY = 'userId';
+const AUTH_EXPIRED_EVENT = 'moneygen:auth-expired';
 
 // API base URL
 function getApiBaseUrl(): string {
@@ -113,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearAuth = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(USER_ID_KEY);
     setToken(null);
     setUser(null);
   }, []);
@@ -120,9 +123,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveAuth = useCallback((newToken: string, newUser: User) => {
     localStorage.setItem(TOKEN_KEY, newToken);
     localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    localStorage.setItem(USER_ID_KEY, newUser.id);
     setToken(newToken);
     setUser(newUser);
   }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearAuth();
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+  }, [clearAuth]);
 
   const verifyToken = async (tokenToVerify: string): Promise<User> => {
     const response = await authFetch<{ success: boolean; data: { user: User } }>('/auth/me', {
