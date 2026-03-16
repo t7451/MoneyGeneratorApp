@@ -20,7 +20,7 @@ Status: Stable
 
 ## Verification
 
-- `npm.cmd run build -- --mode budget` completed successfully.
+- `npm run build:budget` completed successfully.
 - `web/dist/bundle-budget-report.json` reported zero budget violations.
 - `v1.3.1` was tagged and pushed to GitHub.
 
