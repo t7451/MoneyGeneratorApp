@@ -28,6 +28,13 @@ SMOKE_BASE_URL=https://api.moneygenerator.app
 SMOKE_OPERATOR_TOKEN=<AUTH_ADMIN_TOKEN from Railway>
 ```
 
+For the full 10-check verification scripts, also provide valid production user credentials:
+
+```bash
+USER_EMAIL=<real production smoke account email>
+USER_PASS=<real production smoke account password>
+```
+
 If you are checking the frontend manually, open:
 
 - `https://moneygenerator.app`
@@ -80,7 +87,7 @@ curl -i https://api.moneygenerator.app/api/v2/assets/upload-url \
 
 Expected:
 
-- HTTP 200
+- HTTP 201
 - JSON payload with upload reservation fields
 
 ### Repo Smoke Script
@@ -162,3 +169,55 @@ Escalate immediately if any of the following occurs:
 - storefront pages fail to render for public customers
 - Jobs list works but map initialization crashes the page
 - webhook processing shows duplicate fulfillment rather than duplicate acknowledgement
+
+## Automated Verification
+
+Two operator scripts execute all 10 production checks in order and exit non-zero on any failure.
+Run them after every deployment or when investigating an incident.
+
+### Checks performed (in order)
+
+| # | Check | Endpoint | Expected |
+|---|-------|----------|----------|
+| 1 | Health | `GET /health` | HTTP 200 with `{"status":"ok"}` |
+| 2 | Login | `POST /auth/login` | HTTP 200, JWT token captured |
+| 3 | Authenticated profile | `GET /auth/me` | HTTP 200, `success:true` |
+| 4 | Ops overview | `GET /api/v2/ops/overview` | HTTP 200 with `AUTH_ADMIN_TOKEN` |
+| 5 | Dashboard data | `GET /api/v1/dashboard` | HTTP 200 |
+| 6 | Reports data | `GET /api/v2/reporting/reports` | HTTP 200 |
+| 7 | Jobs / gig platforms | `GET /api/v1/platforms`, `GET /api/v1/jobs` | HTTP 200 |
+| 8 | Storefront public | `GET /catalog` (unauthenticated) | HTTP 200 with `products` array |
+| 9 | Webhook reachability | `POST /webhooks/paypal`, `/webhooks/plaid`, `/api/connect/webhooks/accounts`, `/api/payments/webhook` | HTTP 400 (signature error), **not** 404 |
+| 10 | Token rejection | `GET /auth/me` with invalid token | HTTP 401 |
+
+### Linux / macOS (bash)
+
+```bash
+API_URL=https://api.moneygenerator.app \
+AUTH_ADMIN_TOKEN=$SMOKE_OPERATOR_TOKEN \
+USER_EMAIL=smoke@example.com \
+USER_PASS=secret \
+bash scripts/prod-verify.sh
+```
+
+### Windows PowerShell
+
+```powershell
+$env:API_URL = 'https://api.moneygenerator.app'
+$env:AUTH_ADMIN_TOKEN = '<AUTH_ADMIN_TOKEN from Railway>'
+$env:USER_EMAIL = 'smoke@example.com'
+$env:USER_PASS = 'secret'
+.\do-verify.bat
+```
+
+### Windows Command Prompt
+
+```bat
+set API_URL=https://api.moneygenerator.app
+set AUTH_ADMIN_TOKEN=<AUTH_ADMIN_TOKEN from Railway>
+set USER_EMAIL=smoke@example.com
+set USER_PASS=secret
+do-verify.bat
+```
+
+Both scripts print `PASS`/`FAIL` with the HTTP status for every check and exit non-zero if any check fails.
