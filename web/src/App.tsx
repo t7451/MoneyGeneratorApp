@@ -5,7 +5,7 @@ import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppLayout } from './layouts/AppLayout';
 import { ThemeProvider } from './context/ThemeContext';
-import { OnboardingProvider } from './utils/onboardingSystem';
+import { OnboardingProvider } from './utils/onboardingContext';
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute';
 import './App.css';
 

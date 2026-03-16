@@ -21,7 +21,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { OfflineIndicator } from '../components/MobileComponents';
+import { OfflineIndicator } from '../components/OfflineIndicator';
 import { useAuth } from '../context/AuthContext';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
 import './AppLayout.css';

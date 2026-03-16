@@ -1,0 +1,23 @@
+{
+  "version": 8,
+  "name": "money-generator-job-map",
+  "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  "sources": {
+    "osm-raster-tiles": {
+      "type": "raster",
+      "tiles": [
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+      ],
+      "tileSize": 256,
+      "maxzoom": 19,
+      "attribution": "© OpenStreetMap contributors"
+    }
+  },
+  "layers": [
+    {
+      "id": "osm-raster-tiles",
+      "type": "raster",
+      "source": "osm-raster-tiles"
+    }
+  ]
+}

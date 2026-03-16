@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Job } from '../data/mockJobs';
+import jobMapStyle from './jobMapStyle.json';
 import './JobMap.css';
 
 type MapLibreMap = import('maplibre-gl').Map;
 type MapLibreGeoJSONSource = import('maplibre-gl').GeoJSONSource;
 type MapLibreModule = typeof import('maplibre-gl/dist/maplibre-gl-csp');
+type MapLibreStyleSpecification = import('maplibre-gl').StyleSpecification;
 type JobMapLayerClickEvent = import('maplibre-gl').MapMouseEvent & {
   features?: import('maplibre-gl').MapGeoJSONFeature[];
 };
@@ -93,7 +95,7 @@ export function JobMap({ jobs, center = [-122.4194, 37.7749] }: JobMapProps) {
 
       const map = new maplibregl.Map({
         container: containerRef.current,
-        style: 'https://demotiles.maplibre.org/style.json',
+        style: jobMapStyle as MapLibreStyleSpecification,
         center,
         zoom: 11,
         attributionControl: false,
@@ -149,7 +151,6 @@ export function JobMap({ jobs, center = [-122.4194, 37.7749] }: JobMapProps) {
           filter: ['has', 'point_count'],
           layout: {
             'text-field': '{point_count_abbreviated}',
-            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
             'text-size': 12
           }
         });

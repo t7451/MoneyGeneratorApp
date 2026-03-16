@@ -21,12 +21,6 @@
 /* Layout - Header, sidebar, grid, responsive */
 @import './styles/layout.css';
 
-/* Mobile UX Components */
-@import './components/MobileComponents.css';
-
-/* Onboarding System */
-@import './components/OnboardingEducation.css';
-
 /* ========== GLOBAL OVERRIDES ========== */
 * {
   margin: 0;
