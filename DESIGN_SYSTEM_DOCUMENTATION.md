@@ -47,8 +47,8 @@ Transform from "3rd grader fumbled together" to **"Premium fintech product compe
 
 ### Font Stack
 ```css
-Display: Space Grotesk (geometric, modern)
-Body: Inter / System fonts (readable)
+Display: Space Grotesk (geometric, modern) — loaded from Google Fonts
+Body: System fonts (Inter removed from Google Fonts load in v1.3.1)
 Mono: IBM Plex Mono (data, code)
 ```
 
@@ -229,7 +229,7 @@ src/styles/
 ```
 
 ### Import Order (index.css)
-1. Google Fonts
+1. Google Fonts (Space Grotesk only)
 2. designSystem.css (variables)
 3. components.css (UI elements)
 4. layout.css (structure)
@@ -360,8 +360,8 @@ src/styles/
 - Icons from Phosphor or custom SVG
 
 ### Typography Hierarchy
-- Headers: Space Grotesk (geometric, modern)
-- Body: Inter (warm, readable)
+- Headers: Space Grotesk (geometric, modern) — loaded from Google Fonts
+- Body: System fonts (Inter not loaded externally as of v1.3.1)
 - Data: IBM Plex Mono (precise)
 
 ---

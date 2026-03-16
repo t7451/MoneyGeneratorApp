@@ -74,7 +74,7 @@
   - Expense logging
   - Action queue
   - Conflict resolution
-- [ ] **Item 4: Progressive Web App (PWA)**
+- [ ] **Item 4: Progressive Web App (PWA)** *(temporarily disabled — vite-plugin-pwa removed in v1.3.1)*
   - Service worker
   - Install prompt
   - Push notifications

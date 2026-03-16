@@ -316,7 +316,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
-### Latest Version: v1.3.0 (March 12, 2026)
+### Latest Version: v1.3.1 (March 16, 2026)
+- ✅ Removed Recharts — charts now use custom SVG components
+- ✅ Removed vite-plugin-pwa (PWA temporarily disabled, no service worker)
+- ✅ Removed Inter from Google Fonts URL — only Space Grotesk loaded
+- ✅ Tombstoned legacy design-system.css; active file is web/src/styles/designSystem.css
+- ✅ Cleaned up 12 dead CSS tokens, entry CSS reduced to ~31 kB
+
+### v1.3.0 (March 12, 2026)
 - ✅ Removed Android, iOS, and Kotlin Multiplatform components
 - ✅ Focused on full-stack web deployment
 - ✅ Implemented referral system with ShareButtons
@@ -376,7 +383,7 @@ See [SECURITY_NOTE.md](SECURITY_NOTE.md) for security policy.
 ## Performance
 
 - **Frontend Build:** ~5.2 seconds (Vite)
-- **Bundle Size:** ~250KB JS, ~56KB CSS (production)
+- **Bundle Size:** ~250KB JS, ~31KB CSS (production)
 - **Page Load:** < 2 seconds (with optimal network)
 - **API Response:** < 200ms (typical)
 - **Lighthouse Score:** 92+ (all metrics)

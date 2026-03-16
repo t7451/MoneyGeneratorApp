@@ -109,11 +109,11 @@ Permissions-Policy:
 Vite automatically splits code into chunks:
 ```
 vendor-react.js      → React, React DOM, Router
-vendor-charts.js     → Recharts
 vendor-icons.js      → Lucide React
 vendor-utils.js      → Axios, Zod
 app.js               → Your code
 ```
+> **Note (v1.3.1):** Recharts was removed; charts are now custom SVG components, so there is no `vendor-charts` chunk.
 
 Each chunk is cached independently = faster updates
 
@@ -156,7 +156,7 @@ Build optimization:
 - Code splitting rules
 - Minification settings
 - Asset hashing for cache busting
-- PWA configuration
+- Bundle budget enforcement (custom Vite plugin)
 - File size limits
 
 ### netlify/functions/proxy-api.js
@@ -307,7 +307,6 @@ npm run build --prefix web
 
 - **Netlify Docs:** https://docs.netlify.com
 - **Vite Guide:** https://vitejs.dev
-- **PWA Guide:** https://web.dev/progressive-web-apps/
 - **Web Vitals:** https://web.dev/vitals/
 
 ---

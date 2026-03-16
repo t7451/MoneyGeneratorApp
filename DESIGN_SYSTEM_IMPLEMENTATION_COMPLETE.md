@@ -29,8 +29,8 @@ The foundational CSS variable library:
    - Dark mode palette with blue undertones
 
 ✅ Typography System
-   - Space Grotesk (geometric, modern headers)
-   - Inter (readable body text)  
+   - Space Grotesk (geometric, modern headers) — loaded from Google Fonts
+   - System fonts for body (Inter removed from Google Fonts load in v1.3.1)
    - IBM Plex Mono (precise data)
    - Complete type scale (12px - 48px)
    - Font weights (300 - 800)
@@ -163,7 +163,7 @@ Main stylesheet orchestrator:
 
 ```
 ✅ Import Order
-   1. Google Fonts (Space Grotesk + Inter)
+   1. Google Fonts (Space Grotesk only)
    2. designSystem.css (variables)
    3. components.css (UI elements)
    4. layout.css (structure)
@@ -307,10 +307,10 @@ Complete reference guide:
 ✅ File generation: All assets
 
 Bundle Sizes:
-- CSS: 87.5 KB (includes design + components)
+- CSS: ~31 KB (entry CSS after v1.3.1 token cleanup)
 - JS: 246.61 KB (React + app code)
 - HTML: 2.4 KB
-- Total: ~336 KB (excellent for feature-rich app)
+- Total: ~278 KB
 ```
 
 ### Production Ready
@@ -364,7 +364,7 @@ Bundle Sizes:
 | **Responsive Design** | ✅ | Mobile-first, 6 breakpoints, 48px touch targets |
 | **Smooth Animations** | ✅ | 8 keyframes, 60fps performance, proper easing |
 | **Accessibility** | ✅ | WCAG AA contrast, focus states, keyboard nav |
-| **Performance** | ✅ | CSS 87.5 KB gzipped (~30KB), optimal split with JS |
+| **Performance** | ✅ | Entry CSS ~31 KB after v1.3.1 token cleanup, 60fps animations |
 | **Maintainability** | ✅ | 150+ CSS variables, organized imports, documented |
 
 ---
@@ -424,7 +424,7 @@ The design system is **production-ready** and includes:
 ### Production Status:
 - ✅ Design system created (2,070 lines CSS)
 - ✅ All CSS compiles successfully
-- ✅ Bundle sizes optimal (87.5 KB CSS + 246 KB JS)
+- ✅ Bundle sizes reduced (entry CSS ~31 KB after v1.3.1 token cleanup)
 - ✅ Git committed and tracked
 - ✅ Ready for App.tsx implementation
 

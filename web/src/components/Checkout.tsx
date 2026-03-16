@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import './Checkout.css';
 import { apiFetchJson } from '../lib/apiClient';
 
-type BillingCycle = 'monthly' | 'annual';
+export type BillingCycle = 'monthly' | 'annual';
 type PaymentMethod = 'card' | 'paypal' | 'crypto' | 'saved';
 
-type PaymentDetails = {
+export type PaymentDetails = {
   method: PaymentMethod;
   savedMethodId?: string;
   autoRetry: boolean;

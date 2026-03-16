@@ -22,7 +22,8 @@
 
 ### 2. Vite Build Optimization 📦
 **Changes:**
-- Code splitting by vendor chunks (react, charts, icons, utils)
+- Code splitting by vendor chunks (react, icons, utils)
+- Recharts removed in v1.3.1; charts are now custom SVG components
 - Hashed filenames for cache busting
 - esbuild minification (faster than terser)
 - ES2020 target for smaller output
@@ -133,7 +134,7 @@ POST/PUT/DELETE          → No cache
 
 ### Core Configuration
 - ✅ `netlify.toml` - Optimized with caching, security, functions, limits
-- ✅ `vite.config.ts` - Enhanced code splitting, minification, PWA
+- ✅ `vite.config.ts` - Enhanced code splitting, minification, bundle budget enforcement
 - ✅ `web/_redirects` - API routing, SPA fallback
 - ✅ `web/.env.example` - Comprehensive environment template
 

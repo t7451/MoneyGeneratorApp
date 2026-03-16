@@ -7,6 +7,7 @@ import { AppLayout } from './layouts/AppLayout';
 import { ThemeProvider } from './context/ThemeContext';
 import { OnboardingProvider } from './utils/onboardingContext';
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute';
+import type { BillingCycle, PaymentDetails } from './components/Checkout';
 import './App.css';
 
 function lazyNamed(importer: () => Promise<Record<string, ComponentType<any>>>, exportName: string) {
@@ -71,7 +72,7 @@ const AppRoutes = () => {
           onComplete={completeOnboarding}
           onConnectBank={connectBank}
           onSelectRole={updateRole}
-          onSelectPlan={(planId) => {
+          onSelectPlan={(planId: string) => {
             upgradeSubscription(planId, []); 
           }}
           onConnectPlatform={connectPlatform}
@@ -135,7 +136,7 @@ const AppRoutes = () => {
         <Suspense fallback={<RouteLoadingShell message="Loading checkout..." />}>
           <Checkout
             currentPlan={userProfile.subscription || undefined}
-            onSelectPlan={(planId, cycle, addons, payment) =>
+            onSelectPlan={(planId: string, cycle: BillingCycle, addons: string[], payment: PaymentDetails) =>
               upgradeSubscription(planId, addons, {
                 billingCycle: cycle,
                 paymentMethod: payment.method,
