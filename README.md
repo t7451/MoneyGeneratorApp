@@ -2,7 +2,7 @@
 
 **Full-Stack Web Application** | React 18 Frontend + Node.js/Express Backend  
 **Status:** Active Development | Deployed to Railway + Netlify  
-**Latest:** v1.3.1 (March 12, 2026)
+**Latest:** v1.3.1 (March 16, 2026)
 
 ---
 
@@ -23,9 +23,9 @@ Money Generator App is a comprehensive financial SaaS platform helping users:
 - **Styling:** CSS with dark mode & responsive design
 - **State:** Context API + React Hooks
 - **Routing:** React Router v7.13.1
-- **Charts:** Recharts 2.10.0
+- **Charts:** Custom SVG report previews (Recharts removed)
 - **Icons:** Lucide React 0.577.0
-- **PWA:** Vite PWA plugin with service workers
+- **Maps:** MapLibre GL with lazy route and viewport-gated initialization
 
 ### Backend
 - **Runtime:** Node.js 20+
@@ -141,13 +141,13 @@ MoneyGeneratorApp/
 
 6. **Start development servers (in separate terminals)**
    
-   ***Terminal 1 - Frontend (http://localhost:5173)***
+   ***Terminal 1 - Frontend (http://localhost:3000)***
    ```bash
    npm run dev
    # Runs: cd web && npm run dev
    ```
 
-   ***Terminal 2 - Backend (http://localhost:3000)***
+   ***Terminal 2 - Backend (http://localhost:4000)***
    ```bash
    npm run dev --prefix server
    # Runs: node src/index.js
@@ -191,7 +191,7 @@ npm test                 # Run Jest tests
 ## API Documentation
 
 ### Base URL
-**Development:** `http://localhost:3000/api/v2`  
+**Development:** `http://localhost:4000/api/v2`  
 **Production:** `https://moneygenerator.app/api/v2`
 
 ### Key Endpoints
@@ -224,7 +224,7 @@ See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete spec.
 - [x] Income tracking (multiple sources)
 - [x] Expense management with categories
 - [x] Dashboard with KPIs
-- [x] Basic analytics & charts
+- [x] Basic analytics and SVG chart previews
 - [x] Mobile-responsive UI
 
 ### Phase 2: Growth Features 🚀

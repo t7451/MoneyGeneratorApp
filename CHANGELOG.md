@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+- Removed the unused `vite-plugin-pwa` dependency chain from `web/` after audit identified a high-severity advisory through `workbox-build` and `serialize-javascript`.
+- Removed stale PWA references from the Vite config and frontend type declarations so the source matches the installed dependency graph.
+
+## [1.3.1] - 2026-03-16
+
+### Added
+- Strict bundle budget reporting and retained build artifacts for release verification.
+- Lazy-loaded SVG chart preview components for the reports builder.
+- Deferred Jobs map initialization with an in-view loading placeholder.
+
+### Changed
+- Removed `Recharts` from the frontend in favor of lightweight SVG report previews.
+- Replaced the remote MapLibre demo style with a local app-owned style and removed cluster text glyph dependencies.
+- Split onboarding and mobile-only CSS out of the entry stylesheet, trimmed shared layout/component CSS, and reduced entry CSS to roughly 31 kB.
+- Simplified `index.html` metadata and cleaned overlapping global styles in `web/src/index.css`.
+
+### Fixed
+- Cleared reported frontend diagnostics in `index.html`, TypeScript config, and auth/connect styling.
+- Synchronized the web lockfile to match the shipped dependency graph.
+
 ## [1.3.0] - 2026-03-12
 
 ### Added
@@ -121,4 +144,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[Unreleased]: https://github.com/PublicPNWEK/MoneyGeneratorApp/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/PublicPNWEK/MoneyGeneratorApp/releases/tag/v1.3.1
+[1.3.0]: https://github.com/PublicPNWEK/MoneyGeneratorApp/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/PublicPNWEK/MoneyGeneratorApp/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/PublicPNWEK/MoneyGeneratorApp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PublicPNWEK/MoneyGeneratorApp/releases/tag/v1.0.0

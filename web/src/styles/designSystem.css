@@ -82,17 +82,10 @@
   --border-color-light: var(--color-charcoal-100);
 
   /* ========== DARK MODE ========== */
-  --color-dark-bg-primary: #0f172a;    /* Deep navy-black */
-  --color-dark-bg-secondary: #1e293b;  /* Slightly lighter navy */
-  --color-dark-bg-tertiary: #334155;   /* Charcoal */
-  --color-dark-bg-hover: #475569;      /* Lighter charcoal */
-  
-  --color-dark-text-primary: #f1f5f9;  /* Off-white */
-  --color-dark-text-secondary: #cbd5e1;/* Light gray */
-  --color-dark-text-tertiary: #94a3b8; /* Medium gray */
-  
-  --color-dark-border: #334155;        /* Charcoal border */
-  --color-dark-border-light: #1e293b;  /* Darker border */
+  --color-dark-bg-tertiary: #334155;   /* Charcoal — used by MileagePage */
+  --color-dark-bg-hover: #475569;      /* Lighter charcoal — used by MileagePage */
+
+  --color-dark-border: #334155;        /* Charcoal border — used by Card, Button, Auth, etc. */
 
   /* ========== SHADOWS & ELEVATION ========== */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
