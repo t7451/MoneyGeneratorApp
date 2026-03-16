@@ -1,7 +1,6 @@
 {
   "version": 8,
   "name": "money-generator-job-map",
-  "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
   "sources": {
     "osm-raster-tiles": {
       "type": "raster",

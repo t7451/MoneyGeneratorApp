@@ -143,18 +143,6 @@ export function JobMap({ jobs, center = [-122.4194, 37.7749] }: JobMapProps) {
           }
         });
 
-        // Cluster Count Text
-        map.addLayer({
-          id: 'cluster-count',
-          type: 'symbol',
-          source: 'jobs',
-          filter: ['has', 'point_count'],
-          layout: {
-            'text-field': '{point_count_abbreviated}',
-            'text-size': 12
-          }
-        });
-
         // Unclustered Points (Single Jobs)
         map.addLayer({
           id: 'unclustered-point',
