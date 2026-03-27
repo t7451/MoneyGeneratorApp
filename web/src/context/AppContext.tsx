@@ -150,7 +150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const response = await fetch(`${apiUrl}/purchase`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer demo-user' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer demo-user-token' },
         body: JSON.stringify({
           productId: planId,
           userId: 'demo-user',

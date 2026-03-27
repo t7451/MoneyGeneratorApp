@@ -282,7 +282,7 @@ router.get('/benefits/tax-estimate', (req, res) => {
   const { userId = 'demo-user', annualIncome } = req.query;
   const estimate = BenefitsService.calculateEstimatedTax({
     userId,
-    annualIncome: parseFloat(annualIncome) || 50000,
+    annualIncome: annualIncome != null ? parseFloat(annualIncome) : 50000,
   });
   res.json(estimate);
 });
