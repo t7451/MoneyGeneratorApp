@@ -44,3 +44,5 @@ function createLogger(correlationId) {
     error: (message, meta = {}) => console.error(format('error', message, meta)),
   };
 }
+
+export const logger = createLogger('system');

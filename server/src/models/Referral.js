@@ -36,7 +36,7 @@ const referralSchema = {
 
   // Meta
   notes: String,
-  metadata: Schema.Types.Mixed
+  metadata: Object
 };
 
 // In-memory storage (replace with MongoDB for production)
