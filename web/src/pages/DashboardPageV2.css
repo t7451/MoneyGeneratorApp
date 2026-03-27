@@ -410,3 +410,234 @@ body.dark .section-title {
   box-shadow: var(--shadow-lg);
 }
 
+/* Profile Completion Progress Bar */
+.dashboard-progress {
+  width: 100%;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.progress-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: var(--color-neutral-900);
+}
+
+body.dark .progress-title {
+  color: var(--color-dark-text);
+}
+
+.progress-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+  margin: var(--spacing-xs) 0 0 0;
+}
+
+.progress-dismiss {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.progress-dismiss:hover {
+  color: var(--color-neutral-600);
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--color-neutral-100);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+}
+
+body.dark .progress-bar-track {
+  background: var(--color-neutral-700);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.progress-step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.progress-step-check {
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-300);
+}
+
+.progress-step-item.completed .progress-step-check {
+  color: var(--color-success);
+}
+
+.progress-step-empty {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 50%;
+}
+
+body.dark .progress-step-empty {
+  border-color: var(--color-neutral-600);
+}
+
+.progress-step-label {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-700);
+}
+
+.progress-step-item.completed .progress-step-label {
+  color: var(--color-neutral-500);
+  text-decoration: line-through;
+}
+
+body.dark .progress-step-label {
+  color: var(--color-neutral-300);
+}
+
+.progress-step-action {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.progress-step-action:hover {
+  background: var(--color-neutral-50);
+}
+
+body.dark .progress-step-action:hover {
+  background: var(--color-neutral-800);
+}
+
+/* CTA Cards */
+.dashboard-cta {
+  width: 100%;
+}
+
+.cta-card {
+  border-left: 4px solid var(--color-primary);
+}
+
+.cta-card-upgrade {
+  border-left-color: var(--color-success);
+}
+
+.cta-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xl);
+}
+
+.cta-content h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-neutral-900);
+}
+
+body.dark .cta-content h3 {
+  color: var(--color-dark-text);
+}
+
+.cta-content p {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+body.dark .cta-content p {
+  color: var(--color-neutral-400);
+}
+
+/* Key Metric Card */
+.dashboard-key-metric {
+  width: 100%;
+}
+
+.key-metric-card {
+  border-left: 4px solid var(--color-success);
+}
+
+.key-metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.key-metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-medium);
+}
+
+.key-metric-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+}
+
+body.dark .key-metric-value {
+  color: var(--color-dark-text);
+}
+
+.key-metric-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.key-metric-trend.up {
+  color: var(--color-success);
+}
+
+.key-metric-trend.down {
+  color: var(--color-warning);
+}
+
+@media (max-width: 640px) {
+  .cta-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

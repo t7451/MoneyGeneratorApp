@@ -1,6 +1,8 @@
 import { useCallback, useState, useEffect } from 'react';
 import { usePlaidLink, PlaidLinkOptions, PlaidLinkOnSuccess } from 'react-plaid-link';
+import { Check, RefreshCw, Shield } from 'lucide-react';
 import { getUserId } from '../lib/apiClient';
+import { trackEvent, FunnelEvents } from '../lib/analytics';
 import './PlaidLink.css';
 
 interface PlaidLinkButtonProps {
@@ -14,6 +16,7 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
   const effectiveUserId = userId?.trim() || getUserId() || '';
 
   const fetchLinkToken = useCallback(async () => {
@@ -54,6 +57,8 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
 
   const handleSuccess: PlaidLinkOnSuccess = useCallback(
     (publicToken, metadata) => {
+      trackEvent(FunnelEvents.PLAID_LINK_SUCCESS, { accounts: Array.isArray(metadata) ? metadata.length : 1 });
+      setConnected(true);
       onSuccess(publicToken, metadata);
     },
     [onSuccess]
@@ -65,11 +70,31 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
     onExit: (err) => {
       if (err) {
         console.error('Plaid Link exit error:', err);
+        trackEvent(FunnelEvents.BANK_CONNECT_FAILED, { error: String(err) });
       }
     },
   };
 
   const { open, ready } = usePlaidLink(config);
+
+  const handleOpen = () => {
+    trackEvent(FunnelEvents.PLAID_LINK_OPENED);
+    open();
+  };
+
+  if (connected) {
+    return (
+      <div className="plaid-success">
+        <div className="plaid-success-icon">
+          <Check size={24} />
+        </div>
+        <div>
+          <p className="plaid-success-title">Bank connected successfully!</p>
+          <p className="plaid-success-hint">Your transactions will sync within a few minutes.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -83,23 +108,68 @@ export function PlaidLinkButton({ apiUrl, userId, onSuccess, onError }: PlaidLin
   }
 
   return (
-    <button
-      className="btn-plaid"
-      onClick={() => open()}
-      disabled={!ready || loading}
-    >
-      {loading ? (
-        <span className="plaid-loading">
-          <span className="spinner" />
-          Connecting...
-        </span>
-      ) : (
-        <>
-          <span className="plaid-icon">🏦</span>
-          Connect Bank Account
-        </>
+    <div className="plaid-connect-wrapper">
+      <button
+        className="btn-plaid"
+        onClick={handleOpen}
+        disabled={!ready || loading}
+      >
+        {loading ? (
+          <span className="plaid-loading">
+            <span className="spinner" />
+            Connecting...
+          </span>
+        ) : (
+          <>
+            <span className="plaid-icon">{'\u{1F3E6}'}</span>
+            Connect Bank Account
+          </>
+        )}
+      </button>
+      <div className="plaid-trust-row">
+        <span className="plaid-trust-badge"><Shield size={12} /> 256-bit encryption</span>
+        <span className="plaid-trust-badge"><Shield size={12} /> Read-only access</span>
+      </div>
+    </div>
+  );
+}
+
+interface SyncStatusProps {
+  lastSynced?: string;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+}
+
+export function SyncStatus({ lastSynced, onRefresh, isRefreshing }: SyncStatusProps) {
+  const formatSyncTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const diffMs = Date.now() - date.getTime();
+    const diffMin = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin} min ago`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  return (
+    <div className="sync-status">
+      <span className="sync-indicator" />
+      <span className="sync-text">
+        {lastSynced ? `Last synced: ${formatSyncTime(lastSynced)}` : 'Not synced yet'}
+      </span>
+      {onRefresh && (
+        <button
+          className="sync-refresh"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          title="Refresh"
+        >
+          <RefreshCw size={14} className={isRefreshing ? 'sync-spinning' : ''} />
+        </button>
       )}
-    </button>
+    </div>
   );
 }
 
@@ -126,13 +196,13 @@ export function BankAccountCard({
   const getAccountIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'checking':
-        return '💳';
+        return '\u{1F4B3}';
       case 'savings':
-        return '🏦';
+        return '\u{1F3E6}';
       case 'credit':
-        return '💰';
+        return '\u{1F4B0}';
       default:
-        return '📊';
+        return '\u{1F4CA}';
     }
   };
 
@@ -142,7 +212,7 @@ export function BankAccountCard({
       <div className="account-info">
         <h4 className="account-name">{account.name}</h4>
         <p className="account-details">
-          {account.subtype} •••• {account.mask}
+          {account.subtype} &bull;&bull;&bull;&bull; {account.mask}
         </p>
         {account.balance !== undefined && (
           <p className="account-balance">
@@ -150,13 +220,13 @@ export function BankAccountCard({
           </p>
         )}
         {lastSynced && (
-          <p className="account-synced">Last synced: {lastSynced}</p>
+          <SyncStatus lastSynced={lastSynced} onRefresh={onRefresh} />
         )}
       </div>
       <div className="account-actions">
-        {onRefresh && (
+        {onRefresh && !lastSynced && (
           <button className="btn-icon" onClick={onRefresh} title="Refresh">
-            🔄
+            {'\u{1F504}'}
           </button>
         )}
         {onDisconnect && (
@@ -165,7 +235,7 @@ export function BankAccountCard({
             onClick={onDisconnect}
             title="Disconnect"
           >
-            ✕
+            &times;
           </button>
         )}
       </div>
@@ -189,7 +259,7 @@ export function ConnectedAccounts({ accounts, onAddAccount }: ConnectedAccountsP
   if (accounts.length === 0) {
     return (
       <div className="no-accounts">
-        <div className="no-accounts-icon">🏦</div>
+        <div className="no-accounts-icon">{'\u{1F3E6}'}</div>
         <h3>No Accounts Connected</h3>
         <p>Connect your bank account to start tracking your finances automatically.</p>
         <button className="btn-primary" onClick={onAddAccount}>

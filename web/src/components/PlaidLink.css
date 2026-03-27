@@ -216,6 +216,124 @@
   margin: 0 0 1.5rem 0;
 }
 
+/* Plaid success state */
+.plaid-success {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.plaid-success-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.plaid-success-title {
+  font-weight: 600;
+  color: #065f46;
+  margin: 0 0 0.15rem 0;
+}
+
+.plaid-success-hint {
+  font-size: 0.85rem;
+  color: #047857;
+  margin: 0;
+}
+
+/* Connect wrapper */
+.plaid-connect-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.plaid-trust-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.plaid-trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.plaid-trust-badge svg {
+  color: #10b981;
+}
+
+/* Sync Status */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.sync-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+.sync-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.sync-refresh {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.sync-refresh:hover {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.sync-refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sync-spinning {
+  animation: spin 1s linear infinite;
+}
+
 @media (max-width: 480px) {
   .bank-account-card {
     flex-wrap: wrap;
@@ -225,5 +343,11 @@
     width: 100%;
     justify-content: flex-end;
     margin-top: 0.5rem;
+  }
+
+  .plaid-trust-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
   }
 }

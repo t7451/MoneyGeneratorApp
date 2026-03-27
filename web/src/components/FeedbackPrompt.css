@@ -1,0 +1,118 @@
+.feedback-prompt {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  max-width: 320px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.feedback-prompt-thanks {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.feedback-prompt-thanks p {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.feedback-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.feedback-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.feedback-question {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+}
+
+.feedback-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.feedback-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.feedback-star:hover {
+  transform: scale(1.15);
+}
+
+.feedback-star.active {
+  color: #f59e0b;
+}
+
+.feedback-comment-section {
+  margin-top: 0.75rem;
+  animation: slideUp 0.2s ease-out;
+}
+
+.feedback-textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  resize: none;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.feedback-submit {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 480px) {
+  .feedback-prompt {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}

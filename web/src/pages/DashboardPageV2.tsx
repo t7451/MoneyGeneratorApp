@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, CheckCircle, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, CheckCircle, AlertCircle, RefreshCw, Loader2, ChevronRight } from 'lucide-react';
 import { Card, CardBody, CardFooter } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useNavigate } from 'react-router-dom';
 import { apiFetchJson, getUserId } from '../lib/apiClient';
+import { trackEvent, FunnelEvents } from '../lib/analytics';
+import { FeedbackPrompt } from '../components/FeedbackPrompt';
 import { ErrorState, SkeletonMetricCard, SkeletonCard, Skeleton } from '../components';
 import './DashboardPageV2.css';
 
@@ -47,6 +49,14 @@ interface ActivityItem {
   amount?: number | null;
 }
 
+interface ProgressStep {
+  id: string;
+  label: string;
+  completed: boolean;
+  action?: () => void;
+  actionLabel?: string;
+}
+
 export const DashboardPageV2: React.FC = () => {
   const { userProfile, connectBank, openCheckout } = useAppContext();
   const { showToast } = useToast();
@@ -59,6 +69,63 @@ export const DashboardPageV2: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activityError, setActivityError] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [progressDismissed, setProgressDismissed] = useState(() => {
+    return localStorage.getItem('progress_bar_dismissed') === 'true';
+  });
+
+  // Calculate profile completion progress
+  const getProgressSteps = useCallback((): ProgressStep[] => {
+    return [
+      {
+        id: 'role',
+        label: 'Select your role',
+        completed: !!userProfile.role,
+      },
+      {
+        id: 'bank',
+        label: 'Connect your bank',
+        completed: userProfile.bankConnected,
+        action: connectBank,
+        actionLabel: 'Connect',
+      },
+      {
+        id: 'subscription',
+        label: 'Choose a plan',
+        completed: !!userProfile.subscription,
+        action: openCheckout,
+        actionLabel: 'View Plans',
+      },
+    ];
+  }, [userProfile, connectBank, openCheckout]);
+
+  const progressSteps = getProgressSteps();
+  const completedCount = progressSteps.filter(s => s.completed).length;
+  const progressPercent = Math.round((completedCount / progressSteps.length) * 100);
+  const allComplete = completedCount === progressSteps.length;
+
+  // Track dashboard view
+  useEffect(() => {
+    trackEvent(FunnelEvents.DASHBOARD_VIEWED, { role: userProfile.role });
+  }, [userProfile.role]);
+
+  // Show feedback prompt after first week
+  useEffect(() => {
+    const onboardingData = localStorage.getItem('onboarding_data');
+    if (onboardingData) {
+      try {
+        const data = JSON.parse(onboardingData);
+        const completedAt = new Date(data.completedAt);
+        const daysSince = (Date.now() - completedAt.getTime()) / (1000 * 60 * 60 * 24);
+        const feedbackGiven = localStorage.getItem('feedback_given');
+        if (daysSince >= 3 && !feedbackGiven) {
+          setShowFeedback(true);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
 
   // Fetch analytics data from backend
   const fetchDashboardData = useCallback(async (showLoading = true) => {
@@ -88,9 +155,9 @@ export const DashboardPageV2: React.FC = () => {
           {
             label: 'Total Earnings',
             value: `$${summary.totalEarnings.toLocaleString()}`,
-            trend: { 
-              direction: summary.trend?.direction || 'up', 
-              percent: summary.trend?.percent || 0 
+            trend: {
+              direction: summary.trend?.direction || 'up',
+              percent: summary.trend?.percent || 0
             },
             icon: <TrendingUp size={20} />,
           },
@@ -135,49 +202,65 @@ export const DashboardPageV2: React.FC = () => {
 
   // Set up insights based on user profile
   useEffect(() => {
-    setInsights([
-      {
-        type: userProfile.bankConnected ? 'positive' : 'warning',
-        title: userProfile.bankConnected ? 'Bank Connected' : 'Connect Your Bank',
-        description: userProfile.bankConnected
-          ? 'Your bank account is linked for instant payouts.'
-          : 'Link your bank account to enable instant cash advances and automated payouts.',
-        action: !userProfile.bankConnected ? { label: 'Connect Bank', onClick: connectBank } : undefined,
-      },
-      {
-        type: userProfile.subscription ? 'positive' : 'neutral',
-        title: userProfile.subscription ? `${userProfile.subscription} Active` : 'Upgrade Your Plan',
-        description: userProfile.subscription
-          ? `You're on the ${userProfile.subscription} plan with advanced features.`
-          : 'Upgrade to unlock advanced analytics, AI recommendations, and priority support.',
-        action: !userProfile.subscription ? { label: 'View Plans', onClick: openCheckout } : undefined,
-      },
-      {
+    const dynamicInsights: InsightItem[] = [];
+
+    if (!userProfile.bankConnected) {
+      dynamicInsights.push({
+        type: 'warning',
+        title: 'Connect Your Bank',
+        description: 'Link your bank account to see real-time spending insights and enable instant payouts.',
+        action: { label: 'Connect Bank', onClick: connectBank },
+      });
+    } else if (!userProfile.subscription) {
+      dynamicInsights.push({
         type: 'neutral',
-        title: 'Tax Reserve Check',
-        description: 'Review your latest tax summary and reserve targets before your next estimated payment.',
-        action: {
-          label: 'View Reserves',
-          onClick: async () => {
-            try {
-              const year = new Date().getFullYear();
-              await apiFetchJson(`/api/v2/reporting/tax-summary?year=${encodeURIComponent(String(year))}`);
-            } catch {
-              // ignore
-            }
-            navigate('/taxes');
-          },
+        title: 'Upgrade to Pro',
+        description: 'Get advanced analytics, instant payouts, and smart automations with a Pro plan.',
+        action: { label: 'View Plans', onClick: openCheckout },
+      });
+    } else {
+      dynamicInsights.push({
+        type: 'positive',
+        title: `${userProfile.subscription} Active`,
+        description: `You're on the ${userProfile.subscription} plan with access to all advanced features.`,
+      });
+    }
+
+    if (userProfile.bankConnected) {
+      dynamicInsights.push({
+        type: 'positive',
+        title: 'Bank Connected',
+        description: 'Your bank account is linked for instant payouts and automatic expense tracking.',
+      });
+    }
+
+    dynamicInsights.push({
+      type: 'neutral',
+      title: 'Tax Reserve Check',
+      description: 'Review your latest tax summary and reserve targets before your next estimated payment.',
+      action: {
+        label: 'View Reserves',
+        onClick: async () => {
+          try {
+            const year = new Date().getFullYear();
+            await apiFetchJson(`/api/v2/reporting/tax-summary?year=${encodeURIComponent(String(year))}`);
+          } catch {
+            // ignore
+          }
+          navigate('/taxes');
         },
       },
-    ]);
+    });
+
+    setInsights(dynamicInsights);
   }, [userProfile, connectBank, openCheckout, navigate]);
 
   // Set up auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchDashboardData(false); // Silent refresh
+      fetchDashboardData(false);
     }, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, [fetchDashboardData]);
 
@@ -187,6 +270,7 @@ export const DashboardPageV2: React.FC = () => {
   };
 
   const handleExportData = async () => {
+    trackEvent(FunnelEvents.EXPORT_CLICKED);
     try {
       const userId = getUserId();
       const data = await apiFetchJson<any>(`/api/v2/export/summary?userId=${encodeURIComponent(userId)}`);
@@ -226,6 +310,11 @@ export const DashboardPageV2: React.FC = () => {
     }
   };
 
+  const handleDismissProgress = () => {
+    setProgressDismissed(true);
+    localStorage.setItem('progress_bar_dismissed', 'true');
+  };
+
   const formatActivityTime = (value: string) => {
     const date = new Date(value);
     const diffMs = Date.now() - date.getTime();
@@ -256,7 +345,7 @@ export const DashboardPageV2: React.FC = () => {
             <Skeleton width="80%" height="1rem" className="mt-2" />
           </div>
         </section>
-        
+
         {/* Stats Skeleton */}
         <section className="dashboard-stats">
           <div className="stats-grid">
@@ -286,8 +375,16 @@ export const DashboardPageV2: React.FC = () => {
       {/* Hero Section */}
       <section className="dashboard-hero">
         <div className="hero-content">
-          <h1 className="hero-title">Welcome back! 👋</h1>
-          <p className="hero-subtitle">Here's your financial snapshot for today</p>
+          <h1 className="hero-title">
+            {userProfile.subscription
+              ? 'Welcome back! 👋'
+              : "Welcome! Let's get you set up 🚀"}
+          </h1>
+          <p className="hero-subtitle">
+            {userProfile.subscription
+              ? "Here's your financial snapshot for today"
+              : 'Complete your profile to unlock personalized insights'}
+          </p>
           {lastUpdated && (
             <p className="hero-updated">
               Last updated: {lastUpdated.toLocaleTimeString()}
@@ -295,9 +392,9 @@ export const DashboardPageV2: React.FC = () => {
           )}
         </div>
         <div className="hero-actions">
-          <Button 
-            variant="secondary" 
-            size="sm" 
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
@@ -310,6 +407,98 @@ export const DashboardPageV2: React.FC = () => {
           </Button>
         </div>
       </section>
+
+      {/* Profile Completion Progress Bar */}
+      {!allComplete && !progressDismissed && (
+        <section className="dashboard-progress">
+          <Card>
+            <CardBody>
+              <div className="progress-header">
+                <div>
+                  <h3 className="progress-title">Complete your profile</h3>
+                  <p className="progress-subtitle">{completedCount} of {progressSteps.length} steps done</p>
+                </div>
+                <button className="progress-dismiss" onClick={handleDismissProgress} aria-label="Dismiss">&times;</button>
+              </div>
+              <div className="progress-bar-track">
+                <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <div className="progress-steps">
+                {progressSteps.map((s) => (
+                  <div key={s.id} className={`progress-step-item ${s.completed ? 'completed' : ''}`}>
+                    <span className="progress-step-check">
+                      {s.completed ? <CheckCircle size={18} /> : <span className="progress-step-empty" />}
+                    </span>
+                    <span className="progress-step-label">{s.label}</span>
+                    {!s.completed && s.action && (
+                      <button className="progress-step-action" onClick={s.action}>
+                        {s.actionLabel} <ChevronRight size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+        </section>
+      )}
+
+      {/* Personalized CTA for non-connected users */}
+      {!userProfile.bankConnected && !userProfile.subscription && (
+        <section className="dashboard-cta">
+          <Card className="cta-card">
+            <CardBody>
+              <div className="cta-content">
+                <div>
+                  <h3>Connect your bank to see insights</h3>
+                  <p>Link your account for automated tracking, spending breakdowns, and smart tax savings.</p>
+                </div>
+                <Button variant="primary" onClick={connectBank}>
+                  Connect Bank
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </section>
+      )}
+
+      {userProfile.bankConnected && !userProfile.subscription && (
+        <section className="dashboard-cta">
+          <Card className="cta-card cta-card-upgrade">
+            <CardBody>
+              <div className="cta-content">
+                <div>
+                  <h3>Upgrade to Pro for instant payouts and analytics</h3>
+                  <p>Unlock advanced reporting, automations, and priority support starting at $14.99/mo.</p>
+                </div>
+                <Button variant="primary" onClick={openCheckout}>
+                  View Plans
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </section>
+      )}
+
+      {/* Key Metrics (subscribed users) */}
+      {userProfile.subscription && userProfile.earnings > 0 && (
+        <section className="dashboard-key-metric">
+          <Card elevated className="key-metric-card">
+            <CardBody>
+              <div className="key-metric-content">
+                <span className="key-metric-label">Your earnings this month</span>
+                <span className="key-metric-value">${userProfile.earnings.toLocaleString()}</span>
+                {userProfile.weeklyChange !== 0 && (
+                  <span className={`key-metric-trend ${userProfile.weeklyChange >= 0 ? 'up' : 'down'}`}>
+                    {userProfile.weeklyChange >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                    {Math.abs(userProfile.weeklyChange)}% vs last week
+                  </span>
+                )}
+              </div>
+            </CardBody>
+          </Card>
+        </section>
+      )}
 
       {/* Stats Grid */}
       <section className="dashboard-stats">
@@ -379,28 +568,28 @@ export const DashboardPageV2: React.FC = () => {
         <div className="actions-grid">
           <Card interactive onClick={() => navigate('/jobs')}>
             <CardBody>
-              <div className="action-icon-large">💼</div>
+              <div className="action-icon-large">{'💼'}</div>
               <h3 className="action-title">Find Jobs</h3>
               <p className="action-description">Discover high-paying opportunities near you</p>
             </CardBody>
           </Card>
           <Card interactive onClick={() => navigate('/reports')}>
             <CardBody>
-              <div className="action-icon-large">📊</div>
+              <div className="action-icon-large">{'📊'}</div>
               <h3 className="action-title">View Analytics</h3>
               <p className="action-description">Deep dive into your earnings & expenses</p>
             </CardBody>
           </Card>
           <Card interactive onClick={handleExportData}>
             <CardBody>
-              <div className="action-icon-large">📥</div>
+              <div className="action-icon-large">{'📥'}</div>
               <h3 className="action-title">Export Data</h3>
               <p className="action-description">Download reports for tax prep or records</p>
             </CardBody>
           </Card>
           <Card interactive onClick={handleBilling}>
             <CardBody>
-              <div className="action-icon-large">💳</div>
+              <div className="action-icon-large">{'💳'}</div>
               <h3 className="action-title">Billing</h3>
               <p className="action-description">Manage subscriptions & payment methods</p>
             </CardBody>
@@ -450,6 +639,19 @@ export const DashboardPageV2: React.FC = () => {
           </CardFooter>
         </Card>
       </section>
+
+      {/* Feedback prompt */}
+      {showFeedback && (
+        <FeedbackPrompt
+          question="How's your experience so far?"
+          context="dashboard"
+          onDismiss={() => setShowFeedback(false)}
+          onSubmit={() => {
+            setShowFeedback(false);
+            localStorage.setItem('feedback_given', 'true');
+          }}
+        />
+      )}
     </div>
   );
 };
