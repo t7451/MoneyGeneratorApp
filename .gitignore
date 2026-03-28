@@ -89,6 +89,9 @@ metro.config.js
 jest.config.js
 .prettierrc.js
 .eslintrc.js
+
+# But keep server migration index
+!server/src/migrations/index.js
 .watchmanconfig
 package.json
 !web/package.json
