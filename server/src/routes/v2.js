@@ -12,6 +12,7 @@ import taxRouter from './v2/tax.js';
 import opsRouter from './v2/ops.js';
 import assetsRouter from './v2/assets.js';
 import onboardingRouter from './v2/onboarding.js';
+import analyticsRouter from './v2/analytics.js';
 
 const router = express.Router();
 
@@ -27,9 +28,7 @@ router.use('/tax', taxRouter);
 router.use('/ops', opsRouter);
 router.use('/assets', assetsRouter);
 router.use('/onboarding', onboardingRouter);
-
-// Analytics and feedback routes (from onboarding module)
-router.use('/', onboardingRouter);
+router.use('/analytics', analyticsRouter);
 
 /**
  * Feature Flags V2 Routes

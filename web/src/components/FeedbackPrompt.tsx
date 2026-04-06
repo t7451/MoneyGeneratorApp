@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Star } from 'lucide-react';
 import { trackEvent } from '../lib/analytics';
+import { apiFetchJson, getUserId } from '../lib/apiClient';
 import { useToast } from './Toast';
 import './FeedbackPrompt.css';
 
@@ -24,6 +25,16 @@ export function FeedbackPrompt({ question, context, onDismiss, onSubmit }: Feedb
       rating,
       comment: comment.slice(0, 500),
     });
+
+    // Also send to backend feedback endpoint
+    const userId = getUserId();
+    if (userId) {
+      apiFetchJson('/api/v2/onboarding/feedback', {
+        method: 'POST',
+        body: { userId, context, rating, comment: comment.slice(0, 500) },
+      }).catch(() => null);
+    }
+
     setSubmitted(true);
     showToast('Thanks for your feedback!', 'success');
     setTimeout(() => {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 
 export interface OnboardingCheckpoint {
   id: string;
@@ -17,6 +17,7 @@ export interface OnboardingUser {
 
 interface OnboardingContextType {
   user: OnboardingUser;
+  setRole: (role: 'freelancer' | 'business' | 'individual') => void;
   updateCheckpoint: (id: string, completed: boolean) => void;
   markTutorialWatched: (tutorialId: string) => void;
   getCompletionPercentage: () => number;
@@ -36,106 +37,26 @@ export const useOnboarding = () => {
 
 export const DEFAULT_CHECKPOINTS: Record<string, OnboardingCheckpoint[]> = {
   freelancer: [
-    {
-      id: 'welcome',
-      label: 'Welcome & Setup',
-      completed: false,
-      importance: 'critical',
-    },
-    {
-      id: 'connect_bank',
-      label: 'Connect Your Bank',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'connect_platforms',
-      label: 'Connect Gig Platforms',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'set_goals',
-      label: 'Set Financial Goals',
-      completed: false,
-      importance: 'optional',
-    },
-    {
-      id: 'enable_automations',
-      label: 'Enable Automations',
-      completed: false,
-      importance: 'optional',
-    },
-    {
-      id: 'explore_dashboard',
-      label: 'Explore Dashboard',
-      completed: false,
-      importance: 'important',
-    },
+    { id: 'welcome', label: 'Welcome & Setup', completed: false, importance: 'critical' },
+    { id: 'connect_bank', label: 'Connect Your Bank', completed: false, importance: 'important' },
+    { id: 'connect_platforms', label: 'Connect Gig Platforms', completed: false, importance: 'important' },
+    { id: 'set_goals', label: 'Set Financial Goals', completed: false, importance: 'optional' },
+    { id: 'enable_automations', label: 'Enable Automations', completed: false, importance: 'optional' },
+    { id: 'explore_dashboard', label: 'Explore Dashboard', completed: false, importance: 'important' },
   ],
   business: [
-    {
-      id: 'welcome',
-      label: 'Welcome & Setup',
-      completed: false,
-      importance: 'critical',
-    },
-    {
-      id: 'connect_bank',
-      label: 'Connect Business Bank Account',
-      completed: false,
-      importance: 'critical',
-    },
-    {
-      id: 'add_team_members',
-      label: 'Add Team Members',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'setup_bookkeeping',
-      label: 'Setup Automated Bookkeeping',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'configure_payroll',
-      label: 'Configure Payroll Settings',
-      completed: false,
-      importance: 'important',
-    },
+    { id: 'welcome', label: 'Welcome & Setup', completed: false, importance: 'critical' },
+    { id: 'connect_bank', label: 'Connect Business Bank Account', completed: false, importance: 'critical' },
+    { id: 'add_team_members', label: 'Add Team Members', completed: false, importance: 'important' },
+    { id: 'setup_bookkeeping', label: 'Setup Automated Bookkeeping', completed: false, importance: 'important' },
+    { id: 'configure_payroll', label: 'Configure Payroll Settings', completed: false, importance: 'important' },
   ],
   individual: [
-    {
-      id: 'welcome',
-      label: 'Welcome & Setup',
-      completed: false,
-      importance: 'critical',
-    },
-    {
-      id: 'connect_bank',
-      label: 'Connect Your Bank Account',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'manual_setup',
-      label: 'Add Income & Expense Categories',
-      completed: false,
-      importance: 'important',
-    },
-    {
-      id: 'set_savings_goals',
-      label: 'Set Savings Goals',
-      completed: false,
-      importance: 'optional',
-    },
-    {
-      id: 'explore_insights',
-      label: 'Explore Financial Insights',
-      completed: false,
-      importance: 'optional',
-    },
+    { id: 'welcome', label: 'Welcome & Setup', completed: false, importance: 'critical' },
+    { id: 'connect_bank', label: 'Connect Your Bank Account', completed: false, importance: 'important' },
+    { id: 'manual_setup', label: 'Add Income & Expense Categories', completed: false, importance: 'important' },
+    { id: 'set_savings_goals', label: 'Set Savings Goals', completed: false, importance: 'optional' },
+    { id: 'explore_insights', label: 'Explore Financial Insights', completed: false, importance: 'optional' },
   ],
 };
 
@@ -145,7 +66,11 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<OnboardingUser>(() => {
     const stored = localStorage.getItem('onboarding_user');
     if (stored) {
-      return JSON.parse(stored);
+      try {
+        return JSON.parse(stored);
+      } catch {
+        // corrupt data, reset
+      }
     }
     return {
       role: null,
@@ -154,51 +79,76 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   });
 
-  const saveUser = (updatedUser: OnboardingUser) => {
+  const saveUser = useCallback((updatedUser: OnboardingUser) => {
     setUser(updatedUser);
     localStorage.setItem('onboarding_user', JSON.stringify(updatedUser));
-  };
+  }, []);
 
-  const updateCheckpoint = (id: string, completed: boolean) => {
+  const setRole = useCallback((role: 'freelancer' | 'business' | 'individual') => {
     setUser((prev) => {
-      const updated = { ...prev };
-      const checkpoint = updated.checkpoints.find((checkpointItem) => checkpointItem.id === id);
-      if (checkpoint) {
-        checkpoint.completed = completed;
-        checkpoint.completedAt = completed ? new Date().toISOString() : undefined;
-        updated.lastCheckpointTime = new Date().toISOString();
-      }
+      const checkpoints = DEFAULT_CHECKPOINTS[role]?.map(c => ({ ...c })) || [];
+      const updated: OnboardingUser = {
+        ...prev,
+        role,
+        checkpoints,
+      };
       saveUser(updated);
       return updated;
     });
-  };
+  }, [saveUser]);
 
-  const markTutorialWatched = (tutorialId: string) => {
+  const updateCheckpoint = useCallback((id: string, completed: boolean) => {
     setUser((prev) => {
-      const updated = { ...prev };
-      if (!updated.tutorialsWatched.includes(tutorialId)) {
-        updated.tutorialsWatched.push(tutorialId);
+      // If checkpoints are empty but we have a role, initialize them
+      let checkpoints = prev.checkpoints;
+      if (checkpoints.length === 0 && prev.role) {
+        checkpoints = DEFAULT_CHECKPOINTS[prev.role]?.map(c => ({ ...c })) || [];
       }
+
+      const updated = {
+        ...prev,
+        checkpoints: checkpoints.map(cp =>
+          cp.id === id
+            ? { ...cp, completed, completedAt: completed ? new Date().toISOString() : undefined }
+            : cp
+        ),
+        lastCheckpointTime: new Date().toISOString(),
+      };
       saveUser(updated);
       return updated;
     });
-  };
+  }, [saveUser]);
 
-  const getCompletionPercentage = () => {
+  const markTutorialWatched = useCallback((tutorialId: string) => {
+    setUser((prev) => {
+      if (prev.tutorialsWatched.includes(tutorialId)) return prev;
+      const updated = {
+        ...prev,
+        tutorialsWatched: [...prev.tutorialsWatched, tutorialId],
+      };
+      saveUser(updated);
+      return updated;
+    });
+  }, [saveUser]);
+
+  const getCompletionPercentage = useCallback(() => {
     if (user.checkpoints.length === 0) return 0;
-    const completed = user.checkpoints.filter((checkpoint) => checkpoint.completed).length;
+    const completed = user.checkpoints.filter((cp) => cp.completed).length;
     return Math.round((completed / user.checkpoints.length) * 100);
-  };
+  }, [user.checkpoints]);
 
-  const getAllCheckpoints = () => user.checkpoints;
+  const getAllCheckpoints = useCallback(() => user.checkpoints, [user.checkpoints]);
 
-  const getIncompleteCheckpoints = () =>
-    user.checkpoints.filter((checkpoint) => !checkpoint.completed);
+  const getIncompleteCheckpoints = useCallback(
+    () => user.checkpoints.filter((cp) => !cp.completed),
+    [user.checkpoints]
+  );
 
   return (
     <OnboardingContext.Provider
       value={{
         user,
+        setRole,
         updateCheckpoint,
         markTutorialWatched,
         getCompletionPercentage,

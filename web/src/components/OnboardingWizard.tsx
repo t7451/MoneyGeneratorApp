@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { UserRole } from '../context/AppContext';
+import { useOnboarding } from '../utils/onboardingContext';
 import { Briefcase, Building, User, Shield, CreditCard, Star, Zap, Check } from 'lucide-react';
 import { useToast } from './Toast';
 import { trackEvent } from '../lib/analytics';
@@ -94,6 +95,7 @@ export function OnboardingWizard({
   onSetGoal,
 }: OnboardingWizardProps) {
   const { showToast } = useToast();
+  const { updateCheckpoint, setRole: setOnboardingRole } = useOnboarding();
   const [step, setStep] = useState<OnboardingStep>('welcome');
   const [role, setRole] = useState<UserRole>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -155,6 +157,8 @@ export function OnboardingWizard({
   const handleRoleSelect = (selectedRole: UserRole) => {
     setRole(selectedRole);
     onSelectRole(selectedRole);
+    if (selectedRole) setOnboardingRole(selectedRole);
+    updateCheckpoint('welcome', true);
     trackEvent('onboarding_role_selected', { role: selectedRole });
     const nextStep = selectedRole === 'freelancer' ? 'platforms' : 'bank';
     setStep(nextStep);
@@ -167,6 +171,7 @@ export function OnboardingWizard({
       const ok = await onConnectBank();
       setBankConnected(ok);
       if (ok) {
+        updateCheckpoint('connect_bank', true);
         trackEvent('onboarding_bank_connect_success');
       }
     } finally {
@@ -218,7 +223,7 @@ export function OnboardingWizard({
   };
 
   const handlePaymentConfirm = () => {
-    trackEvent('onboarding_payment_confirmed', { plan: selectedPlan, addons: selectedAddons, billingCycle });
+    trackEvent('onboarding_payment_confirmed', { plan: selectedPlan, addons: selectedAddons.length, billingCycle });
     setStep('complete');
     triggerConfetti();
   };
@@ -238,6 +243,7 @@ export function OnboardingWizard({
       const ok1 = r1 !== false;
       const ok2 = r2 !== false;
       if (ok1 && ok2) {
+        updateCheckpoint('set_goals', true);
         trackEvent('onboarding_goals_set', { weeklyGoal, taxReserve });
         handleNext();
         return;
@@ -254,6 +260,12 @@ export function OnboardingWizard({
   };
 
   const handleFinish = () => {
+    // Mark all relevant checkpoints as completed
+    updateCheckpoint('explore_dashboard', true);
+    if (connectedPlatforms.length > 0) {
+      updateCheckpoint('connect_platforms', true);
+    }
+
     localStorage.setItem('onboarding_complete', 'true');
     localStorage.setItem('onboarding_data', JSON.stringify({
       role,
